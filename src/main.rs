@@ -733,16 +733,22 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     let themes=state.borrow().snapshot.themes.clone();
     let active=state.borrow().snapshot.config.get("GRUB_THEME").cloned().unwrap_or_default();
     let writable=can_edit(&state.borrow());
-    let columns=gtk::Paned::new(gtk::Orientation::Horizontal);
+    // FlowBox adapts between two columns on wide desktops and a single
+    // vertical column on narrow windows. A horizontal Paned hid the theme
+    // preview at 560–700 px window widths.
+    let columns=gtk::FlowBox::new();
     columns.add_css_class("theme-split");
-    columns.set_wide_handle(true);
-    columns.set_position(325);
+    columns.set_selection_mode(gtk::SelectionMode::None);
+    columns.set_min_children_per_line(1);
+    columns.set_max_children_per_line(2);
+    columns.set_column_spacing(10);
+    columns.set_row_spacing(10);
+    columns.set_homogeneous(true);
     columns.set_vexpand(true);
-    columns.set_shrink_start_child(true);
-    columns.set_shrink_end_child(true);
 
     let list=card();
     list.add_css_class("theme-browser");
+    list.set_size_request(275,-1);
     let list_header=gtk::Box::new(gtk::Orientation::Horizontal,8);
     let label=gtk::Label::new(Some(&format!("{}  ({})",tr(state,"themes.installed"),themes.len())));
     label.add_css_class("section-heading");label.set_xalign(0.0);label.set_hexpand(true);
@@ -800,10 +806,11 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
         dialog.show();
     });
     list.append(&install);
-    columns.set_start_child(Some(&list));
+    columns.insert(&list,-1);
 
     let preview=card();
     preview.add_css_class("theme-details");
+    preview.set_size_request(275,-1);
     add_text(&preview,&tr(state,"themes.preview"),"section-heading",true);
     let canvas=gtk::Box::new(gtk::Orientation::Vertical,5);
     canvas.add_css_class("boot-preview");
@@ -854,7 +861,7 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     });
     controls.append(&disable);
     preview.append(&controls);
-    columns.set_end_child(Some(&preview));
+    columns.insert(&preview,-1);
     page.append(&columns);
     let s=state.clone();
     let themes_for_selection=themes.clone();
