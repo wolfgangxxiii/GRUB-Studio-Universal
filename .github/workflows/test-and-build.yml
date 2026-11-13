@@ -50,6 +50,15 @@ jobs:
               kill "$app_pid"
               wait "$app_pid" || true
             done
+            target/release/grub-studio-universal --demo-page=menu --appearance=light --language=pl &
+            app_pid=$!
+            sleep 3
+            window_id=$(xdotool search --onlyvisible --name "GRUB Studio Universal" | tail -n 1)
+            xdotool windowsize "$window_id" 700 540
+            sleep 2
+            import -window "$window_id" qa-screenshots/menu-compact-pl.png
+            kill "$app_pid"
+            wait "$app_pid" || true
           '
       - uses: actions/upload-artifact@v4
         with:
@@ -70,24 +79,24 @@ jobs:
         env:
           APPIMAGE_EXTRACT_AND_RUN: "1"
         run: |
-          test -s GRUB-Studio-Universal-v2.2.0-x86_64.AppImage
-          file GRUB-Studio-Universal-v2.2.0-x86_64.AppImage
-          ./GRUB-Studio-Universal-v2.2.0-x86_64.AppImage --version
-          ./GRUB-Studio-Universal-v2.2.0-x86_64.AppImage --self-test
-          sha256sum GRUB-Studio-Universal-v2.2.0-x86_64.AppImage > GRUB-Studio-Universal-v2.2.0-SHA256.txt
+          test -s GRUB-Studio-Universal-v2.3.0-x86_64.AppImage
+          file GRUB-Studio-Universal-v2.3.0-x86_64.AppImage
+          ./GRUB-Studio-Universal-v2.3.0-x86_64.AppImage --version
+          ./GRUB-Studio-Universal-v2.3.0-x86_64.AppImage --self-test
+          sha256sum GRUB-Studio-Universal-v2.3.0-x86_64.AppImage > GRUB-Studio-Universal-v2.3.0-SHA256.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: grub-studio-universal-v2.2.0-release-candidate
+          name: grub-studio-universal-v2.3.0-release-candidate
           path: |
-            GRUB-Studio-Universal-v2.2.0-x86_64.AppImage
-            GRUB-Studio-Universal-v2.2.0-SHA256.txt
+            GRUB-Studio-Universal-v2.3.0-x86_64.AppImage
+            GRUB-Studio-Universal-v2.3.0-SHA256.txt
       - name: Publish downloadable preview release
         if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if gh release view v2.2.0-rc.1 >/dev/null 2>&1; then
-            gh release upload v2.2.0-rc.1 GRUB-Studio-Universal-v2.2.0-x86_64.AppImage GRUB-Studio-Universal-v2.2.0-SHA256.txt --clobber
+          if gh release view v2.3.0-rc.1 >/dev/null 2>&1; then
+            gh release upload v2.3.0-rc.1 GRUB-Studio-Universal-v2.3.0-x86_64.AppImage GRUB-Studio-Universal-v2.3.0-SHA256.txt --clobber
           else
-            gh release create v2.2.0-rc.1 GRUB-Studio-Universal-v2.2.0-x86_64.AppImage GRUB-Studio-Universal-v2.2.0-SHA256.txt --title 'GRUB Studio Universal 2.2.0 — adaptive GTK4 edition' --notes 'Six clearer destinations, adaptive 196/62 px navigation, real installed-theme background thumbnails when available, expandable OS discovery, consolidated backup and activity tools, and automated GTK4 smoke tests at compact and wide widths. Run as normal user; Polkit authorizes system changes. Preview images are not full GRUB rendering. Test writes on your distribution before changing the bootloader.' --prerelease --target "$GITHUB_SHA"
+            gh release create v2.3.0-rc.1 GRUB-Studio-Universal-v2.3.0-x86_64.AppImage GRUB-Studio-Universal-v2.3.0-SHA256.txt --title 'GRUB Studio Universal 2.3.0 — compact UX edition' --notes 'Contextual boot entry actions, compact preferences menu, improved theme selection and preview, seven-language consistency, and responsive GTK4 smoke tests. Run as normal user; Polkit authorizes system changes. Theme preview is approximate; validate writes on your own GRUB installation.' --prerelease --target "$GITHUB_SHA"
           fi

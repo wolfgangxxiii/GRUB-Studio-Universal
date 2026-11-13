@@ -1,4 +1,4 @@
-# GRUB Studio Universal — projekt interfejsu 2.2
+# GRUB Studio Universal — projekt interfejsu 2.3
 
 ## Cel
 
@@ -15,7 +15,8 @@ szczegółów na żądanie z [GNOME HIG](https://developer.gnome.org/hig/).
   szerokość 196 px w dużym oknie i 62 px z samymi ikonami poniżej 860 px.
   Długie nazwy nie zmieniają szerokości panelu; zwinięte ikony mają podpowiedzi.
 - **Pasek górny:** identyfikacja aplikacji, stan uprawnień, odblokowanie przez
-  Polkit, globalne odświeżenie, przełączanie kolorystyki oraz języka.
+  Polkit, globalne odświeżenie i jedno menu preferencji (kolorystyka oraz język).
+  Odblokowanie zastępuje powtarzający jego znaczenie znacznik blokady.
 - **Obszar treści:** nagłówek karty, zwięzły opis i jeden poziom istotnych
   paneli. Zadania drugorzędne są składane w rozwijane sekcje.
 - **Ciemny i jasny motyw:** wspólny akcent niebieski, spokojne tło oraz wyraźny
@@ -26,8 +27,8 @@ szczegółów na żądanie z [GNOME HIG](https://developer.gnome.org/hig/).
 | Karta | Jedyny cel i powiązane działania |
 | --- | --- |
 | Pulpit | Status, aktywny motyw, liczba motywów i systemów, profil rozruchu. Bez powtórzonych przycisków nawigacji. |
-| Menu GRUB | Własne wpisy EFI: dodaj, edytuj, przenieś, ukryj, usuń, zapisz. Rozwijane informacje o wpisach wygenerowanych i wykrytych systemach; opcjonalny `os-prober`. |
-| Motywy | Lista instalacji z `theme.txt`, miniatury lokalnego tła `desktop-image`, wybór, import, aktywowanie lub wyłączenie motywu. |
+| Menu GRUB | Własne wpisy EFI: dodaj, edytuj, zapisz. Przesunięcie, ukrycie i usunięcie dostępne są w kontekstowym menu zaznaczonego wpisu. W osobnym menu: wybór domyślnego wpisu i odrzucenie zmian. Rozwijane informacje o wpisach wygenerowanych i wykrytych systemach; opcjonalny `os-prober`. |
+| Motywy | Lista instalacji z `theme.txt`, miniatury lokalnego tła `desktop-image`, większy podgląd, wybór, import, aktywowanie lub wyłączenie motywu. Pełna ścieżka jest w rozwijanych szczegółach. |
 | Ustawienia | Czas menu, tryb, rozdzielczość, widoczność i obsługiwane parametry jądra. Bez drugiego selektora motywów. |
 | Narzędzia | Tworzenie/przywracanie kopii oraz dziennik w oddzielnych rozwijanych panelach. |
 | Informacje | Dokumentacja obsługi i bezpieczeństwa. |
@@ -42,6 +43,8 @@ bez uprawnień. Funkcje zapisu GRUB zachowują walidację i kopię bezpieczeńst
 - Poniżej 860 px panel boczny jest ikonowy, ale zachowuje wskazówki po najechaniu.
 - Edytor wpisów zawija przyciski do kolejnego wiersza.
 - Biblioteka motywów przechodzi z dwóch kolumn do jednej, gdy brak miejsca.
+- Preferencje wyglądu i języka nie zabierają osobnego miejsca w górnym pasku.
+- Działania na zaznaczonym wpisie są dostępne w menu kontekstowym, a nie w sześciu równych przyciskach.
 - Elementy nawigacji nie zwiększają szerokości pod wpływem tekstu innej karty.
 - Każda nawigacja wywołuje tylko przebudowę aktywnej karty; powłoka jest stała.
 
@@ -58,6 +61,8 @@ Tryb `--ui-smoke` (bez operacji na GRUB) automatycznie otwiera wszystkie sześć
 kart w oknie 720 px i sprawdza, że nawigacja pozostaje zwinięta (62 px).
 `--ui-smoke-wide` sprawdza analogiczny układ przy 1100 px i panelu 196 px.
 GitHub Actions uruchamia oba testy przed budową AppImage.
+Wersja 2.3 zawiera dodatkowy test kompletności kluczowych komunikatów we wszystkich
+siedmiu językach oraz zrzut wąskiego układu menu z polskimi etykietami.
 
 **Granica podglądu motywów:** `desktop-image` to prawdziwy plik tła wskazany
 w motywie GRUB. Program nie odtwarza całej kompozycji widgetów, czcionek

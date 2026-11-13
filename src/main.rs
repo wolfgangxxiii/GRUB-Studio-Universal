@@ -369,6 +369,21 @@ fn button(label: &str, primary: bool) -> gtk::Button {
     b.add_css_class("action-button");
     b
 }
+fn popup_button(label: &str, contents: &gtk::Box) -> gtk::MenuButton {
+    let toggle = gtk::MenuButton::new();
+    toggle.set_label(label);
+    toggle.add_css_class("action-button");
+    toggle.add_css_class("popup-action");
+    let popover = gtk::Popover::new();
+    popover.set_child(Some(contents));
+    toggle.set_popover(Some(&popover));
+    toggle
+}
+fn popup_contents() -> gtk::Box {
+    let content = gtk::Box::new(gtk::Orientation::Vertical, 5);
+    content.add_css_class("popup-contents");
+    content
+}
 fn action_row() -> gtk::Box {
     let row = gtk::Box::new(gtk::Orientation::Horizontal, 6);
     row.add_css_class("actions");
@@ -524,7 +539,7 @@ fn page_settings(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
         let style=styles.get(style.selected() as usize).unwrap_or(&"menu").to_string();
         if !core::valid_timeout(&timeout) || !core::valid_style(&style) || !core::valid_resolution(&gfx)
             || !core::valid_theme_path(&current_theme) {
-            show_message(&w, &tr(&s,"dialog.invalid"), "Invalid timeout, resolution or theme path.", true); return;
+            show_message(&w, &tr(&s,"dialog.invalid"), &tr(&s,"dialog.invalidsettings"), true); return;
         }
         guarded_submit(&w,&s,vec!["--apply".into(),timeout,style,gfx,current_theme.clone()],tr(&s,"dialog.applysettings"));
     });
@@ -550,7 +565,7 @@ fn page_settings(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     let w=window.clone(); let s=state.clone();
     save_kernel.connect_clicked(move |_| {
         let value=kargs.text().to_string();
-        if !core::valid_kernel_args(&value) { show_message(&w,"GRUB","Invalid kernel parameters",true); return; }
+        if !core::valid_kernel_args(&value) { show_message(&w,"GRUB",&tr(&s,"dialog.invalidkernel"),true); return; }
         guarded_submit(&w,&s,vec!["--kernel-args".into(),value.clone()],
             tf(&s,"menu.kernel.confirm",&[("args",&value)]));
     });
@@ -566,6 +581,7 @@ fn page_menu(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     let page=page_root(&tr(state,"menu.title"),&tr(state,"menu.sub"));
     let profile=state.borrow().snapshot.profile.clone();
     let editable=can_edit(&state.borrow()) && profile.family.supports_menu_edit();
+    let local_editable=editable || state.borrow().demo;
     let info=section(&page,&tr(state,"menu.custom"));
     add_text(&info,&tr(state,"menu.custom.note"),"muted",true);
     if !profile.family.supports_menu_edit() { add_text(&info,&tr(state,"menu.readonly"),"warning",true); }
@@ -585,6 +601,9 @@ fn page_menu(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     let title=entry_with_text(""); title.set_placeholder_text(Some(&tr(state,"menu.field.title")));
     let uuid=entry_with_text(""); uuid.set_placeholder_text(Some(&tr(state,"menu.field.uuid")));
     let path=entry_with_text("/EFI/Microsoft/Boot/bootmgfw.efi");
+    title.set_sensitive(local_editable);
+    uuid.set_sensitive(local_editable);
+    path.set_sensitive(local_editable);
     fields.append(&title);fields.append(&uuid);fields.append(&path);
     info.append(&fields);
     let s=state.clone();
@@ -603,18 +622,20 @@ fn page_menu(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     }
     let controls=action_flow();
     let add=button(&tr(state,"menu.add"),false);
+    add.set_sensitive(local_editable);
     let w=window.clone();let s=state.clone();
     let title1=title.clone();let uuid1=uuid.clone();let path1=path.clone();
     add.connect_clicked(move |_| {
         let item=MenuEntry {id:new_id(),title:title1.text().to_string(),uuid:uuid1.text().to_string(),
             path:path1.text().to_string(),enabled:true};
-        if !core::valid_entry(&item) { show_message(&w,"GRUB Studio","Invalid EFI entry title, UUID or path",true);return; }
+        if !core::valid_entry(&item) { show_message(&w,"GRUB Studio",&tr(&s,"dialog.invalidentry"),true);return; }
         s.borrow_mut().pending_entries.push(item);
         s.borrow_mut().selected_entry=None;
         rebuild(&w,&s);
     });
     controls.insert(&add,-1);
     let edit=button(&tr(state,"menu.edit"),false);
+    edit.set_sensitive(local_editable && selected_index.is_some());
     let w=window.clone();let s=state.clone();
     edit.connect_clicked(move |_| {
         let idx=s.borrow().selected_entry;
@@ -623,16 +644,19 @@ fn page_menu(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
         item.title=title.text().to_string();
         item.uuid=uuid.text().to_string();
         item.path=path.text().to_string();
-        if !core::valid_entry(&item) { show_message(&w,"GRUB Studio","Invalid EFI entry",true);return; }
+        if !core::valid_entry(&item) { show_message(&w,"GRUB Studio",&tr(&s,"dialog.invalidentry"),true);return; }
         s.borrow_mut().pending_entries[idx]=item;
         rebuild(&w,&s);
     });
     controls.insert(&edit,-1);
-    // All local entry actions share one responsive toolbar. Each operation
-    // appears once; this replaces two duplicate reorder/delete handlers.
+    // Reorder, hide and delete are contextual operations: they do not need
+    // permanent toolbar space, especially at 620–760 px.
+    let extra_entry=popup_contents();
     for (key,operation) in [("menu.up",-1i32),("menu.down",1),
                             ("menu.toggle",0),("menu.remove",2)] {
         let b=button(&tr(state,key),false);
+        b.set_sensitive(local_editable && selected_index.is_some());
+        b.set_halign(gtk::Align::Fill);
         let w=window.clone();let s=state.clone();
         b.connect_clicked(move |_| {
             let idx=s.borrow().selected_entry;
@@ -649,8 +673,11 @@ fn page_menu(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
             drop(data);
             rebuild(&w,&s);
         });
-        controls.insert(&b,-1);
+        extra_entry.append(&b);
     }
+    let more_entry=popup_button(&tr(state,"menu.entry.actions"),&extra_entry);
+    more_entry.set_sensitive(local_editable && selected_index.is_some());
+    controls.insert(&more_entry,-1);
     info.append(&controls);
     let commit=action_flow();
     let save=button(&tr(state,"menu.save"),true);
@@ -664,16 +691,6 @@ fn page_menu(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
         }
     });
     commit.insert(&save,-1);
-    let set_default=button(&tr(state,"menu.defaultcustom"),false);
-    set_default.set_sensitive(editable);
-    let w=window.clone();let s=state.clone();
-    set_default.connect_clicked(move |_| {
-        let chosen=s.borrow().selected_entry.and_then(|i| s.borrow().pending_entries.get(i).cloned());
-        let Some(item)=chosen else {show_message(&w,"GRUB Studio",&tr(&s,"menu.selectfirst"),true);return};
-        guarded_submit(&w,&s,vec!["--default".into(),item.id.clone()],
-            tf(&s,"menu.default.confirm",&[("id",&item.id)]));
-    });
-    commit.insert(&set_default,-1);
     let preview=button(&tr(state,"menu.preview"),false);
     let w=window.clone();let s=state.clone();
     preview.connect_clicked(move |_| {
@@ -683,7 +700,21 @@ fn page_menu(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
         }
     });
     commit.insert(&preview,-1);
+    let extra_save=popup_contents();
+    let set_default=button(&tr(state,"menu.defaultcustom"),false);
+    set_default.set_sensitive(editable && selected_index.is_some());
+    set_default.set_halign(gtk::Align::Fill);
+    let w=window.clone();let s=state.clone();
+    set_default.connect_clicked(move |_| {
+        let chosen=s.borrow().selected_entry.and_then(|i| s.borrow().pending_entries.get(i).cloned());
+        let Some(item)=chosen else {show_message(&w,"GRUB Studio",&tr(&s,"menu.selectfirst"),true);return};
+        guarded_submit(&w,&s,vec!["--default".into(),item.id.clone()],
+            tf(&s,"menu.default.confirm",&[("id",&item.id)]));
+    });
+    extra_save.append(&set_default);
     let discard=button(&tr(state,"menu.discard"),false);
+    discard.set_sensitive(local_editable);
+    discard.set_halign(gtk::Align::Fill);
     let w=window.clone();let s=state.clone();
     discard.connect_clicked(move |_| {
         let original=s.borrow().snapshot.menu.clone();
@@ -694,7 +725,10 @@ fn page_menu(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
         }
         rebuild(&w,&s);
     });
-    commit.insert(&discard,-1);
+    extra_save.append(&discard);
+    let more_save=popup_button(&tr(state,"menu.more"),&extra_save);
+    more_save.set_sensitive(local_editable);
+    commit.insert(&more_save,-1);
     page.append(&commit);
     // Automatically generated entries are informative and cannot be edited.
     // Place them under one collapsed disclosure instead of duplicating the
@@ -768,7 +802,13 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
             icon.set_size_request(62,42);
             row.append(&icon);
         }
-        row.append(&row_with_heading(&display,&theme.path));
+        let labels=gtk::Box::new(gtk::Orientation::Vertical,3);
+        add_text(&labels,&display,"row-title",false);
+        let location=add_text(&labels,&theme.path,"muted",false);
+        location.set_max_width_chars(28);
+        location.set_ellipsize(gtk::pango::EllipsizeMode::Middle);
+        location.set_tooltip_text(Some(&theme.path));
+        row.append(&labels);
         row.add_css_class("theme-option");
         if active==theme.path {row.add_css_class("theme-current");}
         row.set_margin_top(5);row.set_margin_bottom(5);
@@ -793,7 +833,7 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     let w=window.clone();let s=state.clone();
     install.connect_clicked(move |_| {
         let dialog=gtk::FileChooserNative::new(Some(&tr(&s,"themes.import")),Some(&w),
-            gtk::FileChooserAction::SelectFolder,Some("Select"),Some("Cancel"));
+            gtk::FileChooserAction::SelectFolder,Some(&tr(&s,"themes.import")),Some(&tr(&s,"menu.cancel")));
         // NativeDialog is not a toplevel widget; keep it alive until response.
         let dialog_hold=dialog.clone();
         let w2=w.clone();let s2=s.clone();
@@ -801,7 +841,7 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
             if response==gtk::ResponseType::Accept {
                 if let Some(path)=dialog_response.file().and_then(|file|file.path()) {
                     let folder=path.file_name().map(|x|x.to_string_lossy().to_string()).unwrap_or_default();
-                    if !core::valid_simple_name(&folder) {show_message(&w2,"GRUB Studio","Theme folder must have an ASCII alphanumeric name",true);}
+                    if !core::valid_simple_name(&folder) {show_message(&w2,"GRUB Studio",&tr(&s2,"dialog.invalidthemefolder"),true);}
                     else {guarded_submit(&w2,&s2,vec!["--install-theme".into(),path.to_string_lossy().to_string(),folder],tr(&s2,"themes.import"));}
                 }
             }
@@ -816,6 +856,19 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     preview.add_css_class("theme-details");
     preview.set_size_request(275,-1);
     add_text(&preview,&tr(state,"themes.preview"),"section-heading",true);
+    let selected_name=themes.iter().find(|t|t.path==selected).map(|t|t.name.as_str()).unwrap_or("—");
+    let current_name=gtk::Label::new(Some(selected_name));
+    current_name.add_css_class("theme-selected-name");
+    current_name.set_xalign(0.0);
+    current_name.set_hexpand(true);
+    current_name.set_ellipsize(gtk::pango::EllipsizeMode::End);
+    let current_state_word=if selected==active {tr(state,"themes.active")}else{tr(state,"themes.detected")};
+    let current_status=gtk::Label::new(Some(&current_state_word));
+    current_status.add_css_class("theme-selected-status");
+    let preview_heading=gtk::Box::new(gtk::Orientation::Horizontal,8);
+    preview_heading.append(&current_name);
+    preview_heading.append(&current_status);
+    preview.append(&preview_heading);
     let canvas=gtk::Box::new(gtk::Orientation::Vertical,5);
     canvas.add_css_class("boot-preview");
     add_text(&canvas,"GNU GRUB 2", "preview-title",true);
@@ -837,7 +890,7 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     image.add_css_class("theme-background");
     image.set_keep_aspect_ratio(true);
     image.set_can_shrink(true);
-    image.set_size_request(-1,162);
+    image.set_size_request(-1,196);
     let visual=gtk::Stack::new();
     visual.add_named(&canvas,Some("fallback"));
     visual.add_named(&image,Some("wallpaper"));
@@ -850,11 +903,14 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     selected_info.add_css_class("muted");
     selected_info.set_xalign(0.0);selected_info.set_wrap(true);
     selected_info.set_selectable(true);
-    preview.append(&selected_info);
+    let details=gtk::Expander::new(Some(&tr(state,"themes.details")));
+    details.add_css_class("theme-path-details");
+    details.set_child(Some(&selected_info));
+    preview.append(&details);
     add_text(&preview,&tr(state,"themes.approx"),"muted",true);
     let controls=action_row();
     let activate=button(&tr(state,"themes.use"),true);
-    activate.set_sensitive(writable && !selected.is_empty());
+    activate.set_sensitive(writable && !selected.is_empty() && selected!=active);
     let w=window.clone();let s=state.clone();
     activate.connect_clicked(move |_| {
         let c=s.borrow().snapshot.config.clone();let selected=s.borrow().selected_theme.clone();
@@ -883,12 +939,17 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     page.append(&columns);
     let s=state.clone();
     let themes_for_selection=themes.clone();
+    let active_theme=active.clone();
+    let active_word=tr(state,"themes.active");
+    let detected_word=tr(state,"themes.detected");
     selector.connect_row_selected(move |_,row| {
         if let Some(row)=row {
             if let Some(theme)=themes_for_selection.get(row.index() as usize) {
                 s.borrow_mut().selected_theme=theme.path.clone();
                 selected_info.set_text(&theme.path);
-                activate.set_sensitive(can_edit(&s.borrow()));
+                current_name.set_text(&theme.name);
+                current_status.set_text(if theme.path==active_theme {&active_word}else{&detected_word});
+                activate.set_sensitive(can_edit(&s.borrow()) && theme.path!=active_theme);
                 if let Some(path)=inspect::theme_preview_image(&theme.path) {
                     image.set_filename(Some(path));
                     visual.set_visible_child_name("wallpaper");
@@ -973,7 +1034,7 @@ fn page_tools(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     page
 }
 fn page_about(_window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
-    let page=page_root(&tr(state,"about.title"),"Rust Edition · GTK4 · Wayland · 2.2.0");
+    let page=page_root(&tr(state,"about.title"),"Rust Edition · GTK4 · Wayland · 2.3.0");
     for number in 1..=9 {
         let title=tr(state,&format!("about.{number:02}.title"));
         let text=tr(state,&format!("about.{number:02}.text"));
@@ -1092,7 +1153,7 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
     let branding=gtk::Box::new(gtk::Orientation::Vertical,1);
     branding.set_hexpand(true);
     add_text(&branding,"GRUB Studio","brand",false);
-    add_text(&branding,"UNIVERSAL  ·  2.2","brand-subtitle",false);
+    add_text(&branding,"UNIVERSAL  ·  2.3","brand-subtitle",false);
     header.append(&branding);
     let status=if s.demo {"DEMO".into()}
         else if s.busy {tr(state,"status.scanning")}
@@ -1106,7 +1167,9 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
     badge.set_max_width_chars(22);
     badge.set_ellipsize(gtk::pango::EllipsizeMode::End);
     badge.set_tooltip_text(Some(&status));
-    header.append(&badge);
+    // A locked badge next to an Unlock button duplicates the same state.
+    // Keep one call to action until the first Polkit probe succeeds.
+    if s.demo || s.authorized || s.busy { header.append(&badge); }
     if !s.authorized && !s.demo {
         let unlock=button(&tr(state,"auth.unlock"),true);
         unlock.set_sensitive(!s.busy);
@@ -1119,15 +1182,19 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
     let w=window.clone();let st=state.clone();
     refresh.connect_clicked(move |_|submit(&w,&st,vec!["--probe".into()],false));
     header.append(&refresh);
-    let appearance=icon_button(if s.appearance=="light" {"weather-clear-night-symbolic"}else{"weather-clear-symbolic"},&tr(state,"theme.label"));
-    appearance.set_tooltip_text(Some(&tr(state,"theme.label")));
+    // Appearance and language are preferences, not global editing actions.
+    // Put them in one compact menu so the header fits 620px / HiDPI windows.
+    let settings_content=popup_contents();
+    let appearance=button(&format!("{}: {}",tr(state,"theme.label"),
+        if s.appearance=="light" {tr(state,"theme.light")}else{tr(state,"theme.dark")}),false);
     let w=window.clone();let state2=state.clone();
     appearance.connect_clicked(move |_| {
         let mut s=state2.borrow_mut();
         s.appearance=if s.appearance=="light" {"dark"}else{"light"}.into();
         save_prefs(&s);drop(s);rebuild(&w,&state2);
     });
-    header.append(&appearance);
+    settings_content.append(&appearance);
+    add_text(&settings_content,&tr(state,"language.label"),"section-heading",false);
     let names:Vec<&str>=LANGUAGES.iter().map(|(_,name)|*name).collect();
     let language=gtk::DropDown::from_strings(&names);
     language.add_css_class("lang-select");
@@ -1141,7 +1208,17 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
             drop(st);rebuild(&w,&state2);
         }
     });
-    header.append(&language);
+    settings_content.append(&language);
+    let preferences=gtk::MenuButton::new();
+    preferences.set_icon_name("preferences-system-symbolic");
+    preferences.set_tooltip_text(Some(&tr(state,"prefs.title")));
+    preferences.add_css_class("icon-button");
+    preferences.add_css_class("prefs-trigger");
+    let preferences_popover=gtk::Popover::new();
+    settings_content.add_css_class("prefs-panel");
+    preferences_popover.set_child(Some(&settings_content));
+    preferences.set_popover(Some(&preferences_popover));
+    header.append(&preferences);
 
     let nav=&chrome.sidebar;
     clear_box(nav);
@@ -1229,7 +1306,7 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
 
 fn main() {
     let args:Vec<String>=std::env::args().skip(1).collect();
-    if args.iter().any(|a| a=="--version") { println!("GRUB Studio Universal 2.2.0 Rust Edition");return; }
+    if args.iter().any(|a| a=="--version") { println!("GRUB Studio Universal 2.3.0 Rust Edition");return; }
     if args.iter().any(|a| a=="--self-test") {
         let locales=serde_json::from_str::<serde_json::Value>(include_str!("../assets/translations.json")).expect("valid locale catalog");
         for (code,_) in LANGUAGES {assert!(locales[*code]["tools.title"].is_string(),"missing tools translation: {code}");}
@@ -1253,6 +1330,8 @@ fn main() {
         .map(str::to_owned);
     let preview_appearance=args.iter().find_map(|a|a.strip_prefix("--appearance="))
         .filter(|v| matches!(*v,"light"|"dark")).map(str::to_owned);
+    let preview_language=args.iter().find_map(|a|a.strip_prefix("--language="))
+        .filter(|v| LANGUAGES.iter().any(|(id,_)| id==v)).map(str::to_owned);
     let demo=ui_smoke || demo_themes || demo_page.is_some() || args.iter().any(|a| a=="--demo");
     let app=gtk::Application::builder().application_id(APP_ID).build();
     app.connect_startup(|_| load_css());
@@ -1261,6 +1340,7 @@ fn main() {
         if demo_themes {state.borrow_mut().active="themes".into();}
         if let Some(ref page)=demo_page {state.borrow_mut().active=page.clone();}
         if let Some(ref mode)=preview_appearance {state.borrow_mut().appearance=mode.clone();}
+        if let Some(ref lang)=preview_language {state.borrow_mut().language=lang.clone();}
         let window=gtk::ApplicationWindow::builder()
             .application(app).title("GRUB Studio Universal · Rust Edition")
             .default_width(if ui_smoke {if ui_wide {1100}else{720}}else{1000})
@@ -1304,4 +1384,21 @@ fn main() {
     // Flags such as --demo are consumed by GRUB Studio above, not by GTK's
     // GApplication parser (which otherwise rejects them as unknown options).
     let _=app.run_with_args(&["grub-studio-universal"]);
+}
+
+#[cfg(test)]
+mod interface_tests {
+    use super::*;
+
+    #[test]
+    fn important_actions_and_errors_are_localized_in_all_seven_languages() {
+        let keys=["prefs.title","themes.use","themes.details","menu.entry.actions",
+            "menu.more","dialog.invalidsettings","dialog.invalidkernel",
+            "dialog.invalidentry","dialog.invalidthemefolder"];
+        for (locale,_) in LANGUAGES {
+            for key in keys {
+                assert_ne!(translate(locale,key),key,"missing {key} in {locale}");
+            }
+        }
+    }
 }
