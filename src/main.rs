@@ -398,8 +398,8 @@ fn section(parent: &gtk::Box, heading: &str) -> gtk::Box {
 fn page_root(title: &str, subtitle: &str) -> gtk::Box {
     let v = gtk::Box::new(gtk::Orientation::Vertical, 10);
     v.set_hexpand(true);
-    v.set_margin_top(18); v.set_margin_bottom(20);
-    v.set_margin_start(20); v.set_margin_end(20);
+    v.set_margin_top(15); v.set_margin_bottom(18);
+    v.set_margin_start(16); v.set_margin_end(16);
     add_text(&v, title, "page-title", true);
     add_text(&v, subtitle, "muted", true);
     v
@@ -464,8 +464,9 @@ fn page_home(_window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     page
 }
 
-fn page_systems(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
-    let page = page_root(&tr(state,"systems.title"), &tr(state,"systems.sub"));
+fn systems_panel(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
+    let page = gtk::Box::new(gtk::Orientation::Vertical, 9);
+    add_text(&page,&tr(state,"systems.sub"),"muted",true);
     let actions = action_row();
     // Global refresh always performs a privileged UEFI/EFI scan. Only the
     // optional os-prober deep scan is unique to this page.
@@ -709,6 +710,10 @@ fn page_menu(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     }
     generated.set_child(Some(&generated_body));
     page.append(&generated);
+    let systems=gtk::Expander::new(Some(&tr(state,"systems.title")));
+    systems.add_css_class("generated-expander");
+    systems.set_child(Some(&systems_panel(window,state)));
+    page.append(&systems);
     add_text(&page,&tr(state,"menu.efiwarn"),"muted",true);
     page
 }
@@ -750,7 +755,20 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     selector.add_css_class("studio-list");
     for theme in &themes {
         let display=if active==theme.path {format!("●  {}",theme.name)} else {format!("◇  {}",theme.name)};
-        let row=row_with_heading(&display,&theme.path);
+        let row=gtk::Box::new(gtk::Orientation::Horizontal,10);
+        if let Some(file)=inspect::theme_preview_image(&theme.path) {
+            let thumbnail=gtk::Picture::for_filename(file);
+            thumbnail.set_content_fit(gtk::ContentFit::Cover);
+            thumbnail.set_size_request(62,42);
+            thumbnail.add_css_class("theme-thumbnail");
+            row.append(&thumbnail);
+        } else {
+            let icon=gtk::Image::from_icon_name("applications-graphics-symbolic");
+            icon.set_pixel_size(22);icon.add_css_class("theme-icon-fallback");
+            icon.set_size_request(62,42);
+            row.append(&icon);
+        }
+        row.append(&row_with_heading(&display,&theme.path));
         row.add_css_class("theme-option");
         if active==theme.path {row.add_css_class("theme-current");}
         row.set_margin_top(5);row.set_margin_bottom(5);
@@ -809,7 +827,21 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
         l.set_xalign(0.0);l.add_css_class(if i==0{"preview-selected"}else{"preview-entry"});
         canvas.append(&l);
     }
-    preview.append(&canvas);
+    // The real local wallpaper is shown when the theme specifies a valid
+    // desktop-image file. GRUB widget layout/fonts cannot be rendered by GTK.
+    let image=gtk::Picture::new();
+    image.add_css_class("theme-background");
+    image.set_content_fit(gtk::ContentFit::Contain);
+    image.set_can_shrink(true);
+    image.set_size_request(-1,162);
+    let visual=gtk::Stack::new();
+    visual.add_named(&canvas,Some("fallback"));
+    visual.add_named(&image,Some("wallpaper"));
+    if let Some(path)=inspect::theme_preview_image(&selected) {
+        image.set_filename(Some(path));
+        visual.set_visible_child_name("wallpaper");
+    } else {visual.set_visible_child_name("fallback");}
+    preview.append(&visual);
     let selected_info=gtk::Label::new(Some(if selected.is_empty() {"—"}else{&selected}));
     selected_info.add_css_class("muted");
     selected_info.set_xalign(0.0);selected_info.set_wrap(true);
@@ -853,14 +885,19 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
                 s.borrow_mut().selected_theme=theme.path.clone();
                 selected_info.set_text(&theme.path);
                 activate.set_sensitive(can_edit(&s.borrow()));
+                if let Some(path)=inspect::theme_preview_image(&theme.path) {
+                    image.set_filename(Some(path));
+                    visual.set_visible_child_name("wallpaper");
+                } else {visual.set_visible_child_name("fallback");}
             }
         }
     });
     page
 }
 
-fn page_backups(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
-    let page=page_root(&tr(state,"backups.title"),&tr(state,"backups.sub"));
+fn backups_panel(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
+    let page=gtk::Box::new(gtk::Orientation::Vertical,9);
+    add_text(&page,&tr(state,"backups.sub"),"muted",true);
     let controls=action_row();
     let create=button(&tr(state,"backups.create"),true);
     create.set_sensitive(can_edit(&state.borrow()));
@@ -896,8 +933,9 @@ fn page_backups(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     add_text(&page,&tr(state,"backups.note"),"muted",true);
     page
 }
-fn page_logs(_window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
-    let page=page_root(&tr(state,"logs.title"),&tr(state,"logs.sub"));
+fn logs_panel(state: &Shared) -> gtk::Box {
+    let page=gtk::Box::new(gtk::Orientation::Vertical,9);
+    add_text(&page,&tr(state,"logs.sub"),"muted",true);
     let row=action_row();
     let copy=button(&tr(state,"logs.copy"),false);
     let log=state.borrow().log.join("\n\n");
@@ -909,12 +947,29 @@ fn page_logs(_window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     textview.set_monospace(true);textview.set_editable(false);textview.set_cursor_visible(false);
     textview.set_wrap_mode(gtk::WrapMode::WordChar);
     textview.buffer().set_text(&log);
-    textview.set_vexpand(true);
-    box_.append(&textview);
+    let scroll=gtk::ScrolledWindow::new();
+    scroll.set_min_content_height(160);
+    scroll.set_max_content_height(240);
+    scroll.set_propagate_natural_height(false);
+    scroll.set_child(Some(&textview));
+    box_.append(&scroll);
+    page
+}
+fn page_tools(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
+    let page=page_root(&tr(state,"tools.title"),&tr(state,"tools.sub"));
+    let backups=gtk::Expander::new(Some(&tr(state,"backups.title")));
+    backups.add_css_class("generated-expander");
+    backups.set_expanded(true);
+    backups.set_child(Some(&backups_panel(window,state)));
+    page.append(&backups);
+    let logs=gtk::Expander::new(Some(&tr(state,"logs.title")));
+    logs.add_css_class("generated-expander");
+    logs.set_child(Some(&logs_panel(state)));
+    page.append(&logs);
     page
 }
 fn page_about(_window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
-    let page=page_root(&tr(state,"about.title"),"Rust Edition · GTK4 · Wayland · 2.1.0");
+    let page=page_root(&tr(state,"about.title"),"Rust Edition · GTK4 · Wayland · 2.2.0");
     for number in 1..=9 {
         let title=tr(state,&format!("about.{number:02}.title"));
         let text=tr(state,&format!("about.{number:02}.text"));
@@ -942,6 +997,29 @@ fn icon_button(icon: &str, tooltip: &str) -> gtk::Button {
     b.set_tooltip_text(Some(tooltip));
     b
 }
+fn apply_sidebar_density(sidebar: &gtk::Box, compact: bool) {
+    sidebar.set_size_request(if compact {62} else {196}, -1);
+    if compact {sidebar.add_css_class("nav-compact");}
+    else {sidebar.remove_css_class("nav-compact");}
+    let mut node=sidebar.first_child();
+    while let Some(widget)=node {
+        let next=widget.next_sibling();
+        if widget.has_css_class("nav-heading") || widget.has_css_class("nav-footer") {
+            widget.set_visible(!compact);
+        }
+        if let Ok(button)=widget.clone().downcast::<gtk::Button>() {
+            if let Some(line)=button.child().and_then(|child|child.downcast::<gtk::Box>().ok()) {
+                let mut leaf=line.first_child();
+                while let Some(part)=leaf {
+                    let sibling=part.next_sibling();
+                    if part.has_css_class("nav-label") {part.set_visible(!compact);}
+                    leaf=sibling;
+                }
+            }
+        }
+        node=next;
+    }
+}
 fn ensure_chrome(window: &gtk::ApplicationWindow, state: &Shared) -> Chrome {
     if let Some(chrome)=state.borrow().chrome.clone() { return chrome; }
     let root=gtk::Box::new(gtk::Orientation::Vertical,0);
@@ -961,6 +1039,12 @@ fn ensure_chrome(window: &gtk::ApplicationWindow, state: &Shared) -> Chrome {
     sidebar.set_hexpand(false);
     sidebar.set_halign(gtk::Align::Start);
     body.append(&sidebar);
+    // GTK4's allocated width is observed, so icon-only navigation is applied
+    // on resize without rebuilding page content or losing the user's edits.
+    let responsive_sidebar=sidebar.clone();
+    window.connect_notify_local(Some("width"),move |window,_| {
+        if window.width()>0 {apply_sidebar_density(&responsive_sidebar,window.width()<860);}
+    });
 
     let scroller=gtk::ScrolledWindow::new();
     scroller.set_policy(gtk::PolicyType::Never,gtk::PolicyType::Automatic);
@@ -1004,7 +1088,7 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
     let branding=gtk::Box::new(gtk::Orientation::Vertical,1);
     branding.set_hexpand(true);
     add_text(&branding,"GRUB Studio","brand",false);
-    add_text(&branding,"UNIVERSAL  ·  2.1","brand-subtitle",false);
+    add_text(&branding,"UNIVERSAL  ·  2.2","brand-subtitle",false);
     header.append(&branding);
     let status=if s.demo {"DEMO".into()}
         else if s.busy {tr(state,"status.scanning")}
@@ -1061,7 +1145,6 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
     for (page,icon,key) in [
         ("home","view-grid-symbolic","nav.home"),
         ("menu","view-list-symbolic","nav.menu"),
-        ("systems","drive-harddisk-symbolic","nav.systems"),
         ("themes","applications-graphics-symbolic","nav.themes"),
         ("settings","emblem-system-symbolic","nav.settings")] {
         let b=gtk::Button::new();
@@ -1074,9 +1157,11 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
         label.set_xalign(0.0);label.set_hexpand(true);
         label.set_ellipsize(gtk::pango::EllipsizeMode::End);
         label.set_max_width_chars(17);
+        label.add_css_class("nav-label");
         line.append(&label);
         b.set_child(Some(&line));
         b.add_css_class("nav-button");
+        b.set_tooltip_text(Some(&tr(state,key)));
         if s.active==page {b.add_css_class("nav-active");}
         b.set_halign(gtk::Align::Fill);
         let w=window.clone();let st=state.clone();
@@ -1089,8 +1174,7 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
     let tools_heading=add_text(nav,&tr(state,"nav.tools"),"nav-heading",false);
     tools_heading.add_css_class("nav-group-secondary");
     for (page,icon,key) in [
-        ("backups","document-save-symbolic","nav.backups"),
-        ("logs","text-x-generic-symbolic","nav.logs"),
+        ("tools","applications-utilities-symbolic","tools.title"),
         ("about","help-about-symbolic","nav.about")] {
         let b=gtk::Button::new();
         let line=gtk::Box::new(gtk::Orientation::Horizontal,11);
@@ -1101,8 +1185,10 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
         label.set_xalign(0.0);label.set_hexpand(true);
         label.set_ellipsize(gtk::pango::EllipsizeMode::End);
         label.set_max_width_chars(17);
+        label.add_css_class("nav-label");
         line.append(&label);
         b.set_child(Some(&line));b.add_css_class("nav-button");
+        b.set_tooltip_text(Some(&tr(state,key)));
         if s.active==page {b.add_css_class("nav-active");}
         let w=window.clone();let st=state.clone();
         b.connect_clicked(move |_| {
@@ -1115,15 +1201,14 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
     nav.append(&spacer);
     add_text(nav,&format!("{} · GRUB",s.snapshot.profile.family.label()),"nav-footer",true);
     nav.set_visible(s.sidebar_visible);
+    apply_sidebar_density(nav,window.width()>0 && window.width()<860);
     // The outer window and its fixed-width navigation are persistent.
     // Only the active page is replaced, so tabs cannot resize the menu.
     let page=match s.active.as_str() {
         "menu"=>page_menu(window,state),
-        "systems"=>page_systems(window,state),
         "themes"=>page_themes(window,state),
         "settings"=>page_settings(window,state),
-        "backups"=>page_backups(window,state),
-        "logs"=>page_logs(window,state),
+        "tools"=>page_tools(window,state),
         "about"=>page_about(window,state),
         _=>page_home(window,state),
     };
@@ -1139,10 +1224,10 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
 
 fn main() {
     let args:Vec<String>=std::env::args().skip(1).collect();
-    if args.iter().any(|a| a=="--version") { println!("GRUB Studio Universal 2.1.0 Rust Edition");return; }
+    if args.iter().any(|a| a=="--version") { println!("GRUB Studio Universal 2.2.0 Rust Edition");return; }
     if args.iter().any(|a| a=="--self-test") {
         let locales=serde_json::from_str::<serde_json::Value>(include_str!("../assets/translations.json")).expect("valid locale catalog");
-        for (code,_) in LANGUAGES {assert!(locales[*code]["nav.tools"].is_string(),"missing navigation translation: {code}");}
+        for (code,_) in LANGUAGES {assert!(locales[*code]["tools.title"].is_string(),"missing tools translation: {code}");}
         let exe=std::env::current_exe().expect("executable location");
         let helper=exe.parent().expect("binary directory").join("grub-studio-helper");
         let staged=StagedHelper::new(&helper).expect("portable helper staging");
@@ -1155,20 +1240,25 @@ fn main() {
         eprintln!("Start the GTK window as a normal user, not with sudo. The helper uses Polkit.");
         std::process::exit(2);
     }
-    let ui_smoke=args.iter().any(|a| a=="--ui-smoke");
+    let ui_smoke=args.iter().any(|a| a=="--ui-smoke" || a=="--ui-smoke-wide");
+    let ui_wide=args.iter().any(|a| a=="--ui-smoke-wide");
     let demo_themes=args.iter().any(|a| a=="--demo-themes");
+    let demo_page=args.iter().find_map(|a|a.strip_prefix("--demo-page="))
+        .filter(|value|["home","menu","themes","settings","tools","about"].contains(value))
+        .map(str::to_owned);
     let preview_appearance=args.iter().find_map(|a|a.strip_prefix("--appearance="))
         .filter(|v| matches!(*v,"light"|"dark")).map(str::to_owned);
-    let demo=ui_smoke || demo_themes || args.iter().any(|a| a=="--demo");
+    let demo=ui_smoke || demo_themes || demo_page.is_some() || args.iter().any(|a| a=="--demo");
     let app=gtk::Application::builder().application_id(APP_ID).build();
     app.connect_startup(|_| load_css());
     app.connect_activate(move |app| {
         let state=Rc::new(RefCell::new(initial_state(demo)));
         if demo_themes {state.borrow_mut().active="themes".into();}
+        if let Some(ref page)=demo_page {state.borrow_mut().active=page.clone();}
         if let Some(ref mode)=preview_appearance {state.borrow_mut().appearance=mode.clone();}
         let window=gtk::ApplicationWindow::builder()
             .application(app).title("GRUB Studio Universal · Rust Edition")
-            .default_width(if ui_smoke {720}else{1000})
+            .default_width(if ui_smoke {if ui_wide {1100}else{720}}else{1000})
             .default_height(if ui_smoke {540}else{650}).build();
         rebuild(&window,&state);
         window.present();
@@ -1179,7 +1269,7 @@ fn main() {
             let w=window.clone();let st=state.clone();let application=app.clone();
             let mut next=0_usize;
             let mut baseline=0_i32;
-            let routes=["home","menu","systems","themes","settings","backups","logs","about"];
+            let routes=["home","menu","themes","settings","tools","about"];
             glib::timeout_add_local(Duration::from_millis(330),move || {
                 let width=st.borrow().chrome.as_ref().map(|c|c.sidebar.width()).unwrap_or(0);
                 if width>0 {
@@ -1188,6 +1278,7 @@ fn main() {
                 }
                 if next==routes.len() {
                     assert!(baseline>0,"sidebar was never allocated");
+                    assert_eq!(baseline,if ui_wide {196}else{62},"responsive sidebar has wrong width");
                     println!("GTK4 navigation smoke: {} pages; sidebar {} px: OK",next,baseline);
                     application.quit();
                     return glib::ControlFlow::Break;

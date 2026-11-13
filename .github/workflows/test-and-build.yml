@@ -28,6 +28,8 @@ jobs:
           set -euo pipefail
           timeout 20s xvfb-run -a target/release/grub-studio-universal --ui-smoke | tee gtk-smoke.log
           grep -q 'GTK4 navigation smoke:' gtk-smoke.log
+          timeout 20s xvfb-run -a target/release/grub-studio-universal --ui-smoke-wide | tee gtk-smoke-wide.log
+          grep -q 'sidebar 196 px: OK' gtk-smoke-wide.log
       - name: Capture actual GTK4 dark/light theme screenshots
         env:
           GDK_BACKEND: x11
@@ -37,12 +39,14 @@ jobs:
           mkdir -p qa-screenshots
           xvfb-run -a -s '-screen 0 1280x800x24' bash -c '
             set -euo pipefail
-            for mode in dark light; do
-              target/release/grub-studio-universal --demo-themes --appearance="$mode" &
+            for view in themes-dark themes-light menu-dark tools-light; do
+              page=${view%-*}
+              mode=${view#*-}
+              target/release/grub-studio-universal --demo-page="$page" --appearance="$mode" &
               app_pid=$!
               sleep 4
               window_id=$(xdotool search --onlyvisible --name "GRUB Studio Universal" | tail -n 1)
-              import -window "$window_id" "qa-screenshots/themes-$mode.png"
+              import -window "$window_id" "qa-screenshots/$view.png"
               kill "$app_pid"
               wait "$app_pid" || true
             done
@@ -66,24 +70,24 @@ jobs:
         env:
           APPIMAGE_EXTRACT_AND_RUN: "1"
         run: |
-          test -s GRUB-Studio-Universal-v2.1.0-x86_64.AppImage
-          file GRUB-Studio-Universal-v2.1.0-x86_64.AppImage
-          ./GRUB-Studio-Universal-v2.1.0-x86_64.AppImage --version
-          ./GRUB-Studio-Universal-v2.1.0-x86_64.AppImage --self-test
-          sha256sum GRUB-Studio-Universal-v2.1.0-x86_64.AppImage > GRUB-Studio-Universal-v2.1.0-SHA256.txt
+          test -s GRUB-Studio-Universal-v2.2.0-x86_64.AppImage
+          file GRUB-Studio-Universal-v2.2.0-x86_64.AppImage
+          ./GRUB-Studio-Universal-v2.2.0-x86_64.AppImage --version
+          ./GRUB-Studio-Universal-v2.2.0-x86_64.AppImage --self-test
+          sha256sum GRUB-Studio-Universal-v2.2.0-x86_64.AppImage > GRUB-Studio-Universal-v2.2.0-SHA256.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: grub-studio-universal-v2.1.0-release-candidate
+          name: grub-studio-universal-v2.2.0-release-candidate
           path: |
-            GRUB-Studio-Universal-v2.1.0-x86_64.AppImage
-            GRUB-Studio-Universal-v2.1.0-SHA256.txt
+            GRUB-Studio-Universal-v2.2.0-x86_64.AppImage
+            GRUB-Studio-Universal-v2.2.0-SHA256.txt
       - name: Publish downloadable preview release
         if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if gh release view v2.1.0-rc.1 >/dev/null 2>&1; then
-            gh release upload v2.1.0-rc.1 GRUB-Studio-Universal-v2.1.0-x86_64.AppImage GRUB-Studio-Universal-v2.1.0-SHA256.txt --clobber
+          if gh release view v2.2.0-rc.1 >/dev/null 2>&1; then
+            gh release upload v2.2.0-rc.1 GRUB-Studio-Universal-v2.2.0-x86_64.AppImage GRUB-Studio-Universal-v2.2.0-SHA256.txt --clobber
           else
-            gh release create v2.1.0-rc.1 GRUB-Studio-Universal-v2.1.0-x86_64.AppImage GRUB-Studio-Universal-v2.1.0-SHA256.txt --title 'GRUB Studio Universal 2.1.0 — compact GTK4 redesign' --notes 'Redesigned GTK4 shell with persistent fixed-width navigation, deduplicated global actions and settings, single responsive EFI-entry action group, collapsed generated menu details, polished light/dark themes, and navigation-width smoke tests. CI validates Rust tests, GTK4 tabs and AppImage startup. Verify on your distribution before changing GRUB; Bazzite/OSTree writes remain restricted.' --prerelease --target "$GITHUB_SHA"
+            gh release create v2.2.0-rc.1 GRUB-Studio-Universal-v2.2.0-x86_64.AppImage GRUB-Studio-Universal-v2.2.0-SHA256.txt --title 'GRUB Studio Universal 2.2.0 — adaptive GTK4 edition' --notes 'Six clearer destinations, adaptive 196/62 px navigation, real installed-theme background thumbnails when available, expandable OS discovery, consolidated backup and activity tools, and automated GTK4 smoke tests at compact and wide widths. Run as normal user; Polkit authorizes system changes. Preview images are not full GRUB rendering. Test writes on your distribution before changing the bootloader.' --prerelease --target "$GITHUB_SHA"
           fi

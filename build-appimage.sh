@@ -28,7 +28,7 @@ ln -sfn grub-studio-universal.png "$appdir/.DirIcon"
 # linuxdeploy copies linked libraries and assembles the AppImage runtime.
 # GTK4 + GLib runtime resources must be checked on a second distribution.
 export ARCH=x86_64
-export OUTPUT="GRUB-Studio-Universal-v2.1.0-x86_64.AppImage"
+export OUTPUT="GRUB-Studio-Universal-v2.2.0-x86_64.AppImage"
 linuxdeploy \
   --appdir "$appdir" \
   --executable "$appdir/usr/bin/grub-studio-universal" \
