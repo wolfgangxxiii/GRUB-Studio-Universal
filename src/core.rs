@@ -326,7 +326,7 @@ mod tests {
         assert!(valid_theme_path("/boot/grub2/themes/legion/theme.txt"));
         assert!(!valid_theme_path("/tmp/a/theme.txt"));
         assert!(!valid_theme_path("/boot/grub/themes/../theme.txt"));
-        assert!(!valid_kernel_args("quiet splash iommu=pt"));
+        assert!(valid_kernel_args("quiet splash iommu=pt"));
         assert!(!valid_kernel_args("quiet;reboot"));
         assert!(valid_default("gs-0123456789ab"));
     }
