@@ -730,7 +730,9 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     columns.set_column_spacing(10);
     columns.set_row_spacing(10);
     columns.set_homogeneous(true);
-    columns.set_vexpand(true);
+    // Keep the library dense when only a few themes are installed; the page
+    // scroller owns extra vertical space rather than stretching both cards.
+    columns.set_vexpand(false);
 
     let list=card();
     list.add_css_class("theme-browser");
@@ -760,8 +762,8 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     }
     let scroll=gtk::ScrolledWindow::new();
     scroll.set_policy(gtk::PolicyType::Never,gtk::PolicyType::Automatic);
-    scroll.set_min_content_height(220);
-    scroll.set_vexpand(true);
+    scroll.set_min_content_height(150);
+    scroll.set_vexpand(false);
     scroll.set_child(Some(&selector));
     list.append(&scroll);
     let install=button(&tr(state,"themes.import"),false);
