@@ -22,14 +22,14 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.1.0-rc.1/GRUB-Studio-Universal-v2.1.0-x86_64.AppImage"><strong>⬇️ Download AppImage · v2.1.0 RC1</strong></a>
+  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.2.0-rc.1/GRUB-Studio-Universal-v2.2.0-x86_64.AppImage"><strong>⬇️ Download AppImage · v2.2.0 RC1</strong></a>
   &nbsp;·&nbsp;
   <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases">All releases</a>
 </p>
 
 <p align="center">
-  <img src="preview/GRUB-Studio-2.1-GTK4-Dark.png" alt="Actual GRUB Studio 2.1 GTK4 dark-mode screenshot" width="49%">
-  <img src="preview/GRUB-Studio-2.1-GTK4-Light.png" alt="Actual GRUB Studio 2.1 GTK4 light-mode screenshot" width="49%">
+  <img src="preview/GRUB-Studio-2.2-GTK4-Dark.png" alt="Actual GRUB Studio 2.2 GTK4 dark-mode screenshot" width="49%">
+  <img src="preview/GRUB-Studio-2.2-GTK4-Light.png" alt="Actual GRUB Studio 2.2 GTK4 light-mode screenshot" width="49%">
 </p>
 <p align="center"><sub>Rzeczywiste zrzuty GTK4 / Actual GTK4 screenshots · tryb demonstracyjny / demo mode</sub></p>
 
@@ -45,28 +45,29 @@
 
 | Obszar | Możliwości |
 | --- | --- |
-| 🎨 **Interfejs** | Stała nawigacja bez skoków szerokości; kompaktowy układ, jasny i ciemny motyw, 7 języków. |
+| 🎨 **Interfejs** | Nawigacja 196/62 px zależna od szerokości okna, sześć sekcji, jasny i ciemny motyw, 7 języków. |
 | 🐧 **Dystrybucje** | Rozpoznawanie Bazzite, Fedora, Ubuntu/Debian, Arch/CachyOS i openSUSE. |
 | 🖥️ **Systemy** | Wykrywanie śladów Windows i innych systemów przez UEFI/EFI; opcjonalny skan `os-prober`. |
-| 🖼️ **Motywy GRUB** | Wykrywanie zainstalowanych motywów z plikiem `theme.txt`, wybór i import katalogów motywów. |
+| 🖼️ **Motywy GRUB** | Wykrywanie `theme.txt`, wybór, import oraz miniatury i prawdziwe tło motywu, jeśli plik jest bezpiecznie dostępny. Nie jest to pełna emulacja GRUB. |
 | ⚙️ **Ustawienia** | Czas wyświetlania menu, tryb menu, rozdzielczość, motyw i wybrane ustawienia domyślne. |
-| 📋 **Wpisy rozruchowe** | Podgląd wpisów oraz edycja **własnych** pozycji EFI na obsługiwanych klasycznych instalacjach GRUB. |
+| 📋 **Wpisy rozruchowe** | Podgląd własnych wpisów EFI i wykrytych systemów w jednej sekcji; edycja **własnych** pozycji na obsługiwanych klasycznych instalacjach GRUB. |
+| 🧰 **Narzędzia** | Kopie zapasowe i dziennik działań dostępne razem bez duplikowania pozycji menu. |
 | 🛡️ **Ochrona zmian** | Polkit, kontrola uprawnień, walidacja danych, kopie zapasowe i próba cofnięcia zmian przy błędzie. |
 
 ### ⬇️ Pobieranie i uruchamianie
 
-**[Pobierz GRUB Studio Universal 2.1.0 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.1.0-rc.1/GRUB-Studio-Universal-v2.1.0-x86_64.AppImage)**
+**[Pobierz GRUB Studio Universal 2.2.0 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.2.0-rc.1/GRUB-Studio-Universal-v2.2.0-x86_64.AppImage)**
 
 AppImage nie wymaga instalacji pakietu ani ingerencji w obraz systemu Bazzite. Po pobraniu nadaj mu uprawnienia wykonywania:
 
 ```bash
-chmod +x GRUB-Studio-Universal-v2.1.0-x86_64.AppImage
-./GRUB-Studio-Universal-v2.1.0-x86_64.AppImage
+chmod +x GRUB-Studio-Universal-v2.2.0-x86_64.AppImage
+./GRUB-Studio-Universal-v2.2.0-x86_64.AppImage
 ```
 
-**[Pobierz sumę SHA-256](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.1.0-rc.1/GRUB-Studio-Universal-v2.1.0-SHA256.txt)** · [Zobacz wydanie i zmiany](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.1.0-rc.1)
+**[Pobierz sumę SHA-256](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.2.0-rc.1/GRUB-Studio-Universal-v2.2.0-SHA256.txt)** · [Zobacz wydanie i zmiany](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.2.0-rc.1)
 
-> **Wersja 2.1.0 RC:** Nowy, stały panel nawigacji, brak zdublowanych przycisków odświeżania i wyboru motywu, responsywny edytor EFI, poprawiona hierarchia informacji i nowa kolorystyka. Test GUI automatycznie przełącza osiem kart w małym oknie. Nadal wymagany jest test na konkretnym komputerze i systemie; do administracji potrzebny jest Polkit/`pkexec`.
+> **Wersja 2.2.0 RC:** Sześć uporządkowanych sekcji, automatycznie zwijany panel nawigacji, miniatury tła z zainstalowanych motywów, połączone narzędzia i bardziej kompaktowe karty. Testy GUI sprawdzają przejścia między sześcioma kartami w wąskim i szerokim oknie. Nadal wymagany jest test na konkretnym komputerze; do administracji potrzebny jest Polkit/`pkexec`.
 
 Szczegóły projektu wyglądu i przypisania funkcji do kart: **[docs/DESIGN.md](docs/DESIGN.md)**.
 
@@ -93,6 +94,7 @@ cargo test --all-targets
 cargo build --release --bins
 cargo run --bin grub-studio-universal -- --demo
 GDK_BACKEND=x11 GSK_RENDERER=cairo xvfb-run -a target/release/grub-studio-universal --ui-smoke
+GDK_BACKEND=x11 GSK_RENDERER=cairo xvfb-run -a target/release/grub-studio-universal --ui-smoke-wide
 ```
 
 Skrypt `build-appimage.sh` wymaga dodatkowo `linuxdeploy`. Automatyczny workflow budujący i testujący AppImage znajduje się w [GitHub Actions](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions).
@@ -115,28 +117,29 @@ Masz pomysł lub znalazłeś błąd? Otwórz [Issues](https://github.com/wolfgan
 
 | Area | Features |
 | --- | --- |
-| 🎨 **Interface** | Persistent navigation without width jumps, compact responsive layout, light/dark modes and 7 languages. |
+| 🎨 **Interface** | Six destinations, responsive 196/62 px navigation, compact layout, light/dark modes and 7 languages. |
 | 🐧 **Distributions** | Detection of Bazzite, Fedora, Ubuntu/Debian, Arch/CachyOS, and openSUSE. |
 | 🖥️ **Operating systems** | Detection of Windows and other OS traces through UEFI/EFI; optional `os-prober` scan. |
-| 🖼️ **GRUB themes** | Discovery of installed themes containing `theme.txt`, theme selection, and theme-folder import. |
+| 🖼️ **GRUB themes** | Installed-theme discovery, import, thumbnails and real background wallpaper when safely accessible (not a full GRUB renderer). |
 | ⚙️ **Settings** | Menu timeout, display style, resolution, theme, and selected default options. |
-| 📋 **Boot entries** | Read-only entry preview and editing of **user-created** EFI entries on supported conventional GRUB installations. |
+| 📋 **Boot entries** | User-created EFI entries and detected operating systems in one section; editing on supported conventional GRUB installations. |
+| 🧰 **Tools** | Backups and activity log consolidated into one destination. |
 | 🛡️ **Safety** | Polkit authentication, input validation, backups, and rollback attempts on failure. |
 
 ### ⬇️ Download & run
 
-**[Download GRUB Studio Universal 2.1.0 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.1.0-rc.1/GRUB-Studio-Universal-v2.1.0-x86_64.AppImage)**
+**[Download GRUB Studio Universal 2.2.0 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.2.0-rc.1/GRUB-Studio-Universal-v2.2.0-x86_64.AppImage)**
 
 The portable AppImage does not require installing an application package or modifying the Bazzite base image:
 
 ```bash
-chmod +x GRUB-Studio-Universal-v2.1.0-x86_64.AppImage
-./GRUB-Studio-Universal-v2.1.0-x86_64.AppImage
+chmod +x GRUB-Studio-Universal-v2.2.0-x86_64.AppImage
+./GRUB-Studio-Universal-v2.2.0-x86_64.AppImage
 ```
 
-**[Download SHA-256 checksum](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.1.0-rc.1/GRUB-Studio-Universal-v2.1.0-SHA256.txt)** · [Release notes](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.1.0-rc.1)
+**[Download SHA-256 checksum](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.2.0-rc.1/GRUB-Studio-Universal-v2.2.0-SHA256.txt)** · [Release notes](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.2.0-rc.1)
 
-> **Version 2.1.0 RC:** Persistent sidebar, no duplicate refresh or theme controls, a responsive EFI-entry editor, clearer content hierarchy and new light/dark palettes. The GUI smoke test navigates all eight pages at a compact window width. Real-hardware testing is still required; administration depends on Polkit/`pkexec`.
+> **Version 2.2.0 RC:** Six clearer sections, automatically collapsing sidebar, real theme-background thumbnails, grouped backup/log tools and denser cards. GUI smoke tests navigate all six pages in narrow and wide windows. Real-hardware testing is still required; administration depends on Polkit/`pkexec`.
 
 More about the layout, one-place-per-action design and testing: **[docs/DESIGN.md](docs/DESIGN.md)**.
 
@@ -163,6 +166,7 @@ cargo test --all-targets
 cargo build --release --bins
 cargo run --bin grub-studio-universal -- --demo
 GDK_BACKEND=x11 GSK_RENDERER=cairo xvfb-run -a target/release/grub-studio-universal --ui-smoke
+GDK_BACKEND=x11 GSK_RENDERER=cairo xvfb-run -a target/release/grub-studio-universal --ui-smoke-wide
 ```
 
 The `build-appimage.sh` script additionally requires `linuxdeploy`. Automated builds and AppImage runtime tests are available in [GitHub Actions](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions).

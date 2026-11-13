@@ -758,7 +758,7 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
         let row=gtk::Box::new(gtk::Orientation::Horizontal,10);
         if let Some(file)=inspect::theme_preview_image(&theme.path) {
             let thumbnail=gtk::Picture::for_filename(file);
-            thumbnail.set_content_fit(gtk::ContentFit::Cover);
+            thumbnail.set_keep_aspect_ratio(true);
             thumbnail.set_size_request(62,42);
             thumbnail.add_css_class("theme-thumbnail");
             row.append(&thumbnail);
@@ -831,7 +831,7 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     // desktop-image file. GRUB widget layout/fonts cannot be rendered by GTK.
     let image=gtk::Picture::new();
     image.add_css_class("theme-background");
-    image.set_content_fit(gtk::ContentFit::Contain);
+    image.set_keep_aspect_ratio(true);
     image.set_can_shrink(true);
     image.set_size_request(-1,162);
     let visual=gtk::Stack::new();
