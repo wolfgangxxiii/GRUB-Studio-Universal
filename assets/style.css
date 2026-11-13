@@ -1,139 +1,150 @@
-/* GRUB Studio Universal — compact GTK4 desktop UI.
- * Inspired by the balanced proportions of modern Linux launchers.
- * All colors are explicit for the two supported application appearances.
+/* GRUB Studio Universal 2.1 — compact GTK4 layout, native Wayland/X11.
+ * Stable 196px navigation, typography hierarchy, restrained colors, one
+ * primary action per context. Both palettes meet comfortable text contrast.
  */
-
 .app-root {
   font-family: "Inter", "Noto Sans", "Cantarell", sans-serif;
   font-size: 13px;
 }
 
-/* Dark appearance */
-.grub-dark { background: #10141b; color: #e9edf4; }
-.grub-dark .studio-header { background: #171c25; border-bottom: 1px solid #2c3440; }
-.grub-dark .studio-sidebar { background: #131821; border-right: 1px solid #2d3540; }
-.grub-dark .studio-card { background: #1a202a; border: 1px solid #303946; }
-.grub-dark .metric-card { background: #1b222d; }
-.grub-dark .hero { background: #202a37; border-color: #394959; }
-.grub-dark .warning-card { background: #28241f; border-color: #5a4430; }
-.grub-dark .studio-footer { background: #151b23; color: #8c9aaa; border-top: 1px solid #2d3540; }
+/* Layout: chrome is persistent; only page-scroller's child changes. */
+.studio-header { min-height: 60px; padding: 8px 15px; }
+.studio-sidebar { min-width: 196px; padding: 14px 9px 11px; }
+.page-scroller { min-width: 0; }
+.studio-footer { min-height: 24px; padding: 5px 16px; font-size: 10px; }
+.brand { font-weight: 800; font-size: 15px; letter-spacing: .2px; }
+.brand-subtitle { font-weight: 650; font-size: 10px; letter-spacing: 1.4px; }
+.brand-icon {
+  min-width: 32px; min-height: 32px;
+  border-radius: 10px; font-weight: 800; font-size: 17px;
+  color: #f9fbfe; background: #3778c9;
+}
+.status-badge {
+  padding: 6px 10px; border-radius: 14px;
+  font-size: 10px; font-weight: 700;
+}
+.icon-button { min-width: 32px; min-height: 32px; border-radius: 8px; padding: 6px; }
+.lang-select { min-width: 110px; }
+.nav-heading {
+  margin: 5px 12px 10px; font-size: 10px;
+  font-weight: 750; letter-spacing: 1px;
+}
+.nav-group-secondary { margin-top: 22px; }
+.nav-button {
+  min-height: 38px; padding: 7px 10px;
+  border: 0; border-left: 3px solid transparent;
+  border-radius: 8px; box-shadow: none;
+  font-size: 12px; font-weight: 550;
+}
+.nav-active { font-weight: 750; }
+.nav-footer { margin: 9px 12px; font-size: 11px; }
+.page-title { font-size: 23px; font-weight: 800; letter-spacing: -.3px; }
+.studio-card { border-radius: 12px; padding: 16px; }
+.hero { padding: 19px 18px; }
+.hero-title { font-size: 20px; font-weight: 750; }
+.section-heading { font-size: 11px; font-weight: 750; letter-spacing: .5px; }
+.row-title { font-size: 13px; font-weight: 650; }
+.muted { font-size: 12px; }
+.warning { font-size: 11px; }
+.item-label { font-size: 12px; }
+.actions { margin-top: 7px; margin-bottom: 5px; }
+.action-flow { margin-top: 9px; margin-bottom: 6px; }
+.action-flow flowboxchild { padding: 0; margin: 0; }
+.action-button {
+  min-height: 31px; padding: 6px 13px;
+  border-radius: 7px; font-size: 12px; font-weight: 650;
+}
+.stats-grid { margin-top: 2px; }
+.metric-card { min-height: 60px; padding: 12px 15px; }
+.metric-label { font-size: 10px; font-weight: 750; letter-spacing: .7px; }
+.metric-value { font-size: 17px; font-weight: 750; }
+.studio-list { border-radius: 9px; }
+.studio-list row { min-height: 43px; }
+.studio-list row:last-child { border-bottom: 0; }
+.theme-split { min-height: 284px; }
+.theme-browser, .theme-details { margin: 0 2px; }
+.theme-option { padding: 2px; }
+.boot-preview { min-height: 142px; padding: 15px; border-radius: 8px; }
+.preview-title { color: #b4c9e4; font-family: monospace; font-size: 12px; font-weight: 700; }
+.preview-entry { color: #91a5c4; padding: 6px 10px; font-family: monospace; font-size: 12px; }
+.preview-selected {
+  color: #f5f8ff; background: #356bb1; border-radius: 6px;
+  padding: 6px 10px; font-family: monospace; font-size: 12px;
+}
+.generated-expander { padding: 6px; border-radius: 9px; }
+
+/* Dark mode — ink/navy with a single blue accent. */
+.grub-dark { background: #111620; color: #ebf0f7; }
+.grub-dark .studio-header { background: #171e29; border-bottom: 1px solid #303b4a; }
+.grub-dark .studio-sidebar { background: #121a26; border-right: 1px solid #293545; }
+.grub-dark .page-scroller { background: #111620; }
+.grub-dark .studio-footer { background: #141c28; color: #91a2b9; border-top: 1px solid #283747; }
+.grub-dark .studio-card { background: #1c2532; border: 1px solid #303e50; }
+.grub-dark .hero { background: #202e40; border-color: #354d68; }
+.grub-dark .metric-card { background: #192432; }
+.grub-dark .warning-card { background: #282722; border-color: #575040; }
 .grub-dark .brand-subtitle, .grub-dark .muted,
 .grub-dark .nav-heading, .grub-dark .nav-footer,
-.grub-dark .metric-label { color: #96a6b9; }
-.grub-dark .section-heading { color: #bbc9d8; }
-.grub-dark .status-badge { color: #b7e6cb; background: #1d3a31; }
-.grub-dark .nav-button { color: #b5c2d2; background: transparent; }
-.grub-dark .nav-active { color: #ffffff; background: #3b302b; border-left: 3px solid #ed854c; }
-.grub-dark .nav-button:hover { background: #252e3a; }
-.grub-dark .warning { color: #eebd89; }
-.grub-dark .studio-list { background: #151b24; border: 1px solid #323e4c; }
-.grub-dark .studio-list row { border-bottom: 1px solid #2d3743; }
-.grub-dark .studio-list row:selected { background: #363b47; color: #ffffff; }
-.grub-dark .studio-list row:hover { background: #293340; }
-.grub-dark .theme-current .row-title { color: #f5a46c; }
+.grub-dark .metric-label { color: #98aac0; }
+.grub-dark .section-heading { color: #cad7e7; }
+.grub-dark .warning { color: #e5bd82; }
+.grub-dark .status-badge { color: #a9dbbd; background: #204235; }
+.grub-dark .status-locked { color: #e3bf9d; background: #443324; }
+.grub-dark .status-readonly { color: #e0c58c; background: #413e2c; }
+.grub-dark .nav-button { color: #b7c6d9; background: transparent; }
+.grub-dark .nav-button:hover { background: #243247; }
+.grub-dark .nav-active { color: #ffffff; background: #24466d; border-left-color: #70aaf6; }
+.grub-dark .nav-active .nav-icon { color: #91bbfa; }
+.grub-dark .studio-list { background: #131c28; border: 1px solid #35465c; }
+.grub-dark .studio-list row { border-bottom: 1px solid #2d3b4b; }
+.grub-dark .studio-list row:hover { background: #213047; }
+.grub-dark .studio-list row:selected { color: #ffffff; background: #294b73; }
+.grub-dark .theme-current .row-title { color: #97c5ff; }
 .grub-dark entry, .grub-dark dropdown, .grub-dark textview {
-  background: #151c26; color: #eaf0fa; border: 1px solid #3a4758;
+  background: #131e2c; color: #f0f4fa; border: 1px solid #42556b;
 }
-.grub-dark .action-button.flat { background: #2b3442; color: #e9eef8; border: 1px solid #3b4859; }
-.grub-dark .action-button.flat:hover { background: #354153; }
-.grub-dark .action-button.suggested-action { background: #dc7843; color: #171515; }
-.grub-dark .boot-preview { background: #101721; border: 1px solid #3c4d62; }
+.grub-dark .action-button.flat, .grub-dark .icon-button {
+  background: #293648; color: #e3ebf7; border: 1px solid #3e5065;
+}
+.grub-dark .action-button.flat:hover, .grub-dark .icon-button:hover { background: #34485e; }
+.grub-dark .action-button.suggested-action { background: #4b92e7; color: #071522; }
+.grub-dark .boot-preview { background: #0d1624; border: 1px solid #3e5675; }
+.grub-dark .generated-expander { background: #192331; border: 1px solid #354355; }
 
-/* Light appearance */
-.grub-light { background: #f2f4f7; color: #263345; }
-.grub-light .studio-header { background: #ffffff; border-bottom: 1px solid #dfe4eb; }
-.grub-light .studio-sidebar { background: #f7f9fc; border-right: 1px solid #dde3eb; }
-.grub-light .studio-card { background: #ffffff; border: 1px solid #dde4ed; }
+/* Light mode — clean graphite typography, restrained slate outlines. */
+.grub-light { background: #f3f6fa; color: #243247; }
+.grub-light .studio-header { background: #ffffff; border-bottom: 1px solid #dbe4ef; }
+.grub-light .studio-sidebar { background: #f9fbfe; border-right: 1px solid #dce5ef; }
+.grub-light .page-scroller { background: #f3f6fa; }
+.grub-light .studio-footer { background: #fbfcfe; color: #63778f; border-top: 1px solid #dfe6ef; }
+.grub-light .studio-card { background: #ffffff; border: 1px solid #dbe4ee; }
+.grub-light .hero { background: #ffffff; border-color: #cddcf0; }
 .grub-light .metric-card { background: #ffffff; }
-.grub-light .hero { background: #fffdfb; border-color: #ecd6c4; }
-.grub-light .warning-card { background: #fff6ec; border-color: #ead8c0; }
-.grub-light .studio-footer { background: #fafbfd; color: #6d7c90; border-top: 1px solid #dde4ed; }
+.grub-light .warning-card { background: #fff8ed; border-color: #ebd7b8; }
 .grub-light .brand-subtitle, .grub-light .muted,
 .grub-light .nav-heading, .grub-light .nav-footer,
-.grub-light .metric-label { color: #6a7e93; }
-.grub-light .section-heading { color: #52667d; }
-.grub-light .status-badge { color: #266d48; background: #e0f5e8; }
-.grub-light .nav-button { color: #40556b; background: transparent; }
-.grub-light .nav-active { color: #af582d; background: #fff0e6; border-left: 3px solid #d87542; }
-.grub-light .nav-button:hover { background: #ecf0f5; }
-.grub-light .warning { color: #8d562c; }
-.grub-light .studio-list { background: #fbfcfe; border: 1px solid #dce5ee; }
-.grub-light .studio-list row { border-bottom: 1px solid #e2e8f0; }
-.grub-light .studio-list row:selected { background: #ffeada; color: #853e20; }
-.grub-light .studio-list row:hover { background: #f2f6fa; }
-.grub-light .theme-current .row-title { color: #b65c2e; }
+.grub-light .metric-label { color: #61768e; }
+.grub-light .section-heading { color: #3f5570; }
+.grub-light .warning { color: #98642c; }
+.grub-light .status-badge { color: #236b48; background: #dff4e7; }
+.grub-light .status-locked { color: #895a2b; background: #fff0db; }
+.grub-light .status-readonly { color: #7e6123; background: #fff2cf; }
+.grub-light .nav-button { color: #455a73; background: transparent; }
+.grub-light .nav-button:hover { background: #edf2f8; }
+.grub-light .nav-active { color: #1758a0; background: #e3f0ff; border-left-color: #3779c8; }
+.grub-light .nav-active .nav-icon { color: #2c72c5; }
+.grub-light .studio-list { background: #f9fbfd; border: 1px solid #dce4ee; }
+.grub-light .studio-list row { border-bottom: 1px solid #e3e9f1; }
+.grub-light .studio-list row:hover { background: #edf4fc; }
+.grub-light .studio-list row:selected { color: #174f93; background: #e3f0fe; }
+.grub-light .theme-current .row-title { color: #226ab8; }
 .grub-light entry, .grub-light dropdown, .grub-light textview {
-  background: #ffffff; color: #263345; border: 1px solid #cdd8e5;
+  background: #ffffff; color: #233347; border: 1px solid #c8d6e5;
 }
-.grub-light .action-button.flat { background: #f9fafc; color: #354b62; border: 1px solid #d4deea; }
-.grub-light .action-button.flat:hover { background: #e9eff5; }
-.grub-light .action-button.suggested-action { background: #d97843; color: #ffffff; }
-.grub-light .boot-preview { background: #111927; border: 1px solid #526078; }
-
-/* Shared structure */
-.studio-header {
-  min-height: 54px;
-  padding: 7px 12px;
+.grub-light .action-button.flat, .grub-light .icon-button {
+  background: #ffffff; color: #37506d; border: 1px solid #d0dce9;
 }
-.brand-icon {
-  min-width: 30px;
-  min-height: 30px;
-  border-radius: 9px;
-  background: #d77943;
-  color: #ffffff;
-  font-size: 19px;
-  font-weight: 700;
-}
-.brand { font-size: 15px; font-weight: 800; }
-.brand-subtitle { font-size: 9px; font-weight: 700; }
-.status-badge {
-  font-size: 10px;
-  font-weight: 700;
-  padding: 6px 10px;
-  border-radius: 20px;
-}
-.studio-sidebar { padding: 13px 7px 9px; }
-.nav-heading { margin: 4px 10px 9px; font-size: 10px; font-weight: 700; }
-.nav-button {
-  min-height: 36px;
-  padding: 7px 10px;
-  border-radius: 7px;
-  border: 0;
-  box-shadow: none;
-  font-size: 12px;
-  font-weight: 550;
-}
-.nav-active { font-weight: 700; }
-.nav-footer { font-size: 10px; margin: 8px 8px; }
-.studio-card { border-radius: 11px; padding: 13px; }
-.page-title { font-size: 22px; font-weight: 800; }
-.section-heading { font-size: 10px; font-weight: 700; }
-.hero { padding: 15px; }
-.hero-title { font-size: 20px; font-weight: 750; }
-.muted { font-size: 11px; }
-.warning { font-size: 11px; }
-.row-title { font-size: 12px; font-weight: 650; }
-.item-label { font-size: 12px; }
-.actions { margin-top: 6px; margin-bottom: 2px; }
-.action-button {
-  min-height: 28px;
-  padding: 5px 11px;
-  border-radius: 7px;
-  font-size: 11px;
-  font-weight: 650;
-}
-.stats-grid { margin-top: 0; }
-.metric-card { min-height: 60px; padding: 10px 13px; }
-.metric-label { font-size: 10px; font-weight: 650; }
-.metric-value { font-size: 15px; font-weight: 750; }
-.studio-list { border-radius: 8px; }
-.studio-list row { min-height: 43px; }
-.theme-split { min-height: 285px; }
-.theme-browser, .theme-details { margin: 0 4px; }
-.theme-option { padding: 2px; }
-.studio-footer { min-height: 24px; padding: 5px 12px; font-size: 10px; }
-.lang-select { min-width: 112px; }
-.boot-preview { padding: 17px; min-height: 156px; border-radius: 9px; }
-.preview-title { color: #c5d7ec; font-family: monospace; font-size: 12px; font-weight: 700; }
-.preview-entry { color: #91a8c1; padding: 6px 10px; font-family: monospace; font-size: 12px; }
-.preview-selected { color: #ffffff; background: #c26e41; border-radius: 5px; padding: 6px 10px; font-family: monospace; font-size: 12px; }
+.grub-light .action-button.flat:hover, .grub-light .icon-button:hover { background: #e9f1fb; }
+.grub-light .action-button.suggested-action { background: #347bc9; color: #ffffff; }
+.grub-light .boot-preview { background: #0e1827; border: 1px solid #486080; }
+.grub-light .generated-expander { background: #ffffff; border: 1px solid #dce5ef; }
