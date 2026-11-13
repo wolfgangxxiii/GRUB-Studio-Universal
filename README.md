@@ -1,75 +1,181 @@
-# GRUB Studio Universal 2.0.0 — Rust Edition
+<p align="center">
+  <img src="assets/grub-studio.svg" alt="GRUB Studio Universal logo" width="100">
+</p>
 
-Natywna aplikacja GTK4/Wayland w języku Rust. Projekt jest nowym portem rozwiązania 1.9.0. **Wersja źródłowa / prototyp do testów**, nieprzetestowany jeszcze build produkcyjny.
+<h1 align="center">GRUB Studio Universal</h1>
 
-## Funkcje
+<p align="center">
+  <strong>A modern, portable GRUB configuration studio for Linux.</strong><br>
+  Rust · GTK4 · Wayland · Light & Dark
+</p>
 
-- Responsywny, kompaktowy interfejs GTK4: układ boczny z możliwością schowania na małym ekranie; przewijanie każdej strony.
-- Ciemny i jasny wygląd, siedem języków (PL/EN/DE/ES/FR/UK/PT-BR), ustawienia użytkownika w katalogu domowym.
-- Wykrywanie dystrybucji: Bazzite, Fedora, Debian/Ubuntu, Arch/CachyOS, openSUSE; ograniczanie operacji w systemach atomowych i przy niezgodnym bootloaderze.
-- Wykrywanie już zainstalowanych motywów GRUB (katalogi zawierające `theme.txt`).
-- Wykrywanie śladów Windows i innych systemów w UEFI i na zamontowanej partycji EFI; głębszy skan przez `os-prober` wyłącznie po zgodzie.
-- Edycja czasu, stylu, rozdzielczości GRUB i wyboru motywu; `/etc/default/grub` jest tworzony dopiero podczas zatwierdzonego zapisu, jeżeli go nie ma.
-- Osobny, kompilowany w Rust helper uruchamiany przez `pkexec`; GUI **nie działa jako root**, hasło administratora wpisuje się przez systemowy Polkit już podczas startu.
-- Kopie zapasowe i próba cofnięcia zmian, gdy generowanie pliku GRUB się nie powiedzie.
-- Edytor **własnych** wpisów EFI typu chainloader, obsługiwany na klasycznych GRUB Fedora/Arch/Debian/openSUSE. Automatycznie generowanych wpisów GRUB/OSTree nie edytujemy.
-- Podgląd nazw wpisów wygenerowanych w GRUB (jeżeli system pozwala je odczytać); bez zapisu do `grub.cfg`.
-- Zmiana widoczności menu poprzez `grub2-editenv` (Fedora/Bazzite), zmiana argumentów jądra tylko na Arch/Debian.
-- Przegląd OSTree przez `rpm-ostree status --json` bez odczytu chronionego `/boot/grub2/grub.cfg`.
+<p align="center">
+  <a href="#polski">🇵🇱 Polski</a> &nbsp;·&nbsp; <a href="#english">🇬🇧 English</a>
+</p>
 
-## Bezpieczeństwo
+<p align="center">
+  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions/workflows/test-and-build.yml"><img src="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions/workflows/test-and-build.yml/badge.svg" alt="Build status"></a>
+  <img src="https://img.shields.io/badge/Rust-2021-CE422B?logo=rust&logoColor=white" alt="Rust">
+  <img src="https://img.shields.io/badge/GTK-4-4A86CF?logo=gtk&logoColor=white" alt="GTK4">
+  <img src="https://img.shields.io/badge/Linux-x86__64-1793D1?logo=linux&logoColor=white" alt="Linux x86_64">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-GPL--3.0--or--later-38A169" alt="GPL-3.0-or-later"></a>
+</p>
 
-1. Nie uruchamiaj GUI przez `sudo`. Zgoda administracyjna odbywa się przez Polkit. Odmowa oznacza tryb podglądu.
-2. Operacje roota mają zamkniętą listę akcji i walidują wartości oraz profil systemu ponownie.
-3. Odmowa pisania na systemach z nieobsługiwanym lub innym aktywnym bootloaderem (Limine, systemd-boot, rEFInd).
-4. Program nie zmienia kolejności UEFI, nie uruchamia `grub-install`, nie nadpisuje bezpośrednio `grub.cfg` z GUI.
-5. Motywy GRUB na Bazzite nie są oficjalnie wspierane; zmiany mogą wymagać nośnika ratunkowego. Każdy zapis konfiguracji tworzy kopię.
-6. Import obsługuje **katalog z motywem** (`theme.txt`), a nie jeszcze archiwa `.tar.gz` / `.zip`. Kontrolowane są typy plików, dowiązania, liczba i rozmiar.
-7. W Bazzite podczas operacji root używany jest systemowy `/usr/libexec/bazzite-boot-remount`. Dla innych dystrybucji używany jest ich standardowy generator GRUB. Weryfikacja na konkretnym systemie jest obowiązkowa.
+<p align="center">
+  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.0.0-rc.1/GRUB-Studio-Universal-v2.0.0-x86_64.AppImage"><strong>⬇️ Download AppImage · v2.0.0 RC1</strong></a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases">All releases</a>
+</p>
 
-## Kompilacja na typowej Fedorze / Bazzite w Toolbox
+---
 
-Build wymaga Rust/Cargo, GTK4 development, kompilatora C i pkg-config **w środowisku kompilacji**. Nie należy dodawać tych pakietów do obrazu Bazzite.
+<a id="polski"></a>
+
+## 🇵🇱 Polski
+
+**GRUB Studio Universal** to graficzne narzędzie do zarządzania konfiguracją programu rozruchowego GRUB. Powstało w **Rust** i korzysta z natywnego interfejsu **GTK4**, przystosowanego do Waylanda oraz ekranów o różnej wielkości.
+
+### ✨ Najważniejsze funkcje
+
+| Obszar | Możliwości |
+| --- | --- |
+| 🎨 **Interfejs** | Kompaktowy, skalowalny układ; jasny i ciemny motyw; 7 języków interfejsu. |
+| 🐧 **Dystrybucje** | Rozpoznawanie Bazzite, Fedora, Ubuntu/Debian, Arch/CachyOS i openSUSE. |
+| 🖥️ **Systemy** | Wykrywanie śladów Windows i innych systemów przez UEFI/EFI; opcjonalny skan `os-prober`. |
+| 🖼️ **Motywy GRUB** | Wykrywanie zainstalowanych motywów z plikiem `theme.txt`, wybór i import katalogów motywów. |
+| ⚙️ **Ustawienia** | Czas wyświetlania menu, tryb menu, rozdzielczość, motyw i wybrane ustawienia domyślne. |
+| 📋 **Wpisy rozruchowe** | Podgląd wpisów oraz edycja **własnych** pozycji EFI na obsługiwanych klasycznych instalacjach GRUB. |
+| 🛡️ **Ochrona zmian** | Polkit, kontrola uprawnień, walidacja danych, kopie zapasowe i próba cofnięcia zmian przy błędzie. |
+
+<p align="center">
+  <img src="preview/GRUB-Studio-Rust-2.0-Mockup.svg" alt="Makieta interfejsu GRUB Studio Universal" width="820">
+</p>
+
+<p align="center"><sub>Makieta wyglądu interfejsu · wizualizacja projektu, nie rzeczywisty zrzut ekranu.</sub></p>
+
+### ⬇️ Pobieranie i uruchamianie
+
+**[Pobierz GRUB Studio Universal 2.0.0 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.0.0-rc.1/GRUB-Studio-Universal-v2.0.0-x86_64.AppImage)**
+
+AppImage nie wymaga instalacji pakietu ani ingerencji w obraz systemu Bazzite. Po pobraniu nadaj mu uprawnienia wykonywania:
 
 ```bash
-# W środowisku Toolbox/Distrobox z Fedorą:
-sudo dnf install -y gcc pkgconf-pkg-config gtk4-devel
-# Zainstaluj toolchain Rust przez rustup (jeżeli nie masz cargo).
-cargo test --all-targets
-cargo build --release --bins
-GDK_BACKEND=wayland ./target/release/grub-studio-universal --demo
+chmod +x GRUB-Studio-Universal-v2.0.0-x86_64.AppImage
+./GRUB-Studio-Universal-v2.0.0-x86_64.AppImage
 ```
 
-**Przenośność:** GTK4 wymaga bibliotek desktopowych. AppImage musi zawierać odpowiedni zestaw bibliotek/zasobów GTK4. Dostarczono `build-appimage.sh`, który używa `linuxdeploy`, jeżeli jest obecny. **Nie należy traktować AppImage jako przetestowanego, dopóki nie przejdzie prób na różnych dystrybucjach.** Bazzite zwykle ma GTK4, ale poprawny pakiet AppImage nie powinien zakładać dodatkowej instalacji bibliotek użytkownika.
+**[Pobierz sumę SHA-256](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.0.0-rc.1/GRUB-Studio-Universal-v2.0.0-SHA256.txt)** · [Zobacz wydanie i zmiany](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.0.0-rc.1)
 
-Uruchamianie testowego GUI bez dotykania rzeczywistego GRUB:
+> **Uwaga:** To pierwsze wydanie *Release Candidate*. Build przeszedł testy Rust i test uruchomienia AppImage w CI, ale nie został jeszcze zweryfikowany na wszystkich dystrybucjach ani na Twoim konkretnym sprzęcie. Do operacji administracyjnych system musi udostępniać Polkit/`pkexec` i odpowiednie narzędzia GRUB.
+
+### 🔐 Bezpieczeństwo i kompatybilność
+
+- Aplikację uruchamia się jako **zwykły użytkownik**. O hasło administratora prosi systemowy **Polkit**; po odmowie dostępny jest podgląd.
+- Program **nie edytuje bezpośrednio** `grub.cfg`, nie uruchamia `grub-install` i nie zmienia kolejności startowej UEFI.
+- Plik `/etc/default/grub`, jeśli go nie ma, może zostać utworzony **dopiero po zatwierdzeniu zapisu** w obsługiwanej konfiguracji.
+- Wykrywanie Windows w EFI potwierdza obecność wpisu lub pliku, **nie gwarantuje** poprawnego uruchomienia systemu.
+- Na Bazzite/OSTree obowiązują dodatkowe ograniczenia; zmiany wyglądu GRUB nie są oficjalnie wspierane przez Bazzite.
+- Przy aktywnym Limine, systemd-boot lub rEFInd aplikacja ogranicza operacje zapisu.
+- **Przed zmianą konfiguracji rozruchu wykonaj kopię zapasową i przygotuj nośnik ratunkowy.**
+
+### 🧰 Budowanie ze źródeł
+
+<details>
+<summary>Rozwiń instrukcję dla Rust + GTK4</summary>
+
+W środowisku budowania (np. Fedora Toolbox) wymagane są Rust/Cargo, GTK4 development, GCC i `pkg-config`. Nie trzeba instalować tych narzędzi w podstawowym obrazie Bazzite.
 
 ```bash
+sudo dnf install -y gcc pkgconf-pkg-config gtk4-devel
+cargo test --all-targets
+cargo build --release --bins
 cargo run --bin grub-studio-universal -- --demo
 ```
 
-Przy normalnym uruchomieniu oba pliki wykonywalne muszą znajdować się obok siebie:
+Skrypt `build-appimage.sh` wymaga dodatkowo `linuxdeploy`. Automatyczny workflow budujący i testujący AppImage znajduje się w [GitHub Actions](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions).
+
+</details>
+
+### 🤝 Projekt
+
+Masz pomysł lub znalazłeś błąd? Otwórz [Issues](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/issues). Kod jest udostępniany na licencji **GPL-3.0-or-later**. To niezależny projekt, niezwiązany oficjalnie z Bazzite ani twórcami GRUB.
+
+---
+
+<a id="english"></a>
+
+## 🇬🇧 English
+
+**GRUB Studio Universal** is a graphical tool for managing the GRUB bootloader configuration. Built with **Rust** and **GTK4**, it features a compact, responsive interface designed for Wayland and different screen sizes.
+
+### ✨ Highlights
+
+| Area | Features |
+| --- | --- |
+| 🎨 **Interface** | Compact, resizable layout; light and dark modes; 7 interface languages. |
+| 🐧 **Distributions** | Detection of Bazzite, Fedora, Ubuntu/Debian, Arch/CachyOS, and openSUSE. |
+| 🖥️ **Operating systems** | Detection of Windows and other OS traces through UEFI/EFI; optional `os-prober` scan. |
+| 🖼️ **GRUB themes** | Discovery of installed themes containing `theme.txt`, theme selection, and theme-folder import. |
+| ⚙️ **Settings** | Menu timeout, display style, resolution, theme, and selected default options. |
+| 📋 **Boot entries** | Read-only entry preview and editing of **user-created** EFI entries on supported conventional GRUB installations. |
+| 🛡️ **Safety** | Polkit authentication, input validation, backups, and rollback attempts on failure. |
+
+<p align="center">
+  <img src="preview/GRUB-Studio-Rust-2.0-Mockup.svg" alt="GRUB Studio Universal interface concept" width="820">
+</p>
+
+<p align="center"><sub>UI concept artwork · not an actual application screenshot.</sub></p>
+
+### ⬇️ Download & run
+
+**[Download GRUB Studio Universal 2.0.0 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.0.0-rc.1/GRUB-Studio-Universal-v2.0.0-x86_64.AppImage)**
+
+The portable AppImage does not require installing an application package or modifying the Bazzite base image:
 
 ```bash
-cargo build --release --bins
-./target/release/grub-studio-universal
+chmod +x GRUB-Studio-Universal-v2.0.0-x86_64.AppImage
+./GRUB-Studio-Universal-v2.0.0-x86_64.AppImage
 ```
 
-## Struktura
+**[Download SHA-256 checksum](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.0.0-rc.1/GRUB-Studio-Universal-v2.0.0-SHA256.txt)** · [Release notes](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.0.0-rc.1)
 
-- `src/core.rs`: walidacja ustawień, profili, menu EFI, testy.
-- `src/inspect.rs`: wykrywanie systemu, motywów, backupów i UEFI/EFI.
-- `src/admin.rs`: zamknięty zestaw operacji z uprawnieniami roota, backup/rollback.
-- `src/bin/helper.rs`: osobny helper root uruchamiany przez `pkexec`.
-- `src/main.rs`: natywny interfejs GTK4 Wayland/X11.
-- `assets/translations.json`: 238 tekstów w siedmiu językach (przeniesione i zaktualizowane z 1.9.0).
-- `build-appimage.sh`, `packaging/`: pliki do budowy AppImage.
+> **Please note:** This is the first *Release Candidate*. The Rust tests and AppImage CLI smoke checks passed in CI, but real-world testing across distributions and hardware is still required. Administrative operations depend on system-provided Polkit/`pkexec` and GRUB tooling.
 
-## Granice wersji 2.0.0
+### 🔐 Safety & compatibility
 
-- To pierwszy port w Rust, a nie binarny odpowiednik funkcji 1.9.0. Wciąż potrzeba testów z rzeczywistym GRUB i GTK4 oraz dopracowania instalatora archiwów motywów i podglądu graficznego motywów.
-- UEFI to dowód obecności wpisu w firmware, nie potwierdzenie istnienia systemu ani wpisu w wygenerowanym menu GRUB.
-- Operacja odtworzenia przy niepowodzeniu może sama wymagać ręcznego odzyskania z kopii; **testuj najpierw na maszynie wirtualnej**.
-- Zrzut demonstracyjny można wykonać na komputerze z GTK4 przez `--demo`. Nie przedstawiamy nieuruchomionego mockupu jako rzeczywistego zrzutu aplikacji.
+- Run the GUI as a **regular user**. Administrative authorization is requested through **Polkit**, with a read-only mode when access is denied.
+- The application does **not directly modify** `grub.cfg`, run `grub-install`, or change the UEFI boot order.
+- If `/etc/default/grub` is missing, it may be created **only after an explicitly approved write** on a supported setup.
+- A Windows EFI entry or file is **not proof** that Windows will successfully boot.
+- Bazzite/OSTree systems receive additional safety restrictions; GRUB theme modifications are not officially supported by Bazzite.
+- Write operations are restricted when Limine, systemd-boot, or rEFInd is the active bootloader.
+- **Back up your boot configuration and keep a recovery USB drive ready before making changes.**
 
-Licencja: GPL-3.0-or-later. Niezależny projekt, niezwiązany z Bazzite.
+### 🧰 Build from source
+
+<details>
+<summary>Show Rust + GTK4 build instructions</summary>
+
+The build environment needs Rust/Cargo, GTK4 development files, GCC, and `pkg-config`. A Fedora Toolbox can provide these without installing them into Bazzite's immutable base image.
+
+```bash
+sudo dnf install -y gcc pkgconf-pkg-config gtk4-devel
+cargo test --all-targets
+cargo build --release --bins
+cargo run --bin grub-studio-universal -- --demo
+```
+
+The `build-appimage.sh` script additionally requires `linuxdeploy`. Automated builds and AppImage runtime tests are available in [GitHub Actions](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions).
+
+</details>
+
+### 🤝 Contributing
+
+Found a bug or have an idea? Open an [issue](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/issues). The source is licensed under **GPL-3.0-or-later**. This is an independent project and is not officially affiliated with Bazzite or the GRUB maintainers.
+
+---
+
+<p align="center">
+  <a href="#polski">↑ Polski</a> &nbsp;·&nbsp; <a href="#english">↑ English</a> &nbsp;·&nbsp;
+  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases">Releases</a>
+</p>
