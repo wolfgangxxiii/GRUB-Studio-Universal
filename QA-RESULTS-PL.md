@@ -1,29 +1,49 @@
-# GRUB Studio Universal 2.0.0 — wyniki weryfikacji
+# GRUB Studio Universal 2.1.0 RC1 — raport jakości
 
 Data: 13 listopada 2026
 
-| Kontrola | Wynik |
-|---|---|
-| Siedem katalogów językowych | PASS |
-| 238 kluczy w każdym języku | PASS |
-| Zgodność parametrów tłumaczeń w siedmiu językach | PASS |
-| Poprawny plik JSON | PASS |
-| SVG ikony oraz podglądu graficznego | PASS |
-| Poprawność składni `build-appimage.sh` według Bash | PASS |
-| Leksykalne nawiasowanie sześciu plików Rust | PASS |
-| Uruchomienie `cargo test --all-targets` | **NIEMOŻLIWE**: `cargo: command not found` |
-| Kompilacja GTK4 | **NIEMOŻLIWE**: brak bibliotek deweloperskich GTK4 |
-| Test uruchomienia na Wayland | NIE PRZEPROWADZONO |
-| AppImage x86_64 | NIE ZBUDOWANO |
-| Test działania na prawdziwym GRUB / Bazzite | NIE PRZEPROWADZONO |
+## Automatyczne testy
 
-Status: **kod źródłowy do dalszej kompilacji i testów**, a nie zweryfikowane wydanie binarne.
+| Kontrola | Wynik | Środowisko |
+| --- | --- | --- |
+| `cargo test --all-targets` | **PASS** — 10 testów, zero błędów | Ubuntu / GitHub Actions |
+| `cargo build --release --bins` | **PASS** | Rust stable + GTK4 |
+| Osiem zakładek GTK4 i stała szerokość nawigacji 196 px | **PASS** | `xvfb-run`, okno 720 × 540 |
+| Uruchomienie w trybie demonstracyjnym (ciemny i jasny) | **PASS** | GTK4 / wirtualny ekran X11 |
+| Zrzuty rzeczywistego interfejsu | **PASS** | `preview/GRUB-Studio-2.1-GTK4-{Dark,Light}.png` |
+| `build-appimage.sh`, tworzenie AppDir i AppImage | **PASS** | linuxdeploy, x86_64 |
+| Test `AppImage --version` i `AppImage --self-test` | **PASS** | GitHub Actions |
+| Wykrywanie zainstalowanych motywów i Windows EFI | **PASS** — testy jednostkowe na danych testowych | Rust |
 
-W testach na prawdziwej maszynie priorytetowo należy sprawdzić:
+Przed włączeniem finalnych zmian wizualnych kompilacja kontrolna zakończyła się
+powodzeniem: [GitHub Actions — test projektu 2.1](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions/runs/43474357857).
+Wersja wydana na `main` przechodzi ten sam zestaw kontroli; jej wynik jest
+widoczny na stronie [Actions](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions).
 
-1. Uruchomienie i monity Polkit na KDE Plasma/Wayland.
-2. Czy Bazzite ma właściwy punkt docelowy GRUB i wspierane remountowanie `/boot`.
-3. Co się dzieje, gdy `/etc/default/grub` nie istnieje (tworzenie dopiero podczas zatwierdzonego zapisu).
-4. Instalację motywów, aktualizację GRUB, odtwarzanie kopii i rollback na testowej maszynie wirtualnej.
-5. Zachowanie interfejsu w oknie 600 × 410 i przy skalowaniu 125%–200%.
-6. AppImage na innych dystrybucjach, z wyłączonym XWayland.
+## Sprawdzenie interfejsu
+
+- Powłoka okna, menu, pasek górny i pasek stanu są tworzone jeden raz.
+- Szerokość nawigacji nie zależy od wybranej zakładki i jej treści.
+- Wyrzucono powtórzone czynności: wybór motywu tylko w **Motywach**,
+  odświeżenie podstawowe tylko w pasku górnym, bez duplikatów na pulpicie.
+- Przyciski edytora niestandardowych wpisów EFI zawijają się w małym oknie.
+- Widok biblioteki motywów przechodzi między jedną a dwiema kolumnami.
+- Zestawienie prawdziwych zrzutów z obu palet pokazało i pozwoliło poprawić
+  kontrast etykiet listy i wygląd rozwijanego wyboru języka.
+
+## Co wymaga próby na sprzęcie użytkownika
+
+Automatyczna kompilacja **nie jest** testem modyfikacji działającego bootloadera.
+Następujące rzeczy pozostają do weryfikacji na prawdziwym komputerze, najlepiej
+we własnym środowisku testowym lub maszynie wirtualnej:
+
+1. Polkit i wyświetlenie monitu hasła w KDE Plasma/Wayland oraz GNOME/Wayland.
+2. Montowanie i modyfikowanie `/boot` na konkretnej wersji Bazzite OSTree.
+3. Zapis, tworzenie i odtwarzanie `/etc/default/grub` oraz rollback po awarii.
+4. Import motywu, wykonanie `grub2-mkconfig` i ponowny rozruch w trybie UEFI.
+5. Renderowanie na Wayland bez XWayland, przy skalowaniu 125–200%.
+6. Praca AppImage na innych dystrybucjach i starszych bibliotekach systemowych.
+
+**Wniosek:** przeszły testy kodu, nawigacji GTK4 i przenośnego artefaktu AppImage.
+Operacje zmieniające program rozruchowy wymagają nadal ręcznego testu regresji
+na wspieranych systemach. Aplikacja nie zastępuje kopii zapasowej i nośnika ratunkowego.

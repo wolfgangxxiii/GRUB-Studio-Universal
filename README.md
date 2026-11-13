@@ -27,6 +27,12 @@
   <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases">All releases</a>
 </p>
 
+<p align="center">
+  <img src="preview/GRUB-Studio-2.1-GTK4-Dark.png" alt="Actual GRUB Studio 2.1 GTK4 dark-mode screenshot" width="49%">
+  <img src="preview/GRUB-Studio-2.1-GTK4-Light.png" alt="Actual GRUB Studio 2.1 GTK4 light-mode screenshot" width="49%">
+</p>
+<p align="center"><sub>Rzeczywiste zrzuty GTK4 / Actual GTK4 screenshots · tryb demonstracyjny / demo mode</sub></p>
+
 ---
 
 <a id="polski"></a>
@@ -46,12 +52,6 @@
 | ⚙️ **Ustawienia** | Czas wyświetlania menu, tryb menu, rozdzielczość, motyw i wybrane ustawienia domyślne. |
 | 📋 **Wpisy rozruchowe** | Podgląd wpisów oraz edycja **własnych** pozycji EFI na obsługiwanych klasycznych instalacjach GRUB. |
 | 🛡️ **Ochrona zmian** | Polkit, kontrola uprawnień, walidacja danych, kopie zapasowe i próba cofnięcia zmian przy błędzie. |
-
-<p align="center">
-  <img src="preview/GRUB-Studio-Rust-2.1-Concept.svg" alt="Makieta nowego interfejsu GRUB Studio Universal 2.1" width="940">
-</p>
-
-<p align="center"><sub>Makieta wyglądu interfejsu · wizualizacja projektu, nie rzeczywisty zrzut ekranu.</sub></p>
 
 ### ⬇️ Pobieranie i uruchamianie
 
@@ -122,12 +122,6 @@ Masz pomysł lub znalazłeś błąd? Otwórz [Issues](https://github.com/wolfgan
 | ⚙️ **Settings** | Menu timeout, display style, resolution, theme, and selected default options. |
 | 📋 **Boot entries** | Read-only entry preview and editing of **user-created** EFI entries on supported conventional GRUB installations. |
 | 🛡️ **Safety** | Polkit authentication, input validation, backups, and rollback attempts on failure. |
-
-<p align="center">
-  <img src="preview/GRUB-Studio-Rust-2.1-Concept.svg" alt="GRUB Studio Universal 2.1 interface concept" width="940">
-</p>
-
-<p align="center"><sub>UI concept artwork · not an actual application screenshot.</sub></p>
 
 ### ⬇️ Download & run
 
