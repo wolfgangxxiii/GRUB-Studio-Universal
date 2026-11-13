@@ -406,8 +406,8 @@ fn page_home(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     banner.add_css_class("hero");
     add_text(&banner,&tr(state,"home.distribution"),"section-heading",true);
     add_text(&banner, &snapshot.profile.name, "hero-title", true);
-    add_text(&banner, &format!("{} · GRUB 2 · {}",
-        snapshot.profile.family.label(),
+    add_text(&banner, &format!("{} · {} · {}",
+        snapshot.profile.family.label(), snapshot.profile.bootloader,
         if state.borrow().authorized && snapshot.profile.writable { tr(state, "status.ready") } else { tr(state, "status.readonly") }),
         "muted", true);
     if !snapshot.profile.writable {
@@ -808,7 +808,14 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     let canvas=gtk::Box::new(gtk::Orientation::Vertical,5);
     canvas.add_css_class("boot-preview");
     add_text(&canvas,"GNU GRUB 2", "preview-title",true);
-    for (i,entry) in ["Bazzite Linux", "Advanced options for Linux", "Windows Boot Manager"].iter().enumerate() {
+    // A representative view of this machine's actual detected GRUB entries.
+    // Visual colors are only an approximation, not a rendering of theme.txt.
+    let mut entries=state.borrow().snapshot.generated.iter().take(3).cloned().collect::<Vec<_>>();
+    if entries.is_empty() {
+        entries.push(state.borrow().snapshot.profile.name.clone());
+        entries.extend(state.borrow().snapshot.systems.iter().take(2).map(|os|os.name.clone()));
+    }
+    for (i,entry) in entries.iter().enumerate() {
         let l=gtk::Label::new(Some(entry));
         l.set_xalign(0.0);l.add_css_class(if i==0{"preview-selected"}else{"preview-entry"});
         canvas.append(&l);
@@ -962,7 +969,12 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
     add_text(&branding,"GRUB Studio","brand",false);
     add_text(&branding,"UNIVERSAL  /  RUST","brand-subtitle",false);
     header.append(&branding);
-    let badge=gtk::Label::new(Some(if s.demo {"DEMO"} else if s.busy {"SCANNING…"} else if s.authorized&&s.snapshot.profile.writable {"● GRUB READY"}else if s.authorized {"● READ ONLY"}else{"● LOCKED"}));
+    let status=if s.demo {"DEMO".into()}
+        else if s.busy {tr(state,"status.scanning")}
+        else if s.authorized&&s.snapshot.profile.writable {tr(state,"status.ready")}
+        else if s.authorized {tr(state,"status.readonly")}
+        else {format!("🔒 {}",tr(state,"auth.unlock"))};
+    let badge=gtk::Label::new(Some(&status));
     badge.add_css_class("status-badge");header.append(&badge);
     if !s.authorized && !s.demo {
         let unlock=button(&tr(state,"auth.unlock"),true);
@@ -1083,5 +1095,7 @@ fn main() {
             });
         }
     });
-    let _=app.run();
+    // Flags such as --demo are consumed by GRUB Studio above, not by GTK's
+    // GApplication parser (which otherwise rejects them as unknown options).
+    let _=app.run_with_args(&["grub-studio-universal"]);
 }
