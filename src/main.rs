@@ -1201,7 +1201,8 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
     nav.append(&spacer);
     add_text(nav,&format!("{} · GRUB",s.snapshot.profile.family.label()),"nav-footer",true);
     nav.set_visible(s.sidebar_visible);
-    apply_sidebar_density(nav,window.width()>0 && window.width()<860);
+    let window_width=if window.width()>0 {window.width()} else {window.default_width()};
+    apply_sidebar_density(nav,window_width<860);
     // The outer window and its fixed-width navigation are persistent.
     // Only the active page is replaced, so tabs cannot resize the menu.
     let page=match s.active.as_str() {
