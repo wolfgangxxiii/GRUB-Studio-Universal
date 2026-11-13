@@ -928,7 +928,12 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     add_text(&preview,&tr(state,"themes.approx"),"muted",true);
     let controls=action_row();
     let activate=button(&tr(state,"themes.use"),true);
-    activate.set_sensitive(writable && !selected.is_empty() && selected!=active);
+    let can_apply_theme=writable && !selected.is_empty() && selected!=active;
+    activate.set_sensitive(can_apply_theme);
+    if !can_apply_theme {
+        activate.remove_css_class("suggested-action");
+        activate.add_css_class("flat");
+    }
     let w=window.clone();let s=state.clone();
     activate.connect_clicked(move |_| {
         let c=s.borrow().snapshot.config.clone();let selected=s.borrow().selected_theme.clone();
@@ -970,7 +975,10 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
                 current_status.remove_css_class("theme-state-active");
                 current_status.remove_css_class("theme-state-idle");
                 current_status.add_css_class(if theme.path==active_theme {"theme-state-active"}else{"theme-state-idle"});
-                activate.set_sensitive(can_edit(&s.borrow()) && theme.path!=active_theme);
+                let can_apply=can_edit(&s.borrow()) && theme.path!=active_theme;
+                activate.set_sensitive(can_apply);
+                activate.remove_css_class(if can_apply {"flat"}else{"suggested-action"});
+                activate.add_css_class(if can_apply {"suggested-action"}else{"flat"});
                 if let Some(path)=inspect::theme_preview_image(&theme.path) {
                     image.set_filename(Some(path));
                     visual.set_visible_child_name("wallpaper");
@@ -1130,6 +1138,21 @@ fn ensure_chrome(window: &gtk::ApplicationWindow, state: &Shared) -> Chrome {
     let responsive_sidebar=sidebar.clone();
     window.connect_notify_local(Some("width"),move |window,_| {
         if window.width()>0 {apply_sidebar_density(&responsive_sidebar,window.width()<860);}
+    });
+    // On some Wayland compositors and X11 window managers GTK4 does not
+    // notify the read-only widget width property after an external resize.
+    // A low-frequency geometry fallback keeps real-time transitions correct.
+    let watched_window=window.downgrade();
+    let watched_sidebar=sidebar.downgrade();
+    glib::timeout_add_local(Duration::from_millis(220),move || {
+        let (Some(window),Some(sidebar))=(watched_window.upgrade(),watched_sidebar.upgrade())
+            else {return glib::ControlFlow::Break};
+        if !window.is_visible() {return glib::ControlFlow::Break;}
+        let compact=window.width()<860;
+        if window.width()>0 && sidebar.has_css_class("nav-compact")!=compact {
+            apply_sidebar_density(&sidebar,compact);
+        }
+        glib::ControlFlow::Continue
     });
 
     let scroller=gtk::ScrolledWindow::new();
@@ -1344,6 +1367,7 @@ fn main() {
         std::process::exit(2);
     }
     let ui_smoke=args.iter().any(|a| a=="--ui-smoke" || a=="--ui-smoke-wide");
+    let ui_resize_report=args.iter().any(|a| a=="--ui-resize-report");
     let ui_wide=args.iter().any(|a| a=="--ui-smoke-wide");
     let demo_themes=args.iter().any(|a| a=="--demo-themes");
     let demo_page=args.iter().find_map(|a|a.strip_prefix("--demo-page="))
@@ -1353,7 +1377,7 @@ fn main() {
         .filter(|v| matches!(*v,"light"|"dark")).map(str::to_owned);
     let preview_language=args.iter().find_map(|a|a.strip_prefix("--language="))
         .filter(|v| LANGUAGES.iter().any(|(id,_)| id==v)).map(str::to_owned);
-    let demo=ui_smoke || demo_themes || demo_page.is_some() || args.iter().any(|a| a=="--demo");
+    let demo=ui_smoke || ui_resize_report || demo_themes || demo_page.is_some() || args.iter().any(|a| a=="--demo");
     let app=gtk::Application::builder().application_id(APP_ID).build();
     app.connect_startup(|_| load_css());
     app.connect_activate(move |app| {
@@ -1393,6 +1417,16 @@ fn main() {
                 rebuild(&w,&st);
                 next+=1;
                 glib::ControlFlow::Continue
+            });
+        }
+        if ui_resize_report {
+            let w=window.clone();let st=state.clone();let application=app.clone();
+            glib::timeout_add_local_once(Duration::from_millis(4200),move || {
+                let sidebar=st.borrow().chrome.as_ref().map(|c|c.sidebar.width()).unwrap_or(0);
+                assert!(w.width()>=650 && w.width()<860,"window was not resized to the compact range: {}",w.width());
+                assert_eq!(sidebar,62,"sidebar must collapse after live window resize");
+                println!("GTK4 live resize: sidebar {sidebar} px: OK");
+                application.quit();
             });
         }
         if !demo {

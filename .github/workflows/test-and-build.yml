@@ -30,6 +30,22 @@ jobs:
           grep -q 'GTK4 navigation smoke:' gtk-smoke.log
           timeout 20s xvfb-run -a target/release/grub-studio-universal --ui-smoke-wide | tee gtk-smoke-wide.log
           grep -q 'sidebar 196 px: OK' gtk-smoke-wide.log
+      - name: Test live resize from expanded to compact navigation
+        env:
+          GDK_BACKEND: x11
+          GSK_RENDERER: cairo
+          GTK_A11Y: none
+        run: |
+          timeout 22s xvfb-run -a -s '-screen 0 1280x800x24' bash -c '
+            set -euo pipefail
+            target/release/grub-studio-universal --ui-resize-report > gtk-resize.log 2>&1 &
+            app_pid=$!
+            sleep 2
+            window_id=$(xdotool search --onlyvisible --name "GRUB Studio Universal" | tail -n 1)
+            xdotool windowsize "$window_id" 720 540
+            wait "$app_pid"
+            grep -q "GTK4 live resize: sidebar 62 px: OK" gtk-resize.log
+          '
       - name: Capture actual GTK4 dark/light theme screenshots
         env:
           GDK_BACKEND: x11

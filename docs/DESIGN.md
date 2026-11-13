@@ -63,6 +63,9 @@ Tryb `--ui-smoke` (bez operacji na GRUB) automatycznie otwiera wszystkie sześć
 kart w oknie 720 px i sprawdza, że nawigacja pozostaje zwinięta (62 px).
 `--ui-smoke-wide` sprawdza analogiczny układ przy 1100 px i panelu 196 px.
 GitHub Actions uruchamia oba testy przed budową AppImage.
+Osobny test `--ui-resize-report` wymusza rozmiar 720 px poleceniem `xdotool`
+**po otwarciu okna** i sprawdza przejście z 196 do 62 px; dzięki temu test
+obejmuje też menedżery okien niewysyłające powiadomień o zmianie szerokości.
 Wersja 2.3 zawiera dodatkowy test kompletności kluczowych komunikatów we wszystkich
 siedmiu językach oraz zrzut wąskiego układu menu z polskimi etykietami.
 
