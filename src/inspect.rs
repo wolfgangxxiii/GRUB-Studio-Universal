@@ -57,22 +57,51 @@ pub fn profile() -> Profile {
 }
 
 pub fn scan_themes() -> Vec<Theme> {
-    let roots = ["/boot/grub2/themes", "/boot/grub/themes", "/usr/share/grub/themes",
-        "/usr/share/grub2/themes", "/etc/grub/themes", "/boot/themes"];
+    let roots = [Path::new("/boot/grub2/themes"), Path::new("/boot/grub/themes"),
+        Path::new("/usr/share/grub/themes"), Path::new("/usr/share/grub2/themes"),
+        Path::new("/etc/grub/themes"), Path::new("/boot/themes")];
+    let active = core::parse_grub_config(&fs::read_to_string(CONFIG).unwrap_or_default())
+        .get("GRUB_THEME").cloned();
+    scan_themes_from_roots(&roots, active.as_deref())
+}
+fn scan_themes_from_roots(roots: &[&Path], active: Option<&str>) -> Vec<Theme> {
     let mut found = Vec::new();
     let mut seen = HashSet::new();
+    let mut register = |path: PathBuf| {
+        let Ok(md) = fs::symlink_metadata(&path) else { return };
+        if !md.is_file() || md.len() > 1_000_000 { return }
+        let Some(folder) = path.parent() else { return };
+        let Some(name) = folder.file_name().and_then(|s| s.to_str()) else { return };
+        if !core::valid_simple_name(name) { return }
+        let canonical = path.to_string_lossy().to_string();
+        if seen.insert(canonical.clone()) {
+            found.push(Theme {name:name.to_string(),path:canonical});
+        }
+    };
     for base in roots {
         let Ok(dir) = fs::read_dir(base) else { continue };
-        for item in dir.flatten() {
+        for item in dir.take(256).flatten() {
             let name = item.file_name().to_string_lossy().to_string();
             if !core::valid_simple_name(&name) { continue }
-            let path = item.path().join("theme.txt");
-            if !item.path().is_dir() || !path.is_file() { continue }
-            let canonical = path.to_string_lossy().into_owned();
-            if seen.insert(canonical.clone()) { found.push(Theme { name, path: canonical }); }
+            if !item.file_type().map(|f|f.is_dir()).unwrap_or(false) {continue}
+            register(item.path().join("theme.txt"));
+            // Some archives contain one extra top-level directory. Find
+            // those themes too, but do not traverse unbounded directories.
+            if let Ok(inner) = fs::read_dir(item.path()) {
+                for nested in inner.take(128).flatten() {
+                    if !nested.file_type().map(|f|f.is_dir()).unwrap_or(false) {continue}
+                    let nested_name=nested.file_name().to_string_lossy().to_string();
+                    if core::valid_simple_name(&nested_name) {
+                        register(nested.path().join("theme.txt"));
+                    }
+                }
+            }
         }
     }
-    found.sort_by_key(|x| x.name.to_lowercase());
+    if let Some(active) = active {
+        if core::valid_theme_path(active) { register(PathBuf::from(active)); }
+    }
+    found.sort_by_key(|x| (x.name.to_lowercase(), x.path.clone()));
     found
 }
 
@@ -195,9 +224,10 @@ pub fn deployments() -> Vec<String> {
 
 pub fn inspect() -> Snapshot {
     let p = profile();
+    let config = core::parse_grub_config(&fs::read_to_string(CONFIG).unwrap_or_default());
     Snapshot {
-        config: core::parse_grub_config(&fs::read_to_string(CONFIG).unwrap_or_default()),
         themes: scan_themes(),
+        config,
         systems: scan_systems(),
         backups: scan_backups(p.family),
         menu: read_custom_menu(),
@@ -226,5 +256,22 @@ mod tests {
     fn parses_generated_grub_titles_read_only() {
         let rows=parse_generated_menu("menuentry 'Bazzite Linux' --id=bazzite {\n submenu \"Advanced options\" {\n");
         assert_eq!(rows,vec!["Bazzite Linux","Advanced options"]);
+    }
+    #[test]
+    fn finds_existing_and_nested_themes_without_following_links() {
+        use std::os::unix::fs::symlink;
+        let nonce=std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH)
+            .unwrap().as_nanos();
+        let base=std::env::temp_dir().join(format!("grub-studio-theme-test-{}-{nonce}",std::process::id()));
+        fs::create_dir_all(base.join("legion")).unwrap();
+        fs::create_dir_all(base.join("nested").join("lenovo")).unwrap();
+        fs::write(base.join("legion/theme.txt"), "# Theme").unwrap();
+        fs::write(base.join("nested/lenovo/theme.txt"), "# Theme").unwrap();
+        symlink(base.join("legion"),base.join("linked")).unwrap();
+        let found=scan_themes_from_roots(&[base.as_path()],None);
+        assert_eq!(found.len(),2);
+        assert!(found.iter().any(|t| t.name=="legion"));
+        assert!(found.iter().any(|t| t.name=="lenovo"));
+        fs::remove_dir_all(&base).unwrap();
     }
 }

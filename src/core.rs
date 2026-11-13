@@ -191,12 +191,18 @@ pub fn valid_resolution(value: &str) -> bool {
 pub fn valid_theme_path(value: &str) -> bool {
     if value.is_empty() { return true }
     let p = Path::new(value);
-    if p.file_name().and_then(|n| n.to_str()) != Some("theme.txt") { return false }
-    let Some(name) = p.parent().and_then(|a| a.file_name()).and_then(|s| s.to_str()) else { return false };
-    let Some(root) = p.parent().and_then(Path::parent).and_then(Path::to_str) else { return false };
-    valid_simple_name(name) &&
-        ["/boot/grub2/themes", "/boot/grub/themes", "/usr/share/grub/themes",
-            "/usr/share/grub2/themes", "/etc/grub/themes", "/boot/themes"].contains(&root)
+    ["/boot/grub2/themes", "/boot/grub/themes", "/usr/share/grub/themes",
+        "/usr/share/grub2/themes", "/etc/grub/themes", "/boot/themes"].iter().any(|root| {
+        let Ok(relative) = p.strip_prefix(root) else { return false };
+        let parts = relative.components().collect::<Vec<_>>();
+        if !matches!(parts.len(), 2 | 3) || relative.file_name().and_then(|n| n.to_str()) != Some("theme.txt") {
+            return false;
+        }
+        parts[..parts.len()-1].iter().all(|component| match component {
+            std::path::Component::Normal(name) => name.to_str().map(valid_simple_name).unwrap_or(false),
+            _ => false,
+        })
+    })
 }
 pub fn valid_simple_name(v: &str) -> bool {
     !v.is_empty() && v.len() <= 64 && v.as_bytes()[0].is_ascii_alphanumeric()
@@ -324,8 +330,10 @@ mod tests {
         assert!(valid_timeout("-1") && valid_timeout("0") && valid_timeout("60"));
         assert!(!valid_timeout("61") && !valid_timeout("05"));
         assert!(valid_theme_path("/boot/grub2/themes/legion/theme.txt"));
+        assert!(valid_theme_path("/boot/grub2/themes/legion/legion/theme.txt"));
         assert!(!valid_theme_path("/tmp/a/theme.txt"));
         assert!(!valid_theme_path("/boot/grub/themes/../theme.txt"));
+        assert!(!valid_theme_path("/boot/grub/themes/legion/a/b/theme.txt"));
         assert!(valid_kernel_args("quiet splash iommu=pt"));
         assert!(!valid_kernel_args("quiet;reboot"));
         assert!(valid_default("gs-0123456789ab"));

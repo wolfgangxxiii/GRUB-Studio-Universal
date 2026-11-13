@@ -8,6 +8,8 @@ use gtk::glib;
 use gtk::prelude::*;
 use std::cell::RefCell;
 use std::fs;
+use std::io::Read;
+use std::os::unix::fs::{DirBuilderExt, PermissionsExt};
 use std::path::PathBuf;
 use std::process::Command;
 use std::rc::Rc;
@@ -124,7 +126,13 @@ fn run_admin(args: &[String]) -> Result<String, String> {
     let exe = std::env::current_exe().map_err(|e| format!("Cannot locate application executable: {e}"))?;
     let helper = exe.parent().ok_or("Invalid application path")?.join("grub-studio-helper");
     if !helper.is_file() { return Err(format!("Missing separate helper executable: {}", helper.display())); }
-    let result = Command::new(pkexec).arg(helper).args(args).output().map_err(|e| format!("Polkit error: {e}"))?;
+    // The AppImage runtime normally mounts its SquashFS through FUSE for the
+    // desktop user. A root process launched by pkexec may not be allowed to
+    // traverse that mount. Copy just the compiled helper to a private,
+    // short-lived real-filesystem directory before invoking Polkit.
+    let staged = StagedHelper::new(&helper)?;
+    let result = Command::new(pkexec).arg(&staged.path).args(args).output()
+        .map_err(|e| format!("Cannot launch Polkit: {e}"))?;
     if result.status.success() { Ok(String::from_utf8_lossy(&result.stdout).into_owned()) }
     else if result.status.code() == Some(126) { Err("Administrator authentication cancelled".into()) }
     else {
@@ -132,9 +140,42 @@ fn run_admin(args: &[String]) -> Result<String, String> {
         Err(format!("Operation denied or failed: {}", stderr.chars().take(1800).collect::<String>()))
     }
 }
+struct StagedHelper { path: PathBuf, directory: PathBuf }
+impl StagedHelper {
+    fn new(source: &std::path::Path) -> Result<Self, String> {
+        let file_type = fs::symlink_metadata(source)
+            .map_err(|e| format!("Cannot inspect administrator helper: {e}"))?.file_type();
+        if !file_type.is_file() || file_type.is_symlink() {
+            return Err("Administrator helper must be a regular file".into());
+        }
+        let mut entropy = [0_u8; 16];
+        fs::File::open("/dev/urandom").and_then(|mut file| file.read_exact(&mut entropy))
+            .map_err(|e| format!("Cannot create a secure temporary helper directory: {e}"))?;
+        let nonce = entropy.iter().map(|b| format!("{b:02x}")).collect::<String>();
+        let directory = std::env::temp_dir().join(format!("grub-studio-helper-{}-{nonce}", std::process::id()));
+        fs::DirBuilder::new().mode(0o700).create(&directory)
+            .map_err(|e| format!("Cannot create temporary helper directory: {e}"))?;
+        let path = directory.join("grub-studio-helper");
+        if let Err(e) = fs::copy(source, &path)
+            .and_then(|_| fs::set_permissions(&path, fs::Permissions::from_mode(0o700))) {
+            let _ = fs::remove_file(&path);
+            let _ = fs::remove_dir(&directory);
+            return Err(format!("Cannot prepare administrator helper: {e}"));
+        }
+        Ok(Self { path, directory })
+    }
+}
+impl Drop for StagedHelper {
+    fn drop(&mut self) {
+        let _ = fs::remove_file(&self.path);
+        let _ = fs::remove_dir(&self.directory);
+    }
+}
 fn apply_probe(s: &mut StudioState, raw: &str, deep: bool) -> Result<(), String> {
     let header = if deep { "GRUB_STUDIO_DEEP_V2" } else { "GRUB_STUDIO_PROBE_V2" };
     if raw.lines().next() != Some(header) { return Err("Invalid privileged scan output".into()); }
+    let previously_found = if deep { Vec::new() } else { s.snapshot.themes.clone() };
+    let mut profile_received = false;
     if !deep {
         s.snapshot.themes.clear();
         s.snapshot.systems.clear();
@@ -148,6 +189,7 @@ fn apply_probe(s: &mut StudioState, raw: &str, deep: bool) -> Result<(), String>
         let p: Vec<&str> = line.split('\t').collect();
         match p.as_slice() {
             ["PROFILE", family, writable, name, reason] if !deep => {
+                profile_received = true;
                 s.snapshot.profile.writable = *writable == "1";
                 s.snapshot.profile.name = (*name).to_string();
                 s.snapshot.profile.reasons = if reason.is_empty() { vec![] } else { vec![(*reason).to_string()] };
@@ -174,6 +216,13 @@ fn apply_probe(s: &mut StudioState, raw: &str, deep: bool) -> Result<(), String>
         }
     }
     if !deep {
+        if !profile_received { return Err("Incomplete privileged scan (missing system profile)".into()); }
+        for theme in previously_found {
+            if !s.snapshot.themes.iter().any(|other| other.path==theme.path) {
+                s.snapshot.themes.push(theme);
+            }
+        }
+        s.snapshot.themes.sort_by_key(|t| (t.name.to_lowercase(),t.path.clone()));
         s.pending_entries = s.snapshot.menu.clone();
         s.selected_entry = None;
         s.selected_theme = s.snapshot.config.get("GRUB_THEME").cloned().unwrap_or_default();
@@ -193,17 +242,7 @@ fn initial_state(demo: bool) -> StudioState {
         s.pending_entries = s.snapshot.menu.clone();
         s.selected_theme = s.snapshot.config.get("GRUB_THEME").cloned().unwrap_or_default();
         s.log.push("DEMO: all administrative writes are disabled".into());
-    } else {
-        // Required by the original brief: system Polkit password dialog on startup.
-        // The GUI never receives, stores or displays the password.
-        match run_admin(&["--probe".into()]) {
-            Ok(text) => match apply_probe(&mut s, &text, false) {
-                Ok(()) => { s.authorized = true; s.log.push("Polkit authorization succeeded".into()); }
-                Err(e) => s.log.push(format!("Root scan error: {e}")),
-            },
-            Err(e) => s.log.push(format!("Read-only session: {e}")),
-        }
-    }
+    } else { s.log.push("Waiting for Polkit authentication after the window opens".into()); }
     s
 }
 fn can_edit(s: &StudioState) -> bool {
@@ -236,8 +275,10 @@ fn submit(window: &gtk::ApplicationWindow, shared: &Shared, args: Vec<String>, d
         show_message(window, "Demo", "Preview mode never writes to the system.", false);
         return
     }
-    if !shared.borrow().authorized {
-        show_message(window, "Polkit", "Restart the application and approve administrator authentication.", true);
+    let probing = args.first().map(String::as_str) == Some("--probe");
+    let initial_probe = probing && !shared.borrow().authorized;
+    if !shared.borrow().authorized && !probing {
+        show_message(window, "Polkit", "Select Unlock in the top bar to request administrator authentication.", true);
         return
     }
     {
@@ -270,18 +311,26 @@ fn submit(window: &gtk::ApplicationWindow, shared: &Shared, args: Vec<String>, d
                     if deep {
                         if let Err(e) = apply_probe(&mut s, &message, true) { s.log.push(e); }
                     } else if let Some(scan) = scan {
-                        if let Err(e) = apply_probe(&mut s, &scan, false) { s.log.push(e); }
+                        match apply_probe(&mut s, &scan, false) {
+                            Ok(()) => { s.authorized = true; s.log.push("Polkit authentication and privileged scan succeeded".into()); }
+                            Err(e) => { s.authorized = false; s.log.push(e); }
+                        }
                     }
                     s.log.push(message.chars().take(1400).collect());
                     Ok(message)
                 }
-                Ok(Err(e)) => { state.borrow_mut().log.push(e.clone()); Err(e) }
+                Ok(Err(e)) => {
+                    let mut s=state.borrow_mut();
+                    if probing {s.authorized=false;}
+                    s.log.push(e.clone());
+                    Err(e)
+                }
                 Err(_) => Err("Administrative worker stopped unexpectedly".into()),
             };
             state.borrow_mut().busy = false;
             rebuild(&window, &state);
             match response {
-                Ok(info) => if !deep { show_message(&window, "GRUB Studio", &info, false); },
+                Ok(info) => if !deep && !initial_probe { show_message(&window, "GRUB Studio", &info, false); },
                 Err(err) => show_message(&window, "GRUB Studio", &err, true),
             }
             glib::ControlFlow::Break
@@ -326,9 +375,9 @@ fn section(parent: &gtk::Box, heading: &str) -> gtk::Box {
     content
 }
 fn page_root(title: &str, subtitle: &str) -> gtk::Box {
-    let v = gtk::Box::new(gtk::Orientation::Vertical, 14);
-    v.set_margin_top(20); v.set_margin_bottom(26);
-    v.set_margin_start(20); v.set_margin_end(20);
+    let v = gtk::Box::new(gtk::Orientation::Vertical, 10);
+    v.set_margin_top(16); v.set_margin_bottom(18);
+    v.set_margin_start(16); v.set_margin_end(16);
     add_text(&v, title, "page-title", true);
     add_text(&v, subtitle, "muted", true);
     v
@@ -355,10 +404,11 @@ fn page_home(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     let page = page_root(&tr(state, "home.title"), &tr(state, "home.sub"));
     let banner = card();
     banner.add_css_class("hero");
+    add_text(&banner,&tr(state,"home.distribution"),"section-heading",true);
     add_text(&banner, &snapshot.profile.name, "hero-title", true);
     add_text(&banner, &format!("{} · GRUB 2 · {}",
         snapshot.profile.family.label(),
-        if snapshot.profile.writable { tr(state, "status.ready") } else { tr(state, "status.readonly") }),
+        if state.borrow().authorized && snapshot.profile.writable { tr(state, "status.ready") } else { tr(state, "status.readonly") }),
         "muted", true);
     if !snapshot.profile.writable {
         add_text(&banner, &snapshot.profile.reasons.join(" • "), "warning", true);
@@ -372,15 +422,36 @@ fn page_home(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     let s = state.clone(); let w = window.clone();
     refresh.connect_clicked(move |_| submit(&w, &s, vec!["--probe".into()], false));
     actions.append(&refresh);
+    let open_themes=button(&tr(state,"nav.themes"),false);
+    let s=state.clone();let w=window.clone();
+    open_themes.connect_clicked(move |_|{s.borrow_mut().active="themes".into();rebuild(&w,&s);});
+    actions.append(&open_themes);
     banner.append(&actions);
     page.append(&banner);
-    let overview = section(&page, &tr(state, "home.deployments"));
-    add_text(&overview, &format!("{}: {}", tr(state,"home.theme"),
-        snapshot.config.get("GRUB_THEME").map(|s| s.rsplit('/').nth(1).unwrap_or(s)).unwrap_or("—")), "row-title", true);
-    add_text(&overview, &format!("{}: {}", tr(state, "home.others"), snapshot.systems.len()), "muted", true);
-    for dep in &snapshot.deployments { add_text(&overview, dep, "item-label", true); }
-    if snapshot.deployments.is_empty() { add_text(&overview, &tr(state,"home.deployments.sub"), "muted", true); }
+
+    let stats=gtk::Grid::new();
+    stats.add_css_class("stats-grid");
+    stats.set_row_spacing(8);stats.set_column_spacing(8);
+    let current_theme=snapshot.config.get("GRUB_THEME").and_then(|s|s.split('/').rev().nth(1))
+        .unwrap_or("—");
+    for (position,title,value) in [
+        (0,tr(state,"home.theme"),current_theme.to_string()),
+        (1,tr(state,"themes.installed"),snapshot.themes.len().to_string()),
+        (2,tr(state,"home.others"),snapshot.systems.len().to_string()),
+        (3,tr(state,"home.bootloader"),snapshot.profile.bootloader.clone()),
+    ] {
+        let tile=card();tile.add_css_class("metric-card");
+        add_text(&tile,title,"metric-label",true);
+        add_text(&tile,value,"metric-value",true);
+        stats.attach(&tile,position%2,position/2,1,1);
+    }
+    page.append(&stats);
+    if !snapshot.deployments.is_empty(){
+        let overview = section(&page, &tr(state, "home.deployments"));
+        for dep in &snapshot.deployments { add_text(&overview, dep, "item-label", true); }
+    }
     let warning = section(&page, &tr(state, "home.warning.title"));
+    warning.add_css_class("warning-card");
     add_text(&warning, &tr(state,"home.warning.text"), "warning", true);
     page
 }
@@ -658,28 +729,57 @@ fn page_menu(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
 
 fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     let page=page_root(&tr(state,"themes.title"),&tr(state,"themes.sub"));
-    let list=section(&page,&tr(state,"themes.installed"));
     let selected=state.borrow().selected_theme.clone();
     let themes=state.borrow().snapshot.themes.clone();
-    if themes.is_empty(){add_text(&list,&tr(state,"themes.placeholder"),"muted",true);}
+    let active=state.borrow().snapshot.config.get("GRUB_THEME").cloned().unwrap_or_default();
+    let writable=can_edit(&state.borrow());
+    let columns=gtk::Paned::new(gtk::Orientation::Horizontal);
+    columns.add_css_class("theme-split");
+    columns.set_wide_handle(true);
+    columns.set_position(325);
+    columns.set_vexpand(true);
+    columns.set_shrink_start_child(true);
+    columns.set_shrink_end_child(true);
+
+    let list=card();
+    list.add_css_class("theme-browser");
+    let list_header=gtk::Box::new(gtk::Orientation::Horizontal,8);
+    let label=gtk::Label::new(Some(&format!("{}  ({})",tr(state,"themes.installed"),themes.len())));
+    label.add_css_class("section-heading");label.set_xalign(0.0);label.set_hexpand(true);
+    list_header.append(&label);
+    let refresh=button("↻",false);
+    refresh.set_tooltip_text(Some(&tr(state,"home.refresh")));
+    refresh.set_sensitive(!state.borrow().busy);
+    let w=window.clone();let s=state.clone();
+    refresh.connect_clicked(move |_|submit(&w,&s,vec!["--probe".into()],false));
+    list_header.append(&refresh);
+    list.append(&list_header);
+    if themes.is_empty() {
+        add_text(&list,&tr(state,"themes.placeholder"),"muted",true);
+        add_text(&list,&tr(state,"status.readonly"),"warning",true);
+    }
     let selector=gtk::ListBox::new();
     selector.add_css_class("studio-list");
     for theme in &themes {
-        let display=if selected==theme.path {format!("●  {}",theme.name)} else {format!("○  {}",theme.name)};
+        let display=if active==theme.path {format!("●  {}",theme.name)} else {format!("◇  {}",theme.name)};
         let row=row_with_heading(&display,&theme.path);
-        row.set_margin_top(6); row.set_margin_bottom(6); row.set_margin_start(9);row.set_margin_end(9);
+        row.add_css_class("theme-option");
+        if active==theme.path {row.add_css_class("theme-current");}
+        row.set_margin_top(5);row.set_margin_bottom(5);
+        row.set_margin_start(10);row.set_margin_end(10);
         selector.append(&row);
     }
-    let s=state.clone();
-    selector.connect_row_selected(move |_,row| {
-        if let Some(row)=row {
-            if let Some(path)=themes.get(row.index() as usize) {s.borrow_mut().selected_theme=path.path.clone();}
-        }
-    });
-    list.append(&selector);
-    let row=action_row();
-    let install=button(&tr(state,"themes.import"),true);
-    install.set_sensitive(can_edit(&state.borrow()));
+    if let Some(index)=themes.iter().position(|t|t.path==selected) {
+        if let Some(row)=selector.row_at_index(index as i32) {selector.select_row(Some(&row));}
+    }
+    let scroll=gtk::ScrolledWindow::new();
+    scroll.set_policy(gtk::PolicyType::Never,gtk::PolicyType::Automatic);
+    scroll.set_min_content_height(220);
+    scroll.set_vexpand(true);
+    scroll.set_child(Some(&selector));
+    list.append(&scroll);
+    let install=button(&tr(state,"themes.import"),false);
+    install.set_sensitive(writable);
     let w=window.clone();let s=state.clone();
     install.connect_clicked(move |_| {
         let dialog=gtk::FileChooserNative::new(Some(&tr(&s,"themes.import")),Some(&w),
@@ -699,33 +799,13 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
         });
         dialog.show();
     });
-    row.append(&install);
-    let activate=button(&tr(state,"themes.use"),false);
-    activate.set_sensitive(can_edit(&state.borrow()));
-    let w=window.clone();let s=state.clone();
-    activate.connect_clicked(move |_| {
-        let c=s.borrow().snapshot.config.clone();let selected=s.borrow().selected_theme.clone();
-        if !core::valid_theme_path(&selected){show_message(&w,"GRUB Studio","Select an installed theme",true);return;}
-        guarded_submit(&w,&s,vec!["--apply".into(),
-            c.get("GRUB_TIMEOUT").cloned().unwrap_or_else(||"5".into()),
-            c.get("GRUB_TIMEOUT_STYLE").cloned().unwrap_or_else(||"menu".into()),
-            c.get("GRUB_GFXMODE").cloned().unwrap_or_else(||"auto".into()),selected],tr(&s,"themes.use"));
-    });
-    row.append(&activate);
-    let disable=button(&tr(state,"themes.disable"),false);
-    disable.set_sensitive(can_edit(&state.borrow()));
-    let w=window.clone();let s=state.clone();
-    disable.connect_clicked(move |_| {
-        let c=s.borrow().snapshot.config.clone();
-        guarded_submit(&w,&s,vec!["--apply".into(),
-            c.get("GRUB_TIMEOUT").cloned().unwrap_or_else(||"5".into()),
-            c.get("GRUB_TIMEOUT_STYLE").cloned().unwrap_or_else(||"menu".into()),
-            c.get("GRUB_GFXMODE").cloned().unwrap_or_else(||"auto".into()),String::new()],tr(&s,"themes.disable"));
-    });
-    row.append(&disable);
-    list.append(&row);
-    let preview=section(&page,&tr(state,"themes.preview"));
-    let canvas=gtk::Box::new(gtk::Orientation::Vertical,8);
+    list.append(&install);
+    columns.set_start_child(Some(&list));
+
+    let preview=card();
+    preview.add_css_class("theme-details");
+    add_text(&preview,&tr(state,"themes.preview"),"section-heading",true);
+    let canvas=gtk::Box::new(gtk::Orientation::Vertical,5);
     canvas.add_css_class("boot-preview");
     add_text(&canvas,"GNU GRUB 2", "preview-title",true);
     for (i,entry) in ["Bazzite Linux", "Advanced options for Linux", "Windows Boot Manager"].iter().enumerate() {
@@ -734,7 +814,52 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
         canvas.append(&l);
     }
     preview.append(&canvas);
-    add_text(&preview,&format!("{}\n{}",selected,tr(state,"themes.approx")),"muted",true);
+    let selected_info=gtk::Label::new(Some(if selected.is_empty() {"—"}else{&selected}));
+    selected_info.add_css_class("muted");
+    selected_info.set_xalign(0.0);selected_info.set_wrap(true);
+    selected_info.set_selectable(true);
+    preview.append(&selected_info);
+    add_text(&preview,&tr(state,"themes.approx"),"muted",true);
+    let controls=action_row();
+    let activate=button(&tr(state,"themes.use"),true);
+    activate.set_sensitive(writable && !selected.is_empty());
+    let w=window.clone();let s=state.clone();
+    activate.connect_clicked(move |_| {
+        let c=s.borrow().snapshot.config.clone();let selected=s.borrow().selected_theme.clone();
+        if selected.is_empty() || !core::valid_theme_path(&selected){
+            show_message(&w,"GRUB Studio","Select an installed theme",true);return;
+        }
+        guarded_submit(&w,&s,vec!["--apply".into(),
+            c.get("GRUB_TIMEOUT").cloned().unwrap_or_else(||"5".into()),
+            c.get("GRUB_TIMEOUT_STYLE").cloned().unwrap_or_else(||"menu".into()),
+            c.get("GRUB_GFXMODE").cloned().unwrap_or_else(||"auto".into()),selected],tr(&s,"themes.use"));
+    });
+    controls.append(&activate);
+    let disable=button(&tr(state,"themes.disable"),false);
+    disable.set_sensitive(writable && !active.is_empty());
+    let w=window.clone();let s=state.clone();
+    disable.connect_clicked(move |_| {
+        let c=s.borrow().snapshot.config.clone();
+        guarded_submit(&w,&s,vec!["--apply".into(),
+            c.get("GRUB_TIMEOUT").cloned().unwrap_or_else(||"5".into()),
+            c.get("GRUB_TIMEOUT_STYLE").cloned().unwrap_or_else(||"menu".into()),
+            c.get("GRUB_GFXMODE").cloned().unwrap_or_else(||"auto".into()),String::new()],tr(&s,"themes.disable"));
+    });
+    controls.append(&disable);
+    preview.append(&controls);
+    columns.set_end_child(Some(&preview));
+    page.append(&columns);
+    let s=state.clone();
+    let themes_for_selection=themes.clone();
+    selector.connect_row_selected(move |_,row| {
+        if let Some(row)=row {
+            if let Some(theme)=themes_for_selection.get(row.index() as usize) {
+                s.borrow_mut().selected_theme=theme.path.clone();
+                selected_info.set_text(&theme.path);
+                activate.set_sensitive(can_edit(&s.borrow()));
+            }
+        }
+    });
     page
 }
 
@@ -793,7 +918,7 @@ fn page_logs(_window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     page
 }
 fn page_about(_window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
-    let page=page_root(&tr(state,"about.title"),"Rust Edition · GTK4 · Wayland · 2.0.0");
+    let page=page_root(&tr(state,"about.title"),"Rust Edition · GTK4 · Wayland · 2.0.1");
     for number in 1..=9 {
         let title=tr(state,&format!("about.{number:02}.title"));
         let text=tr(state,&format!("about.{number:02}.text"));
@@ -817,10 +942,11 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
     let root=gtk::Box::new(gtk::Orientation::Vertical,0);
     root.add_css_class("app-root");
     root.add_css_class(if s.appearance=="light" { "grub-light" } else { "grub-dark" });
-    root.set_size_request(600,410);
-    let header=gtk::Box::new(gtk::Orientation::Horizontal,10);
+    root.set_size_request(560,420);
+    let header=gtk::Box::new(gtk::Orientation::Horizontal,9);
     header.add_css_class("studio-header");
     let hamburger=button("☰",false);
+    hamburger.set_tooltip_text(Some(&tr(state,"navigation")));
     let w=window.clone();let state2=state.clone();
     hamburger.connect_clicked(move |_| {
         let old=state2.borrow().sidebar_visible;
@@ -828,11 +954,23 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
         rebuild(&w,&state2);
     });
     header.append(&hamburger);
-    let title=gtk::Label::new(Some("GRUB  Studio"));
-    title.add_css_class("brand");title.set_xalign(0.0);title.set_hexpand(true);
-    header.append(&title);
-    let badge=gtk::Label::new(Some(if s.demo {"DEMO"} else if s.busy {"WORKING"} else if s.authorized&&s.snapshot.profile.writable {"GRUB ✓"}else{"READ ONLY"}));
+    let emblem=gtk::Label::new(Some("◆"));
+    emblem.add_css_class("brand-icon");
+    header.append(&emblem);
+    let branding=gtk::Box::new(gtk::Orientation::Vertical,1);
+    branding.set_hexpand(true);
+    add_text(&branding,"GRUB Studio","brand",false);
+    add_text(&branding,"UNIVERSAL  /  RUST","brand-subtitle",false);
+    header.append(&branding);
+    let badge=gtk::Label::new(Some(if s.demo {"DEMO"} else if s.busy {"SCANNING…"} else if s.authorized&&s.snapshot.profile.writable {"● GRUB READY"}else if s.authorized {"● READ ONLY"}else{"● LOCKED"}));
     badge.add_css_class("status-badge");header.append(&badge);
+    if !s.authorized && !s.demo {
+        let unlock=button(&tr(state,"auth.unlock"),true);
+        unlock.set_sensitive(!s.busy);
+        let w=window.clone();let st=state.clone();
+        unlock.connect_clicked(move |_|submit(&w,&st,vec!["--probe".into()],false));
+        header.append(&unlock);
+    }
     let appearance=button(if s.appearance=="light" {"☾"}else{"☼"},false);
     appearance.set_tooltip_text(Some(&tr(state,"theme.label")));
     let w=window.clone();let state2=state.clone();
@@ -860,17 +998,18 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
 
     let body=gtk::Box::new(gtk::Orientation::Horizontal,0);
     body.set_hexpand(true);body.set_vexpand(true);
-    let stack=gtk::Stack::new();stack.set_hexpand(true);stack.set_vexpand(true);
-    stack.set_transition_type(gtk::StackTransitionType::Crossfade);
     let nav=gtk::Box::new(gtk::Orientation::Vertical,3);
     nav.add_css_class("studio-sidebar");
-    nav.set_size_request(164,-1);
+    nav.set_size_request(170,-1);
     add_text(&nav,&tr(state,"navigation"),"nav-heading",true);
     for (page,icon,key) in [
         ("home","▦","nav.home"),("menu","≡","nav.menu"),("systems","◫","nav.systems"),
         ("themes","◈","nav.themes"),("settings","⚙","nav.settings"),
         ("backups","↺","nav.backups"),("logs","≡","nav.logs"),("about","ⓘ","nav.about")] {
-        let b=gtk::Button::with_label(&format!("{icon}   {}",tr(state,key)));
+        let b=gtk::Button::new();
+        let label=gtk::Label::new(Some(&format!("{icon}    {}",tr(state,key))));
+        label.set_xalign(0.0);
+        b.set_child(Some(&label));
         b.add_css_class("nav-button");
         if s.active==page {b.add_css_class("nav-active");}
         b.set_halign(gtk::Align::Fill);b.set_hexpand(true);
@@ -880,39 +1019,46 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
     }
     let spacer=gtk::Box::new(gtk::Orientation::Vertical,0);spacer.set_vexpand(true);
     nav.append(&spacer);
-    add_text(&nav,&format!("v2.0.0 · {}",s.snapshot.profile.family.label()),"nav-footer",true);
+    add_text(&nav,&format!("RUST  ·  {}",s.snapshot.profile.family.label()),"nav-footer",true);
     if s.sidebar_visible {body.append(&nav);}
-    for (name,page) in [
-        ("home",page_home(window,state)),("menu",page_menu(window,state)),
-        ("systems",page_systems(window,state)),("themes",page_themes(window,state)),
-        ("settings",page_settings(window,state)),("backups",page_backups(window,state)),
-        ("logs",page_logs(window,state)),("about",page_about(window,state)),
-    ]{
-        let scroller=gtk::ScrolledWindow::new();
-        scroller.set_policy(gtk::PolicyType::Never,gtk::PolicyType::Automatic);
-        scroller.set_hexpand(true);scroller.set_vexpand(true);
-        scroller.set_child(Some(&page));
-        stack.add_named(&scroller,Some(name));
-    }
-    stack.set_visible_child_name(&s.active);
-    body.append(&stack);
+    // Only construct the visible page. Older versions instantiated all eight
+    // pages on every click, wasting memory and causing a sluggish interface.
+    let page=match s.active.as_str() {
+        "menu"=>page_menu(window,state),
+        "systems"=>page_systems(window,state),
+        "themes"=>page_themes(window,state),
+        "settings"=>page_settings(window,state),
+        "backups"=>page_backups(window,state),
+        "logs"=>page_logs(window,state),
+        "about"=>page_about(window,state),
+        _=>page_home(window,state),
+    };
+    let scroller=gtk::ScrolledWindow::new();
+    scroller.set_policy(gtk::PolicyType::Never,gtk::PolicyType::Automatic);
+    scroller.set_hexpand(true);scroller.set_vexpand(true);
+    scroller.set_child(Some(&page));
+    body.append(&scroller);
     root.append(&body);
     let footer=gtk::Box::new(gtk::Orientation::Horizontal,8);
     footer.add_css_class("studio-footer");
     let label=gtk::Label::new(Some(&tr(state,"footer")));
     label.set_hexpand(true);label.set_xalign(0.0);label.set_wrap(true);
     footer.append(&label);
-    footer.append(&gtk::Label::new(Some(if s.demo {"DEMO"}else{"Wayland / GTK4"})));
+    footer.append(&gtk::Label::new(Some(if s.demo {"DEMO"}else{"GTK4  ·  Wayland/X11"})));
     root.append(&footer);
     window.set_child(Some(&root));
 }
 
 fn main() {
     let args:Vec<String>=std::env::args().skip(1).collect();
-    if args.iter().any(|a| a=="--version") { println!("GRUB Studio Universal 2.0.0 Rust Edition");return; }
+    if args.iter().any(|a| a=="--version") { println!("GRUB Studio Universal 2.0.1 Rust Edition");return; }
     if args.iter().any(|a| a=="--self-test") {
         let _=serde_json::from_str::<serde_json::Value>(include_str!("../assets/translations.json")).expect("valid locale catalog");
-        println!("Built-in translations: OK; run cargo test for full core checks");
+        let exe=std::env::current_exe().expect("executable location");
+        let helper=exe.parent().expect("binary directory").join("grub-studio-helper");
+        let staged=StagedHelper::new(&helper).expect("portable helper staging");
+        assert!(staged.path.is_file(),"staged helper must exist on a normal filesystem");
+        println!("Translations, portable administrator helper staging: OK");
         return;
     }
     unsafe extern "C" { fn geteuid() -> u32; }
@@ -927,9 +1073,15 @@ fn main() {
         let state=Rc::new(RefCell::new(initial_state(demo)));
         let window=gtk::ApplicationWindow::builder()
             .application(app).title("GRUB Studio Universal · Rust Edition")
-            .default_width(960).default_height(625).build();
+            .default_width(980).default_height(630).build();
         rebuild(&window,&state);
         window.present();
+        if !demo {
+            let w=window.clone();let s=state.clone();
+            glib::timeout_add_local_once(Duration::from_millis(300),move || {
+                submit(&w,&s,vec!["--probe".into()],false);
+            });
+        }
     });
     let _=app.run();
 }

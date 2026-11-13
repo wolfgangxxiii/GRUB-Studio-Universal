@@ -1,7 +1,7 @@
 name: Build and publish GRUB Studio Rust AppImage
 on:
   push:
-    branches: [main]
+    branches: [main, 'fix/**']
   workflow_dispatch:
 permissions:
   contents: write
@@ -13,11 +13,23 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - name: Install GTK4 build dependencies
-        run: sudo apt-get update && sudo apt-get install -y pkg-config gcc libgtk-4-dev libfuse2t64
+        run: sudo apt-get update && sudo apt-get install -y pkg-config gcc libgtk-4-dev libfuse2t64 xvfb xauth
       - name: Rust tests
         run: cargo test --all-targets
       - name: Build executables
         run: cargo build --release --bins
+      - name: Smoke test GTK4 interface (virtual display)
+        env:
+          GDK_BACKEND: x11
+          GSK_RENDERER: cairo
+        run: |
+          set +e
+          timeout 8s xvfb-run -a target/release/grub-studio-universal --demo
+          status=$?
+          if [ "$status" -ne 124 ]; then
+            echo "GTK4 window failed to stay open (exit $status)"
+            exit 1
+          fi
       - name: Install linuxdeploy
         run: |
           mkdir -p "$RUNNER_TEMP/bin"
@@ -33,24 +45,24 @@ jobs:
         env:
           APPIMAGE_EXTRACT_AND_RUN: "1"
         run: |
-          test -s GRUB-Studio-Universal-v2.0.0-x86_64.AppImage
-          file GRUB-Studio-Universal-v2.0.0-x86_64.AppImage
-          ./GRUB-Studio-Universal-v2.0.0-x86_64.AppImage --version
-          ./GRUB-Studio-Universal-v2.0.0-x86_64.AppImage --self-test
-          sha256sum GRUB-Studio-Universal-v2.0.0-x86_64.AppImage > GRUB-Studio-Universal-v2.0.0-SHA256.txt
+          test -s GRUB-Studio-Universal-v2.0.1-x86_64.AppImage
+          file GRUB-Studio-Universal-v2.0.1-x86_64.AppImage
+          ./GRUB-Studio-Universal-v2.0.1-x86_64.AppImage --version
+          ./GRUB-Studio-Universal-v2.0.1-x86_64.AppImage --self-test
+          sha256sum GRUB-Studio-Universal-v2.0.1-x86_64.AppImage > GRUB-Studio-Universal-v2.0.1-SHA256.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: grub-studio-universal-v2.0.0-experimental
+          name: grub-studio-universal-v2.0.1-release-candidate
           path: |
-            GRUB-Studio-Universal-v2.0.0-x86_64.AppImage
-            GRUB-Studio-Universal-v2.0.0-SHA256.txt
+            GRUB-Studio-Universal-v2.0.1-x86_64.AppImage
+            GRUB-Studio-Universal-v2.0.1-SHA256.txt
       - name: Publish downloadable preview release
         if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if gh release view v2.0.0-rc.1 >/dev/null 2>&1; then
-            gh release upload v2.0.0-rc.1 GRUB-Studio-Universal-v2.0.0-x86_64.AppImage GRUB-Studio-Universal-v2.0.0-SHA256.txt --clobber
+          if gh release view v2.0.1-rc.1 >/dev/null 2>&1; then
+            gh release upload v2.0.1-rc.1 GRUB-Studio-Universal-v2.0.1-x86_64.AppImage GRUB-Studio-Universal-v2.0.1-SHA256.txt --clobber
           else
-            gh release create v2.0.0-rc.1 GRUB-Studio-Universal-v2.0.0-x86_64.AppImage GRUB-Studio-Universal-v2.0.0-SHA256.txt --title 'GRUB Studio Universal 2.0.0 Rust — preview' --notes 'Rust/GTK4 x86_64 AppImage. CI validates the Rust tests and CLI startup. GRUB edits affect system boot; verify compatibility and create a recovery medium. Bazzite/OSTree editing is intentionally restricted.' --prerelease --target "$GITHUB_SHA"
+            gh release create v2.0.1-rc.1 GRUB-Studio-Universal-v2.0.1-x86_64.AppImage GRUB-Studio-Universal-v2.0.1-SHA256.txt --title 'GRUB Studio Universal 2.0.1 Rust — preview' --notes 'Fixes Polkit startup, portable helper access from AppImage, root-protected theme discovery, and redesigns the GTK4 layout. CI validates Rust tests, helper staging, and AppImage CLI startup. Test on your distribution before changing GRUB; Bazzite/OSTree writes remain restricted.' --prerelease --target "$GITHUB_SHA"
           fi
