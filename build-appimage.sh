@@ -22,6 +22,8 @@ install -Dm644 assets/grub-studio.svg "$appdir/usr/share/icons/hicolor/scalable/
 icon_png="$project_dir/build/grub-studio-universal.png"
 rsvg-convert -w 256 -h 256 -o "$icon_png" assets/grub-studio.svg
 install -Dm644 "$icon_png" "$appdir/usr/share/icons/hicolor/256x256/apps/grub-studio-universal.png"
+install -m644 "$icon_png" "$appdir/grub-studio-universal.png"
+ln -sfn grub-studio-universal.png "$appdir/.DirIcon"
 
 # linuxdeploy copies linked libraries and assembles the AppImage runtime.
 # GTK4 + GLib runtime resources must be checked on a second distribution.

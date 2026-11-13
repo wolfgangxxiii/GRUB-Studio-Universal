@@ -1154,11 +1154,16 @@ fn main() {
         std::process::exit(2);
     }
     let ui_smoke=args.iter().any(|a| a=="--ui-smoke");
-    let demo=ui_smoke || args.iter().any(|a| a=="--demo");
+    let demo_themes=args.iter().any(|a| a=="--demo-themes");
+    let preview_appearance=args.iter().find_map(|a|a.strip_prefix("--appearance="))
+        .filter(|v| matches!(*v,"light"|"dark")).map(str::to_owned);
+    let demo=ui_smoke || demo_themes || args.iter().any(|a| a=="--demo");
     let app=gtk::Application::builder().application_id(APP_ID).build();
     app.connect_startup(|_| load_css());
     app.connect_activate(move |app| {
         let state=Rc::new(RefCell::new(initial_state(demo)));
+        if demo_themes {state.borrow_mut().active="themes".into();}
+        if let Some(ref mode)=preview_appearance {state.borrow_mut().appearance=mode.clone();}
         let window=gtk::ApplicationWindow::builder()
             .application(app).title("GRUB Studio Universal · Rust Edition")
             .default_width(if ui_smoke {720}else{1000})

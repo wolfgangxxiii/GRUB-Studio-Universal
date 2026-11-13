@@ -22,7 +22,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.0.1-rc.1/GRUB-Studio-Universal-v2.0.1-x86_64.AppImage"><strong>⬇️ Download AppImage · v2.0.1 RC1</strong></a>
+  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.1.0-rc.1/GRUB-Studio-Universal-v2.1.0-x86_64.AppImage"><strong>⬇️ Download AppImage · v2.1.0 RC1</strong></a>
   &nbsp;·&nbsp;
   <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases">All releases</a>
 </p>
@@ -39,7 +39,7 @@
 
 | Obszar | Możliwości |
 | --- | --- |
-| 🎨 **Interfejs** | Kompaktowy, skalowalny układ; jasny i ciemny motyw; 7 języków interfejsu. |
+| 🎨 **Interfejs** | Stała nawigacja bez skoków szerokości; kompaktowy układ, jasny i ciemny motyw, 7 języków. |
 | 🐧 **Dystrybucje** | Rozpoznawanie Bazzite, Fedora, Ubuntu/Debian, Arch/CachyOS i openSUSE. |
 | 🖥️ **Systemy** | Wykrywanie śladów Windows i innych systemów przez UEFI/EFI; opcjonalny skan `os-prober`. |
 | 🖼️ **Motywy GRUB** | Wykrywanie zainstalowanych motywów z plikiem `theme.txt`, wybór i import katalogów motywów. |
@@ -48,25 +48,27 @@
 | 🛡️ **Ochrona zmian** | Polkit, kontrola uprawnień, walidacja danych, kopie zapasowe i próba cofnięcia zmian przy błędzie. |
 
 <p align="center">
-  <img src="preview/GRUB-Studio-Rust-2.0-Mockup.svg" alt="Makieta interfejsu GRUB Studio Universal" width="820">
+  <img src="preview/GRUB-Studio-Rust-2.1-Concept.svg" alt="Makieta nowego interfejsu GRUB Studio Universal 2.1" width="940">
 </p>
 
 <p align="center"><sub>Makieta wyglądu interfejsu · wizualizacja projektu, nie rzeczywisty zrzut ekranu.</sub></p>
 
 ### ⬇️ Pobieranie i uruchamianie
 
-**[Pobierz GRUB Studio Universal 2.0.1 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.0.1-rc.1/GRUB-Studio-Universal-v2.0.1-x86_64.AppImage)**
+**[Pobierz GRUB Studio Universal 2.1.0 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.1.0-rc.1/GRUB-Studio-Universal-v2.1.0-x86_64.AppImage)**
 
 AppImage nie wymaga instalacji pakietu ani ingerencji w obraz systemu Bazzite. Po pobraniu nadaj mu uprawnienia wykonywania:
 
 ```bash
-chmod +x GRUB-Studio-Universal-v2.0.1-x86_64.AppImage
-./GRUB-Studio-Universal-v2.0.1-x86_64.AppImage
+chmod +x GRUB-Studio-Universal-v2.1.0-x86_64.AppImage
+./GRUB-Studio-Universal-v2.1.0-x86_64.AppImage
 ```
 
-**[Pobierz sumę SHA-256](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.0.1-rc.1/GRUB-Studio-Universal-v2.0.1-SHA256.txt)** · [Zobacz wydanie i zmiany](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.0.1-rc.1)
+**[Pobierz sumę SHA-256](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.1.0-rc.1/GRUB-Studio-Universal-v2.1.0-SHA256.txt)** · [Zobacz wydanie i zmiany](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.1.0-rc.1)
 
-> **Wersja 2.0.1 RC:** Poprawiono monit Polkit przy uruchomieniu, uruchamianie pomocnika z AppImage, wykrywanie chronionych i zagnieżdżonych motywów oraz wygląd i skalowanie interfejsu. Testy Rust, okna GTK4 i AppImage przeszły w CI. Nadal wymagany jest test na konkretnym komputerze i systemie; do administracji potrzebny jest Polkit/`pkexec`.
+> **Wersja 2.1.0 RC:** Nowy, stały panel nawigacji, brak zdublowanych przycisków odświeżania i wyboru motywu, responsywny edytor EFI, poprawiona hierarchia informacji i nowa kolorystyka. Test GUI automatycznie przełącza osiem kart w małym oknie. Nadal wymagany jest test na konkretnym komputerze i systemie; do administracji potrzebny jest Polkit/`pkexec`.
+
+Szczegóły projektu wyglądu i przypisania funkcji do kart: **[docs/DESIGN.md](docs/DESIGN.md)**.
 
 ### 🔐 Bezpieczeństwo i kompatybilność
 
@@ -90,6 +92,7 @@ sudo dnf install -y gcc pkgconf-pkg-config gtk4-devel
 cargo test --all-targets
 cargo build --release --bins
 cargo run --bin grub-studio-universal -- --demo
+GDK_BACKEND=x11 GSK_RENDERER=cairo xvfb-run -a target/release/grub-studio-universal --ui-smoke
 ```
 
 Skrypt `build-appimage.sh` wymaga dodatkowo `linuxdeploy`. Automatyczny workflow budujący i testujący AppImage znajduje się w [GitHub Actions](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions).
@@ -112,7 +115,7 @@ Masz pomysł lub znalazłeś błąd? Otwórz [Issues](https://github.com/wolfgan
 
 | Area | Features |
 | --- | --- |
-| 🎨 **Interface** | Compact, resizable layout; light and dark modes; 7 interface languages. |
+| 🎨 **Interface** | Persistent navigation without width jumps, compact responsive layout, light/dark modes and 7 languages. |
 | 🐧 **Distributions** | Detection of Bazzite, Fedora, Ubuntu/Debian, Arch/CachyOS, and openSUSE. |
 | 🖥️ **Operating systems** | Detection of Windows and other OS traces through UEFI/EFI; optional `os-prober` scan. |
 | 🖼️ **GRUB themes** | Discovery of installed themes containing `theme.txt`, theme selection, and theme-folder import. |
@@ -121,25 +124,27 @@ Masz pomysł lub znalazłeś błąd? Otwórz [Issues](https://github.com/wolfgan
 | 🛡️ **Safety** | Polkit authentication, input validation, backups, and rollback attempts on failure. |
 
 <p align="center">
-  <img src="preview/GRUB-Studio-Rust-2.0-Mockup.svg" alt="GRUB Studio Universal interface concept" width="820">
+  <img src="preview/GRUB-Studio-Rust-2.1-Concept.svg" alt="GRUB Studio Universal 2.1 interface concept" width="940">
 </p>
 
 <p align="center"><sub>UI concept artwork · not an actual application screenshot.</sub></p>
 
 ### ⬇️ Download & run
 
-**[Download GRUB Studio Universal 2.0.1 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.0.1-rc.1/GRUB-Studio-Universal-v2.0.1-x86_64.AppImage)**
+**[Download GRUB Studio Universal 2.1.0 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.1.0-rc.1/GRUB-Studio-Universal-v2.1.0-x86_64.AppImage)**
 
 The portable AppImage does not require installing an application package or modifying the Bazzite base image:
 
 ```bash
-chmod +x GRUB-Studio-Universal-v2.0.1-x86_64.AppImage
-./GRUB-Studio-Universal-v2.0.1-x86_64.AppImage
+chmod +x GRUB-Studio-Universal-v2.1.0-x86_64.AppImage
+./GRUB-Studio-Universal-v2.1.0-x86_64.AppImage
 ```
 
-**[Download SHA-256 checksum](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.0.1-rc.1/GRUB-Studio-Universal-v2.0.1-SHA256.txt)** · [Release notes](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.0.1-rc.1)
+**[Download SHA-256 checksum](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.1.0-rc.1/GRUB-Studio-Universal-v2.1.0-SHA256.txt)** · [Release notes](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.1.0-rc.1)
 
-> **Version 2.0.1 RC:** Fixes Polkit authentication at startup, AppImage helper execution, protected/nested theme discovery, and the compact responsive interface. Rust tests, GTK4 window startup, and AppImage smoke checks passed in CI. Real-hardware and distribution testing is still required; administration depends on system-provided Polkit/`pkexec`.
+> **Version 2.1.0 RC:** Persistent sidebar, no duplicate refresh or theme controls, a responsive EFI-entry editor, clearer content hierarchy and new light/dark palettes. The GUI smoke test navigates all eight pages at a compact window width. Real-hardware testing is still required; administration depends on Polkit/`pkexec`.
+
+More about the layout, one-place-per-action design and testing: **[docs/DESIGN.md](docs/DESIGN.md)**.
 
 ### 🔐 Safety & compatibility
 
@@ -163,6 +168,7 @@ sudo dnf install -y gcc pkgconf-pkg-config gtk4-devel
 cargo test --all-targets
 cargo build --release --bins
 cargo run --bin grub-studio-universal -- --demo
+GDK_BACKEND=x11 GSK_RENDERER=cairo xvfb-run -a target/release/grub-studio-universal --ui-smoke
 ```
 
 The `build-appimage.sh` script additionally requires `linuxdeploy`. Automated builds and AppImage runtime tests are available in [GitHub Actions](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions).
