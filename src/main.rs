@@ -780,7 +780,11 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     }
     let scroll=gtk::ScrolledWindow::new();
     scroll.set_policy(gtk::PolicyType::Never,gtk::PolicyType::Automatic);
-    scroll.set_min_content_height(150);
+    // Three installed themes should be visible without clipping the last row.
+    // Larger libraries scroll inside the card rather than growing indefinitely.
+    scroll.set_min_content_height(220);
+    scroll.set_max_content_height(270);
+    scroll.set_propagate_natural_height(true);
     scroll.set_vexpand(false);
     scroll.set_child(Some(&selector));
     list.append(&scroll);

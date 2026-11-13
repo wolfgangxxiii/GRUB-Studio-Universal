@@ -73,6 +73,8 @@
 .theme-option { padding: 2px; }
 .theme-thumbnail { border-radius: 6px; }
 .theme-icon-fallback { opacity: .72; }
+.grub-dark .theme-icon-fallback { color: #bbd0e8; }
+.grub-light .theme-icon-fallback { color: #496c91; }
 .theme-background { min-height: 162px; background: #0d1624; border-radius: 8px; }
 .boot-preview { min-height: 142px; padding: 15px; border-radius: 8px; }
 .preview-title { color: #b4c9e4; font-family: monospace; font-size: 12px; font-weight: 700; }

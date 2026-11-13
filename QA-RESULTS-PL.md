@@ -1,49 +1,48 @@
-# GRUB Studio Universal 2.1.0 RC1 — raport jakości
+# GRUB Studio Universal 2.2.0 — raport jakości / QA
 
 Data: 13 listopada 2026
 
-## Automatyczne testy
+## Zakres przebudowy
 
-| Kontrola | Wynik | Środowisko |
-| --- | --- | --- |
-| `cargo test --all-targets` | **PASS** — 10 testów, zero błędów | Ubuntu / GitHub Actions |
-| `cargo build --release --bins` | **PASS** | Rust stable + GTK4 |
-| Osiem zakładek GTK4 i stała szerokość nawigacji 196 px | **PASS** | `xvfb-run`, okno 720 × 540 |
-| Uruchomienie w trybie demonstracyjnym (ciemny i jasny) | **PASS** | GTK4 / wirtualny ekran X11 |
-| Zrzuty rzeczywistego interfejsu | **PASS** | `preview/GRUB-Studio-2.1-GTK4-{Dark,Light}.png` |
-| `build-appimage.sh`, tworzenie AppDir i AppImage | **PASS** | linuxdeploy, x86_64 |
-| Test `AppImage --version` i `AppImage --self-test` | **PASS** | GitHub Actions |
-| Wykrywanie zainstalowanych motywów i Windows EFI | **PASS** — testy jednostkowe na danych testowych | Rust |
+- **Sześć stron**: Przegląd, Menu rozruchowe, Motywy, Ustawienia GRUB, Narzędzia, O programie i bezpieczeństwo.
+- Wykrywanie systemów jest rozwijaną sekcją w **Menu rozruchowym**; kopie zapasowe i dziennik działań są połączone w **Narzędziach**.
+- Boczne menu ma stabilną szerokość **196 px** w szerokim oknie i **62 px** w wąskim, z podpowiedziami po ukryciu podpisów. Rozmiar nie zmienia się przy przełączaniu stron.
+- Karta Motywy wykrywa katalogi `theme.txt`, wyświetla lokalne miniatury tapety `desktop-image`, jeśli są bezpiecznie dostępne, i umożliwia wybór wykrytego motywu.
+- Lista motywów mieści kilka wierszy i ma przewijanie dla większych kolekcji.
+- Przegląd menu GRUB pozostaje **przybliżony**: obraz tła można pokazać, ale GTK nie renderuje skryptu `theme.txt` tak jak GRUB podczas startu systemu.
 
-Przed włączeniem finalnych zmian wizualnych kompilacja kontrolna zakończyła się
-powodzeniem: [GitHub Actions — test projektu 2.1](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions/runs/43474357857).
-Wersja wydana na `main` przechodzi ten sam zestaw kontroli; jej wynik jest
-widoczny na stronie [Actions](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions).
+## Kontrole automatyczne
 
-## Sprawdzenie interfejsu
+| Kontrola | Oczekiwany wynik / sposób sprawdzenia |
+| --- | --- |
+| `cargo test --all-targets` | Wszystkie testy Rust zakończone sukcesem, w tym walidacja ścieżek tapet i motywów |
+| `cargo build --release --bins` | Kompilacja aplikacji GTK4 i modułu uprzywilejowanego |
+| `--ui-smoke` w `xvfb-run` | 6 stron, nawigacja **62 px** w oknie 720 × 540 px |
+| `--ui-smoke-wide` w `xvfb-run` | 6 stron, nawigacja **196 px** w oknie 1100 × 540 px |
+| Zrzuty GTK4 | Motywy (ciemny i jasny), Menu (ciemny), Narzędzia (jasny) |
+| `build-appimage.sh` | Wytworzenie przenośnego AppImage x86_64 |
+| `AppImage --version` i `AppImage --self-test` | Sprawdzenie pliku wynikowego |
 
-- Powłoka okna, menu, pasek górny i pasek stanu są tworzone jeden raz.
-- Szerokość nawigacji nie zależy od wybranej zakładki i jej treści.
-- Wyrzucono powtórzone czynności: wybór motywu tylko w **Motywach**,
-  odświeżenie podstawowe tylko w pasku górnym, bez duplikatów na pulpicie.
-- Przyciski edytora niestandardowych wpisów EFI zawijają się w małym oknie.
-- Widok biblioteki motywów przechodzi między jedną a dwiema kolumnami.
-- Zestawienie prawdziwych zrzutów z obu palet pokazało i pozwoliło poprawić
-  kontrast etykiet listy i wygląd rozwijanego wyboru języka.
+Przebieg poprzedzający końcową korektę listy motywów: [GitHub Actions #43510267031](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions/runs/43510267031) — wszystkie etapy zakończone sukcesem, w tym testy Rust, interfejsu i AppImage. Bieżące wyniki każdej późniejszej kompilacji są dostępne w [GitHub Actions](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions).
 
-## Co wymaga próby na sprzęcie użytkownika
+## Zrzuty z rzeczywistej aplikacji
 
-Automatyczna kompilacja **nie jest** testem modyfikacji działającego bootloadera.
-Następujące rzeczy pozostają do weryfikacji na prawdziwym komputerze, najlepiej
-we własnym środowisku testowym lub maszynie wirtualnej:
+Zrzuty pochodzą z procesu GTK4 w wirtualnym środowisku X11; nie są renderami marketingowymi:
 
-1. Polkit i wyświetlenie monitu hasła w KDE Plasma/Wayland oraz GNOME/Wayland.
-2. Montowanie i modyfikowanie `/boot` na konkretnej wersji Bazzite OSTree.
-3. Zapis, tworzenie i odtwarzanie `/etc/default/grub` oraz rollback po awarii.
-4. Import motywu, wykonanie `grub2-mkconfig` i ponowny rozruch w trybie UEFI.
-5. Renderowanie na Wayland bez XWayland, przy skalowaniu 125–200%.
-6. Praca AppImage na innych dystrybucjach i starszych bibliotekach systemowych.
+- [Motywy — ciemny](preview/GRUB-Studio-2.2-GTK4-Dark.png)
+- [Motywy — jasny](preview/GRUB-Studio-2.2-GTK4-Light.png)
+- [Menu — ciemny](preview/GRUB-Studio-2.2-Menu-Dark.png)
+- [Narzędzia — jasny](preview/GRUB-Studio-2.2-Tools-Light.png)
 
-**Wniosek:** przeszły testy kodu, nawigacji GTK4 i przenośnego artefaktu AppImage.
-Operacje zmieniające program rozruchowy wymagają nadal ręcznego testu regresji
-na wspieranych systemach. Aplikacja nie zastępuje kopii zapasowej i nośnika ratunkowego.
+## Ograniczenia weryfikacji
+
+Wirtualny ekran X11 umożliwia porównanie geometrii kart i podstawowych interakcji, lecz **nie zastępuje testu na rzeczywistym komputerze**. W szczególności pozostają do ręcznego sprawdzenia:
+
+1. Graficzny monit Polkit z hasłem administratora przy uruchomieniu na KDE/Wayland i GNOME/Wayland.
+2. Odczyt zasobów `/boot` przy uprawnieniach i etykietach SELinux Bazzite.
+3. Kopia zapasowa, odtworzenie oraz modyfikacja `/etc/default/grub` na rzeczywistej instalacji.
+4. Aktualizacja konfiguracji GRUB i ponowny rozruch na systemach UEFI z Windows.
+5. Skalowanie HiDPI 125–200%, obsługa dotyku i różne kompozytory Wayland.
+6. Uruchomienie AppImage na dystrybucjach innych niż obraz systemu kompilującego.
+
+Przed zmianami bootloadera użytkownik powinien mieć dostęp do nośnika ratunkowego oraz kopii zapasowej. **Automatyczny PASS nie oznacza przetestowania zapisu GRUB na sprzęcie.**
