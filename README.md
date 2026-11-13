@@ -22,7 +22,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.0.0-rc.1/GRUB-Studio-Universal-v2.0.0-x86_64.AppImage"><strong>⬇️ Download AppImage · v2.0.0 RC1</strong></a>
+  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.0.1-rc.1/GRUB-Studio-Universal-v2.0.1-x86_64.AppImage"><strong>⬇️ Download AppImage · v2.0.1 RC1</strong></a>
   &nbsp;·&nbsp;
   <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases">All releases</a>
 </p>
@@ -55,18 +55,18 @@
 
 ### ⬇️ Pobieranie i uruchamianie
 
-**[Pobierz GRUB Studio Universal 2.0.0 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.0.0-rc.1/GRUB-Studio-Universal-v2.0.0-x86_64.AppImage)**
+**[Pobierz GRUB Studio Universal 2.0.1 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.0.1-rc.1/GRUB-Studio-Universal-v2.0.1-x86_64.AppImage)**
 
 AppImage nie wymaga instalacji pakietu ani ingerencji w obraz systemu Bazzite. Po pobraniu nadaj mu uprawnienia wykonywania:
 
 ```bash
-chmod +x GRUB-Studio-Universal-v2.0.0-x86_64.AppImage
-./GRUB-Studio-Universal-v2.0.0-x86_64.AppImage
+chmod +x GRUB-Studio-Universal-v2.0.1-x86_64.AppImage
+./GRUB-Studio-Universal-v2.0.1-x86_64.AppImage
 ```
 
-**[Pobierz sumę SHA-256](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.0.0-rc.1/GRUB-Studio-Universal-v2.0.0-SHA256.txt)** · [Zobacz wydanie i zmiany](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.0.0-rc.1)
+**[Pobierz sumę SHA-256](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.0.1-rc.1/GRUB-Studio-Universal-v2.0.1-SHA256.txt)** · [Zobacz wydanie i zmiany](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.0.1-rc.1)
 
-> **Uwaga:** To pierwsze wydanie *Release Candidate*. Build przeszedł testy Rust i test uruchomienia AppImage w CI, ale nie został jeszcze zweryfikowany na wszystkich dystrybucjach ani na Twoim konkretnym sprzęcie. Do operacji administracyjnych system musi udostępniać Polkit/`pkexec` i odpowiednie narzędzia GRUB.
+> **Wersja 2.0.1 RC:** Poprawiono monit Polkit przy uruchomieniu, uruchamianie pomocnika z AppImage, wykrywanie chronionych i zagnieżdżonych motywów oraz wygląd i skalowanie interfejsu. Testy Rust, okna GTK4 i AppImage przeszły w CI. Nadal wymagany jest test na konkretnym komputerze i systemie; do administracji potrzebny jest Polkit/`pkexec`.
 
 ### 🔐 Bezpieczeństwo i kompatybilność
 
@@ -128,18 +128,18 @@ Masz pomysł lub znalazłeś błąd? Otwórz [Issues](https://github.com/wolfgan
 
 ### ⬇️ Download & run
 
-**[Download GRUB Studio Universal 2.0.0 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.0.0-rc.1/GRUB-Studio-Universal-v2.0.0-x86_64.AppImage)**
+**[Download GRUB Studio Universal 2.0.1 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.0.1-rc.1/GRUB-Studio-Universal-v2.0.1-x86_64.AppImage)**
 
 The portable AppImage does not require installing an application package or modifying the Bazzite base image:
 
 ```bash
-chmod +x GRUB-Studio-Universal-v2.0.0-x86_64.AppImage
-./GRUB-Studio-Universal-v2.0.0-x86_64.AppImage
+chmod +x GRUB-Studio-Universal-v2.0.1-x86_64.AppImage
+./GRUB-Studio-Universal-v2.0.1-x86_64.AppImage
 ```
 
-**[Download SHA-256 checksum](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.0.0-rc.1/GRUB-Studio-Universal-v2.0.0-SHA256.txt)** · [Release notes](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.0.0-rc.1)
+**[Download SHA-256 checksum](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.0.1-rc.1/GRUB-Studio-Universal-v2.0.1-SHA256.txt)** · [Release notes](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.0.1-rc.1)
 
-> **Please note:** This is the first *Release Candidate*. The Rust tests and AppImage CLI smoke checks passed in CI, but real-world testing across distributions and hardware is still required. Administrative operations depend on system-provided Polkit/`pkexec` and GRUB tooling.
+> **Version 2.0.1 RC:** Fixes Polkit authentication at startup, AppImage helper execution, protected/nested theme discovery, and the compact responsive interface. Rust tests, GTK4 window startup, and AppImage smoke checks passed in CI. Real-hardware and distribution testing is still required; administration depends on system-provided Polkit/`pkexec`.
 
 ### 🔐 Safety & compatibility
 
