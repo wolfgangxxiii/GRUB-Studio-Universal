@@ -585,18 +585,35 @@ fn page_menu(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     let info=section(&page,&tr(state,"menu.custom"));
     add_text(&info,&tr(state,"menu.custom.note"),"muted",true);
     if !profile.family.supports_menu_edit() { add_text(&info,&tr(state,"menu.readonly"),"warning",true); }
+    let editor=gtk::FlowBox::new();
+    editor.add_css_class("menu-editor-flow");
+    editor.set_selection_mode(gtk::SelectionMode::None);
+    editor.set_min_children_per_line(1);
+    editor.set_max_children_per_line(2);
+    editor.set_column_spacing(12);
+    editor.set_row_spacing(10);
+    let list_side=gtk::Box::new(gtk::Orientation::Vertical,7);
+    list_side.set_size_request(265,-1);
+    list_side.add_css_class("menu-entry-list");
+    let form_side=gtk::Box::new(gtk::Orientation::Vertical,8);
+    form_side.set_size_request(335,-1);
+    form_side.add_css_class("menu-entry-fields");
+    add_text(&form_side,&tr(state,"menu.entry"),"section-heading",true);
+    editor.insert(&list_side,-1);
+    editor.insert(&form_side,-1);
+    info.append(&editor);
     let list=gtk::ListBox::new();
     list.set_selection_mode(gtk::SelectionMode::Single);
     list.add_css_class("studio-list");
     let items=state.borrow().pending_entries.clone();
-    if items.is_empty() { add_text(&info,&tr(state,"menu.empty"),"muted",true); }
+    if items.is_empty() { add_text(&list_side,&tr(state,"menu.empty"),"muted",true); }
     for item in &items {
         let label=row_with_heading(&item.title,&format!("{} · {} · {}",item.uuid,item.path,
             if item.enabled {tr(state,"menu.enabled")} else {tr(state,"menu.hidden")}));
         label.set_margin_top(7); label.set_margin_bottom(7); label.set_margin_start(11); label.set_margin_end(11);
         list.append(&label);
     }
-    info.append(&list);
+    list_side.append(&list);
     let fields=gtk::Box::new(gtk::Orientation::Vertical,7);
     let title=entry_with_text(""); title.set_placeholder_text(Some(&tr(state,"menu.field.title")));
     let uuid=entry_with_text(""); uuid.set_placeholder_text(Some(&tr(state,"menu.field.uuid")));
@@ -605,7 +622,7 @@ fn page_menu(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     uuid.set_sensitive(local_editable);
     path.set_sensitive(local_editable);
     fields.append(&title);fields.append(&uuid);fields.append(&path);
-    info.append(&fields);
+    form_side.append(&fields);
     let s=state.clone();
     let title2=title.clone(); let uuid2=uuid.clone(); let path2=path.clone();
     list.connect_row_selected(move |_, row| {
@@ -678,7 +695,7 @@ fn page_menu(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     let more_entry=popup_button(&tr(state,"menu.entry.actions"),&extra_entry);
     more_entry.set_sensitive(local_editable && selected_index.is_some());
     controls.insert(&more_entry,-1);
-    info.append(&controls);
+    form_side.append(&controls);
     let commit=action_flow();
     let save=button(&tr(state,"menu.save"),true);
     save.set_sensitive(editable);
@@ -865,6 +882,7 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     let current_state_word=if selected==active {tr(state,"themes.active")}else{tr(state,"themes.detected")};
     let current_status=gtk::Label::new(Some(&current_state_word));
     current_status.add_css_class("theme-selected-status");
+    current_status.add_css_class(if selected==active {"theme-state-active"}else{"theme-state-idle"});
     let preview_heading=gtk::Box::new(gtk::Orientation::Horizontal,8);
     preview_heading.append(&current_name);
     preview_heading.append(&current_status);
@@ -949,6 +967,9 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
                 selected_info.set_text(&theme.path);
                 current_name.set_text(&theme.name);
                 current_status.set_text(if theme.path==active_theme {&active_word}else{&detected_word});
+                current_status.remove_css_class("theme-state-active");
+                current_status.remove_css_class("theme-state-idle");
+                current_status.add_css_class(if theme.path==active_theme {"theme-state-active"}else{"theme-state-idle"});
                 activate.set_sensitive(can_edit(&s.borrow()) && theme.path!=active_theme);
                 if let Some(path)=inspect::theme_preview_image(&theme.path) {
                     image.set_filename(Some(path));

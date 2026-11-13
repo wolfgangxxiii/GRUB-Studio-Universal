@@ -50,7 +50,7 @@
 | 🖥️ **Systemy** | Wykrywanie śladów Windows i innych systemów przez UEFI/EFI; opcjonalny skan `os-prober`. |
 | 🖼️ **Motywy GRUB** | Wykrywanie `theme.txt`, wybór, import, większy podgląd i miniatury prawdziwego tła (jeśli plik jest bezpiecznie dostępny). Ścieżki ukryte w szczegółach. Nie jest to pełna emulacja GRUB. |
 | ⚙️ **Ustawienia** | Czas wyświetlania menu, tryb menu, rozdzielczość, motyw i wybrane ustawienia domyślne. |
-| 📋 **Wpisy rozruchowe** | Podgląd własnych wpisów EFI i wykrytych systemów w jednej sekcji; akcje porządkowania i usuwania w menu kontekstowym, edycja **własnych** pozycji tylko na obsługiwanych instalacjach GRUB. |
+| 📋 **Wpisy rozruchowe** | Adaptacyjny edytor z listą i formularzem obok siebie, akcje porządkowania i usuwania w menu kontekstowym, edycja **własnych** pozycji tylko na obsługiwanych instalacjach GRUB. |
 | 🧰 **Narzędzia** | Kopie zapasowe i dziennik działań dostępne razem bez duplikowania pozycji menu. |
 | 🛡️ **Ochrona zmian** | Polkit, kontrola uprawnień, walidacja danych, kopie zapasowe i próba cofnięcia zmian przy błędzie. |
 
@@ -122,7 +122,7 @@ Masz pomysł lub znalazłeś błąd? Otwórz [Issues](https://github.com/wolfgan
 | 🖥️ **Operating systems** | Detection of Windows and other OS traces through UEFI/EFI; optional `os-prober` scan. |
 | 🖼️ **GRUB themes** | Installed-theme discovery, import, larger preview, thumbnails and real wallpaper when safely accessible; paths in collapsible details (not a full GRUB renderer). |
 | ⚙️ **Settings** | Menu timeout, display style, resolution, theme, and selected default options. |
-| 📋 **Boot entries** | User-created EFI entries and detected operating systems in one section; contextual editing actions on supported conventional GRUB installations. |
+| 📋 **Boot entries** | Responsive list-and-form editor for user-created EFI entries, contextual actions and OS discovery on supported conventional GRUB installations. |
 | 🧰 **Tools** | Backups and activity log consolidated into one destination. |
 | 🛡️ **Safety** | Polkit authentication, input validation, backups, and rollback attempts on failure. |
 

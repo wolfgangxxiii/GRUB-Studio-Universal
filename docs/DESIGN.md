@@ -42,6 +42,8 @@ bez uprawnień. Funkcje zapisu GRUB zachowują walidację i kopię bezpieczeńst
 - Minimalny obszar okna 620 × 440 px; pionowy przewijany widok karty.
 - Poniżej 860 px panel boczny jest ikonowy, ale zachowuje wskazówki po najechaniu.
 - Edytor wpisów zawija przyciski do kolejnego wiersza.
+- Na szerokim ekranie edytor ma dwie kolumny (lista wpisów i formularz);
+  przy mniejszej szerokości kolumny ustawiają się jedna pod drugą.
 - Biblioteka motywów przechodzi z dwóch kolumn do jednej, gdy brak miejsca.
 - Preferencje wyglądu i języka nie zabierają osobnego miejsca w górnym pasku.
 - Działania na zaznaczonym wpisie są dostępne w menu kontekstowym, a nie w sześciu równych przyciskach.
