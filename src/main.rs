@@ -7,6 +7,7 @@ use gtk::gdk;
 use gtk::glib;
 use gtk::prelude::*;
 use std::cell::RefCell;
+use std::collections::BTreeMap;
 use std::fs;
 use std::io::Read;
 use std::os::unix::fs::{DirBuilderExt, PermissionsExt};
@@ -31,13 +32,38 @@ struct StudioState {
     language: String,
     appearance: String,
     active: String,
-    sidebar_visible: bool,
     selected_theme: String,
     selected_backup: Option<String>,
     selected_entry: Option<usize>,
     pending_entries: Vec<MenuEntry>,
+    menu_form_draft: Option<MenuFormDraft>,
+    settings_draft: Option<SettingsDraft>,
     log: Vec<String>,
     chrome: Option<Chrome>,
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct MenuFormDraft {
+    selected: Option<usize>,
+    title: String,
+    uuid: String,
+    path: String,
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct SettingsDraft {
+    timeout: String,
+    style: String,
+    gfx: String,
+    kernel_args: String,
+}
+impl SettingsDraft {
+    fn from_config(config: &BTreeMap<String, String>) -> Self {
+        Self {
+            timeout: config.get("GRUB_TIMEOUT").cloned().unwrap_or_else(|| "5".into()),
+            style: config.get("GRUB_TIMEOUT_STYLE").cloned().unwrap_or_else(|| "menu".into()),
+            gfx: config.get("GRUB_GFXMODE").cloned().unwrap_or_else(|| "auto".into()),
+            kernel_args: config.get("GRUB_CMDLINE_LINUX_DEFAULT").cloned().unwrap_or_default(),
+        }
+    }
 }
 // GTK widgets in Chrome live for the lifetime of the window. Updating a page
 // never tears down the sidebar/header, preventing width jumps and focus loss.
@@ -246,8 +272,9 @@ fn initial_state(demo: bool) -> StudioState {
     let mut s = StudioState {
         snapshot: if demo { demo_snapshot() } else { inspect::inspect() },
         authorized: false, demo, busy: false, language: prefs.1, appearance: prefs.0,
-        active:"home".into(), sidebar_visible:true, selected_theme:String::new(),
-        selected_backup:None, selected_entry:None, pending_entries:vec![], log:vec![], chrome:None,
+        active:"home".into(), selected_theme:String::new(),
+        selected_backup:None, selected_entry:None, pending_entries:vec![],
+        menu_form_draft:None, settings_draft:None, log:vec![], chrome:None,
     };
     if demo {
         s.authorized = true;
@@ -565,6 +592,8 @@ fn systems_panel(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     // Global refresh always performs a privileged UEFI/EFI scan. Only the
     // optional os-prober deep scan is unique to this page.
     let deep = button(&tr(state,"systems.deep"), true);
+    deep.set_sensitive(!state.borrow().demo && !state.borrow().busy);
+    if state.borrow().demo {deep.set_tooltip_text(Some(&editing_hint(state)));}
     let w=window.clone(); let s=state.clone();
     deep.connect_clicked(move |_| {
         let w2=w.clone(); let s2=s.clone();
@@ -594,18 +623,57 @@ fn page_settings(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     let page=page_root(&tr(state,"settings.title"), &tr(state,"settings.sub"));
     let config=state.borrow().snapshot.config.clone();
     let writable=can_edit(&state.borrow());
-    if !writable {add_text(&page,editing_hint(state),"warning",true);}
+    let draft=state.borrow().settings_draft.clone()
+        .unwrap_or_else(|| SettingsDraft::from_config(&config));
+    if !writable {
+        let current=SettingsDraft::from_config(&config);
+        add_text(&page,editing_hint(state),"warning",true);
+        let summary=section(&page,&tr(state,"settings.general"));
+        for (key,value) in [
+            ("settings.timeout",current.timeout.as_str()),
+            ("settings.style",current.style.as_str()),
+            ("settings.resolution",current.gfx.as_str()),
+        ] {
+            summary.append(&row_with_heading(&tr(state,key),value));
+        }
+        if !current.kernel_args.is_empty() {
+            summary.append(&row_with_heading(&tr(state,"menu.kernel"),&current.kernel_args));
+        }
+        return page;
+    }
+    let needs_draft=state.borrow().settings_draft.is_none();
+    if needs_draft {
+        state.borrow_mut().settings_draft=Some(draft.clone());
+    }
     let grid=section(&page,&tr(state,"settings.general"));
-    let timeout=entry_with_text(config.get("GRUB_TIMEOUT").map(String::as_str).unwrap_or("5"));
+    let timeout=entry_with_text(&draft.timeout);
     timeout.set_sensitive(writable);
+    let s=state.clone();
+    timeout.connect_changed(move |entry| {
+        if let Some(draft)=s.borrow_mut().settings_draft.as_mut() {
+            draft.timeout=entry.text().to_string();
+        }
+    });
     form_row(&grid, &tr(state,"settings.timeout"), &timeout);
     let styles=["menu","hidden","countdown"];
     let style=gtk::DropDown::from_strings(&styles);
-    style.set_selected(styles.iter().position(|x| Some(*x)==config.get("GRUB_TIMEOUT_STYLE").map(String::as_str)).unwrap_or(0) as u32);
+    style.set_selected(styles.iter().position(|x| *x==draft.style.as_str()).unwrap_or(0) as u32);
     style.set_sensitive(writable);
+    let s=state.clone();
+    style.connect_selected_notify(move |combo| {
+        if let Some(draft)=s.borrow_mut().settings_draft.as_mut() {
+            draft.style=styles.get(combo.selected() as usize).unwrap_or(&"menu").to_string();
+        }
+    });
     form_row(&grid,&tr(state,"settings.style"),&style);
-    let gfx=entry_with_text(config.get("GRUB_GFXMODE").map(String::as_str).unwrap_or("auto"));
+    let gfx=entry_with_text(&draft.gfx);
     gfx.set_sensitive(writable);
+    let s=state.clone();
+    gfx.connect_changed(move |entry| {
+        if let Some(draft)=s.borrow_mut().settings_draft.as_mut() {
+            draft.gfx=entry.text().to_string();
+        }
+    });
     form_row(&grid,&tr(state,"settings.resolution"),&gfx);
     // Theme selection belongs exclusively to the Theme Library. Saving
     // basic settings must preserve GRUB_THEME and never accidentally apply
@@ -642,8 +710,14 @@ fn page_settings(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     visibility.append(&actions);
     let kernel=section(&page,&tr(state,"menu.kernel"));
     add_text(&kernel,&tr(state,"menu.kernel.note"),"muted",true);
-    let kargs=entry_with_text(config.get("GRUB_CMDLINE_LINUX_DEFAULT").map(String::as_str).unwrap_or(""));
+    let kargs=entry_with_text(&draft.kernel_args);
     kargs.set_sensitive(writable && matches!(state.borrow().snapshot.profile.family,core::Family::Arch|core::Family::Debian));
+    let s=state.clone();
+    kargs.connect_changed(move |entry| {
+        if let Some(draft)=s.borrow_mut().settings_draft.as_mut() {
+            draft.kernel_args=entry.text().to_string();
+        }
+    });
     kernel.append(&kargs);
     let save_kernel=button(&tr(state,"menu.kernel.save"),false);
     save_kernel.set_sensitive(writable && matches!(state.borrow().snapshot.profile.family,core::Family::Arch|core::Family::Debian));
@@ -666,10 +740,13 @@ fn page_menu(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     let page=page_root(&tr(state,"menu.title"),&tr(state,"menu.sub"));
     let profile=state.borrow().snapshot.profile.clone();
     let editable=can_edit(&state.borrow()) && profile.family.supports_menu_edit();
-    let local_editable=editable || state.borrow().demo;
+    let local_editable=editable;
     let info=section(&page,&tr(state,"menu.custom"));
     add_text(&info,&tr(state,"menu.custom.note"),"muted",true);
-    if !profile.family.supports_menu_edit() { add_text(&info,&tr(state,"menu.readonly"),"warning",true); }
+    if !editable {
+        let why=if !profile.family.supports_menu_edit() {tr(state,"menu.readonly")} else {editing_hint(state)};
+        add_text(&info,why,"warning",true);
+    }
     let editor=gtk::FlowBox::new();
     editor.add_css_class("menu-editor-flow");
     editor.set_selection_mode(gtk::SelectionMode::None);
@@ -679,9 +756,11 @@ fn page_menu(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     editor.set_row_spacing(10);
     let list_side=gtk::Box::new(gtk::Orientation::Vertical,7);
     list_side.set_size_request(265,-1);
+    list_side.set_hexpand(!local_editable);
     list_side.add_css_class("menu-entry-list");
     let form_side=gtk::Box::new(gtk::Orientation::Vertical,8);
     form_side.set_size_request(335,-1);
+    form_side.set_visible(local_editable);
     form_side.add_css_class("menu-entry-fields");
     add_text(&form_side,&tr(state,"menu.entry"),"section-heading",true);
     editor.insert(&list_side,-1);
@@ -708,20 +787,47 @@ fn page_menu(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     path.set_sensitive(local_editable);
     fields.append(&title);fields.append(&uuid);fields.append(&path);
     form_side.append(&fields);
-    let s=state.clone();
-    let title2=title.clone(); let uuid2=uuid.clone(); let path2=path.clone();
-    list.connect_row_selected(move |_, row| {
-        if let Some(index)=row.map(|r| r.index() as usize) {
-            s.borrow_mut().selected_entry=Some(index);
-            if let Some(item)=s.borrow().pending_entries.get(index) {
-                title2.set_text(&item.title); uuid2.set_text(&item.uuid); path2.set_text(&item.path);
-            }
-        }
-    });
     let selected_index=state.borrow().selected_entry;
     if let Some(index)=selected_index {
         if let Some(row)=list.row_at_index(index as i32) { list.select_row(Some(&row)); }
     }
+    let saved=state.borrow().menu_form_draft.clone()
+        .filter(|draft| draft.selected==selected_index);
+    if let Some(draft)=saved {
+        title.set_text(&draft.title);
+        uuid.set_text(&draft.uuid);
+        path.set_text(&draft.path);
+    } else if let Some(item)=selected_index.and_then(|i| state.borrow().pending_entries.get(i).cloned()) {
+        title.set_text(&item.title);
+        uuid.set_text(&item.uuid);
+        path.set_text(&item.path);
+    }
+    for field in [&title,&uuid,&path] {
+        let s=state.clone();
+        let title=title.clone();let uuid=uuid.clone();let path=path.clone();
+        field.connect_changed(move |_| {
+            let selected=s.borrow().selected_entry;
+            s.borrow_mut().menu_form_draft=Some(MenuFormDraft {
+                selected,title:title.text().to_string(),uuid:uuid.text().to_string(),path:path.text().to_string(),
+            });
+        });
+    }
+    let s=state.clone();
+    let title2=title.clone(); let uuid2=uuid.clone(); let path2=path.clone();
+    list.connect_row_selected(move |_, row| {
+        let index=row.map(|r| r.index() as usize);
+        let selected=index.and_then(|i| s.borrow().pending_entries.get(i).cloned());
+        s.borrow_mut().selected_entry=index;
+        if let Some(item)=selected {
+            title2.set_text(&item.title); uuid2.set_text(&item.uuid); path2.set_text(&item.path);
+        } else {
+            title2.set_text("");uuid2.set_text("");
+            path2.set_text("/EFI/Microsoft/Boot/bootmgfw.efi");
+        }
+        s.borrow_mut().menu_form_draft=Some(MenuFormDraft {
+            selected:index,title:title2.text().to_string(),uuid:uuid2.text().to_string(),path:path2.text().to_string(),
+        });
+    });
     let controls=action_flow();
     let add=button(&tr(state,"menu.add"),false);
     add.set_sensitive(local_editable);
@@ -733,6 +839,7 @@ fn page_menu(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
         if !core::valid_entry(&item) { show_message(&w,"GRUB Studio",&tr(&s,"dialog.invalidentry"),true);return; }
         s.borrow_mut().pending_entries.push(item);
         s.borrow_mut().selected_entry=None;
+        s.borrow_mut().menu_form_draft=None;
         rebuild(&w,&s);
     });
     controls.insert(&add,-1);
@@ -748,6 +855,7 @@ fn page_menu(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
         item.path=path.text().to_string();
         if !core::valid_entry(&item) { show_message(&w,"GRUB Studio",&tr(&s,"dialog.invalidentry"),true);return; }
         s.borrow_mut().pending_entries[idx]=item;
+        s.borrow_mut().menu_form_draft=None;
         rebuild(&w,&s);
     });
     controls.insert(&edit,-1);
@@ -772,6 +880,7 @@ fn page_menu(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
                 2 => {data.pending_entries.remove(idx);data.selected_entry=None;},
                 _ => {}
             }
+            data.menu_form_draft=None;
             drop(data);
             rebuild(&w,&s);
         });
@@ -782,6 +891,7 @@ fn page_menu(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     controls.insert(&more_entry,-1);
     form_side.append(&controls);
     let commit=action_flow();
+    commit.set_visible(local_editable);
     let save=button(&tr(state,"menu.save"),true);
     save.set_sensitive(editable);
     let w=window.clone();let s=state.clone();
@@ -824,6 +934,7 @@ fn page_menu(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
             let mut data=s.borrow_mut();
             data.pending_entries=original;
             data.selected_entry=None;
+            data.menu_form_draft=None;
         }
         rebuild(&w,&s);
     });
@@ -1091,7 +1202,7 @@ fn page_tools(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     page
 }
 fn page_about(_window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
-    let page=page_root(&tr(state,"about.title"),"Rust Edition · GTK4 · Wayland · 2.3.3");
+    let page=page_root(&tr(state,"about.title"),"Rust Edition · GTK4 · Wayland · 2.3.4");
     for number in 1..=9 {
         let title=tr(state,&format!("about.{number:02}.title"));
         let text=tr(state,&format!("about.{number:02}.text"));
@@ -1217,15 +1328,8 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
 
     clear_box(&chrome.header);
     let header=&chrome.header;
-    let hamburger=icon_button("open-menu-symbolic",&tr(state,"navigation"));
-    hamburger.set_tooltip_text(Some(&tr(state,"navigation")));
-    let w=window.clone();let state2=state.clone();
-    hamburger.connect_clicked(move |_| {
-        let old=state2.borrow().sidebar_visible;
-        state2.borrow_mut().sidebar_visible=!old;
-        rebuild(&w,&state2);
-    });
-    header.append(&hamburger);
+    // Navigation is always available. At narrow widths it becomes icon-only,
+    // but never disappears, so there is no menu visibility toggle.
     // Embed the actual app artwork: GtkIconTheme may not resolve AppImage
     // desktop icons until after the window has opened on some distributions.
     let logo_bytes=glib::Bytes::from_static(include_bytes!("../assets/grub-studio-256.png"));
@@ -1237,7 +1341,7 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
     let branding=gtk::Box::new(gtk::Orientation::Vertical,1);
     branding.set_hexpand(true);
     add_text(&branding,"GRUB Studio","brand",false);
-    add_text(&branding,"UNIVERSAL  ·  2.3.3","brand-subtitle",false);
+    add_text(&branding,"UNIVERSAL  ·  2.3.4","brand-subtitle",false);
     header.append(&branding);
     let status=if s.demo {"DEMO".into()}
         else if s.busy {tr(state,"status.scanning")}
@@ -1342,8 +1446,6 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
         });
         nav.append(&b);
     }
-    let tools_heading=add_text(nav,&tr(state,"nav.tools"),"nav-heading",false);
-    tools_heading.add_css_class("nav-group-secondary");
     for (page,icon,key) in [
         ("tools","applications-utilities-symbolic","tools.title"),
         ("about","help-about-symbolic","nav.about")] {
@@ -1359,6 +1461,7 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
         label.add_css_class("nav-label");
         line.append(&label);
         b.set_child(Some(&line));b.add_css_class("nav-button");
+        if page=="tools" {b.add_css_class("nav-group-secondary");}
         b.set_tooltip_text(Some(&tr(state,key)));
         if s.active==page {b.add_css_class("nav-active");}
         let w=window.clone();let st=state.clone();
@@ -1371,7 +1474,7 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
     let spacer=gtk::Box::new(gtk::Orientation::Vertical,0);spacer.set_vexpand(true);
     nav.append(&spacer);
     add_text(nav,&format!("{} · GRUB",s.snapshot.profile.family.label()),"nav-footer",true);
-    nav.set_visible(s.sidebar_visible);
+    nav.set_visible(true);
     let window_width=if window.width()>0 {window.width()} else {window.default_width()};
     apply_sidebar_density(nav,window_width<860);
     // The outer window and its fixed-width navigation are persistent.
@@ -1393,7 +1496,7 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
     label.set_hexpand(true);label.set_xalign(0.0);
     label.set_ellipsize(gtk::pango::EllipsizeMode::End);
     footer.append(&label);
-    footer.append(&gtk::Label::new(Some(if s.demo {"DEMO"}else{"GTK4  ·  Wayland/X11"})));
+    footer.append(&gtk::Label::new(Some("GTK4  ·  Wayland/X11")));
 }
 
 #[cfg(test)]
@@ -1433,7 +1536,7 @@ mod ui_tests {
 
 fn main() {
     let args:Vec<String>=std::env::args().skip(1).collect();
-    if args.iter().any(|a| a=="--version") { println!("GRUB Studio Universal 2.3.3 Rust Edition");return; }
+    if args.iter().any(|a| a=="--version") { println!("GRUB Studio Universal 2.3.4 Rust Edition");return; }
     if args.iter().any(|a| a=="--self-test") {
         let locales=serde_json::from_str::<serde_json::Value>(include_str!("../assets/translations.json")).expect("valid locale catalog");
         for (code,_) in LANGUAGES {assert!(locales[*code]["tools.title"].is_string(),"missing tools translation: {code}");}
@@ -1506,6 +1609,10 @@ fn main() {
                 st.borrow_mut().active=routes[next].into();
                 rebuild(&w,&st);
                 if let Some(chrome)=st.borrow().chrome.as_ref() {
+                    assert!(chrome.sidebar.is_visible(),"navigation must never be hidden");
+                    assert!(chrome.header.first_child()
+                        .and_then(|child|child.downcast::<gtk::Picture>().ok()).is_some(),
+                        "application logo must be the first header item without a hamburger toggle");
                     assert_eq!(chrome.theme_actions.is_visible(),routes[next]=="themes",
                         "theme actions must only appear on the Themes page");
                 }
@@ -1549,5 +1656,20 @@ mod interface_tests {
                 assert_ne!(translate(locale,key),key,"missing {key} in {locale}");
             }
         }
+    }
+    #[test]
+    fn settings_draft_starts_from_actual_grub_config() {
+        let config=BTreeMap::from([
+            ("GRUB_TIMEOUT".into(),"9".into()),
+            ("GRUB_TIMEOUT_STYLE".into(),"countdown".into()),
+            ("GRUB_GFXMODE".into(),"2560x1440".into()),
+            ("GRUB_CMDLINE_LINUX_DEFAULT".into(),"quiet splash".into()),
+        ]);
+        let draft=SettingsDraft::from_config(&config);
+        assert_eq!(draft.timeout,"9");
+        assert_eq!(draft.style,"countdown");
+        assert_eq!(draft.gfx,"2560x1440");
+        assert_eq!(draft.kernel_args,"quiet splash");
+        assert_eq!(SettingsDraft::from_config(&BTreeMap::new()).timeout,"5");
     }
 }
