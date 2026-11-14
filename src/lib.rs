@@ -2,4 +2,5 @@
 pub mod core;
 pub mod inspect;
 pub mod admin;
+pub mod theme_archive;
 

@@ -1,6 +1,6 @@
 //! Native GTK4 UI with libadwaita styling. GTK4 selects Wayland directly
 //! when WAYLAND_DISPLAY is set; the system window decorations remain intact.
-use grub_studio::{core, inspect};
+use grub_studio::{core, inspect, theme_archive};
 use grub_studio::core::MenuEntry;
 use grub_studio::inspect::{OsRecord, Snapshot, Theme};
 use gtk4 as gtk;
@@ -431,6 +431,10 @@ fn confirm(window: &gtk::ApplicationWindow, title: &str, message: &str, action: 
     dialog.present();
 }
 fn submit(window: &gtk::ApplicationWindow, shared: &Shared, args: Vec<String>, deep: bool) {
+    submit_with_staging(window, shared, args, deep, None);
+}
+fn submit_with_staging(window: &gtk::ApplicationWindow, shared: &Shared, args: Vec<String>, deep: bool,
+                       staging: Option<theme_archive::PreparedTheme>) {
     if shared.borrow().busy { return; }
     if shared.borrow().demo {
         show_message(window, "Demo", "Preview mode never writes to the system.", false);
@@ -450,6 +454,9 @@ fn submit(window: &gtk::ApplicationWindow, shared: &Shared, args: Vec<String>, d
     }
     let (tx, rx) = mpsc::channel();
     std::thread::spawn(move || {
+        // Keep the private extracted directory alive throughout Polkit and the
+        // privileged copy. Drop removes it on both success and failure.
+        let _staging = staging;
         let result = run_admin(&args).and_then(|output| {
             if deep { Ok((output, None)) }
             else if args.first().map(String::as_str) == Some("--probe") {
@@ -507,6 +514,21 @@ fn guarded_submit(window: &gtk::ApplicationWindow, state: &Shared, args: Vec<Str
     let s = state.clone();
     confirm(window, &tr(state, "dialog.confirm"),
         &format!("{}\n\n{}", note, tr(state, "dialog.risk")), move || submit(&w, &s, args, false));
+}
+fn guarded_submit_archive(window: &gtk::ApplicationWindow, state: &Shared,
+                          prepared: theme_archive::PreparedTheme) {
+    let w = window.clone();
+    let s = state.clone();
+    let note = format!("{}: {}\n{}: {} · {}: {:.2} MB\n\n{}",
+        tr(state,"themes.detectedarchive"), prepared.name,
+        tr(state,"themes.filecount"), prepared.files,
+        tr(state,"themes.size"), prepared.bytes as f64 / 1_000_000.0,
+        tr(state,"themes.noactivation"));
+    confirm(window, &tr(state, "dialog.confirm"),
+        &format!("{}\n\n{}", note, tr(state,"dialog.risk")), move || {
+            let args = vec!["--install-theme".into(), prepared.folder.to_string_lossy().to_string(), prepared.name.clone()];
+            submit_with_staging(&w, &s, args, false, Some(prepared));
+        });
 }
 
 fn add_text(parent: &gtk::Box, text: impl AsRef<str>, class: &str, wrap: bool) -> gtk::Label {
@@ -1159,6 +1181,47 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     // Import belongs to this list and stays in its header; a separate
     // full-width button below the list needlessly pushed actions offscreen.
     list_header.append(&install);
+    let import_archive=button(&tr(state,"themes.importarchive"),false);
+    import_archive.set_sensitive(writable);
+    let w=window.clone();let s=state.clone();
+    import_archive.connect_clicked(move |_| {
+        let dialog=gtk::FileChooserNative::new(Some(&tr(&s,"themes.importarchive")),Some(&w),
+            gtk::FileChooserAction::Open,Some(&tr(&s,"themes.importarchive")),Some(&tr(&s,"menu.cancel")));
+        let filter=gtk::FileFilter::new();
+        filter.set_name(Some("ZIP / TAR.GZ / TAR.XZ"));
+        for suffix in ["*.zip","*.tar.gz","*.tar.xz"] {filter.add_pattern(suffix);}
+        dialog.add_filter(&filter);
+        let hold=dialog.clone();
+        let w2=w.clone();let s2=s.clone();
+        dialog.connect_response(move |selected,response| {
+            if response==gtk::ResponseType::Accept {
+                if let Some(path)=selected.file().and_then(|file|file.path()) {
+                    if s2.borrow().busy { hold.destroy();return; }
+                    let (tx,rx)=mpsc::channel();
+                    std::thread::spawn(move || { let _=tx.send(theme_archive::prepare(&path)); });
+                    let w3=w2.clone();let s3=s2.clone();
+                    glib::timeout_add_local(Duration::from_millis(75),move || match rx.try_recv() {
+                        Err(mpsc::TryRecvError::Empty) => glib::ControlFlow::Continue,
+                        Ok(Ok(prepared)) => {
+                            guarded_submit_archive(&w3,&s3,prepared);
+                            glib::ControlFlow::Break
+                        }
+                        Ok(Err(error)) => {
+                            show_message(&w3,"GRUB Studio",&error,true);
+                            glib::ControlFlow::Break
+                        }
+                        Err(mpsc::TryRecvError::Disconnected) => {
+                            show_message(&w3,"GRUB Studio","Archive inspection stopped unexpectedly",true);
+                            glib::ControlFlow::Break
+                        }
+                    });
+                }
+            }
+            hold.destroy();
+        });
+        dialog.show();
+    });
+    list_header.append(&import_archive);
     page.append(&list);
 
     // Keep primary actions fixed to the bottom of the window. At 700x540
@@ -1322,7 +1385,7 @@ fn page_tools(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     page
 }
 fn page_about(_window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
-    let page=page_root(&tr(state,"about.title"),"Rust Edition · GTK4 · libadwaita · 3.0.1");
+    let page=page_root(&tr(state,"about.title"),"Rust Edition · GTK4 · libadwaita · 3.0.2");
     for number in 1..=9 {
         let title=tr(state,&format!("about.{number:02}.title"));
         let text=tr(state,&format!("about.{number:02}.text"));
@@ -1535,7 +1598,7 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
     let brand=gtk::Box::new(gtk::Orientation::Vertical,1);
     brand.set_hexpand(true);
     add_text(&brand,"GRUB Studio","brand",false);
-    add_text(&brand,"UNIVERSAL  ·  3.0.1","brand-subtitle",false);
+    add_text(&brand,"UNIVERSAL  ·  3.0.2","brand-subtitle",false);
     header.append(&brand);
     // Custom controls never become part of the window manager's title bar.
     let status=if s.demo {"DEMO".into()}
@@ -1781,7 +1844,7 @@ mod ui_tests {
 
 fn main() {
     let args:Vec<String>=std::env::args().skip(1).collect();
-    if args.iter().any(|a| a=="--version") { println!("GRUB Studio Universal 3.0.1 Rust / Adwaita Edition");return; }
+    if args.iter().any(|a| a=="--version") { println!("GRUB Studio Universal 3.0.2 Rust / Adwaita Edition");return; }
     if args.iter().any(|a| a=="--self-test") {
         let locales=serde_json::from_str::<serde_json::Value>(include_str!("../assets/translations.json")).expect("valid locale catalog");
         for (code,_) in LANGUAGES {assert!(locales[*code]["tools.title"].is_string(),"missing tools translation: {code}");}
