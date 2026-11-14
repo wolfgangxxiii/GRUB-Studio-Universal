@@ -1134,11 +1134,13 @@ fn backups_panel(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     let controls=action_row();
     let create=button(&tr(state,"backups.create"),true);
     create.set_sensitive(can_edit(&state.borrow()));
+    if !can_edit(&state.borrow()) {create.set_tooltip_text(Some(&editing_hint(state)));}
     let w=window.clone();let s=state.clone();
     create.connect_clicked(move |_| submit(&w,&s,vec!["--backup".into()],false));
     controls.append(&create);
     let restore=button(&tr(state,"backups.restore"),false);
     restore.set_sensitive(can_edit(&state.borrow()));
+    if !can_edit(&state.borrow()) {restore.set_tooltip_text(Some(&editing_hint(state)));}
     let w=window.clone();let s=state.clone();
     restore.connect_clicked(move |_| {
         let Some(name)=s.borrow().selected_backup.clone() else {

@@ -70,7 +70,9 @@
 }
 /* Disabled writes must not resemble an available primary action. */
 .action-button:disabled, .icon-button:disabled,
-.popup-action:disabled, .prefs-trigger:disabled { opacity: .82; }
+.popup-action:disabled, .prefs-trigger:disabled { opacity: .48; }
+.grub-dark .action-button.suggested-action:disabled,
+.grub-light .action-button.suggested-action:disabled { background: #7d8b9a; color: #ecf0f4; }
 .grub-dark entry:disabled, .grub-dark dropdown:disabled,
 .grub-light entry:disabled, .grub-light dropdown:disabled { opacity: .78; }
 .stats-grid { margin-top: 2px; }
