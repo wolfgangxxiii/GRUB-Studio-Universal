@@ -211,9 +211,25 @@ impl Drop for StagedHelper {
         let _ = fs::remove_dir(&self.directory);
     }
 }
-fn apply_probe(s: &mut StudioState, raw: &str, deep: bool) -> Result<(), String> {
+fn apply_probe(s: &mut StudioState, raw: &str, deep: bool, preserve_drafts: bool) -> Result<(), String> {
     let header = if deep { "GRUB_STUDIO_DEEP_V2" } else { "GRUB_STUDIO_PROBE_V2" };
     if raw.lines().next() != Some(header) { return Err("Invalid privileged scan output".into()); }
+    if !deep && !raw.lines().any(|line| line.starts_with("PROFILE\t")) {
+        return Err("Incomplete privileged scan (missing system profile)".into());
+    }
+    let active_theme = s.snapshot.config.get("GRUB_THEME").cloned().unwrap_or_default();
+    let form_dirty = s.menu_form_draft.as_ref().is_some_and(|draft| {
+        if let Some(entry) = draft.selected.and_then(|i| s.pending_entries.get(i)) {
+            draft.title != entry.title || draft.uuid != entry.uuid || draft.path != entry.path
+        } else {
+            !draft.title.is_empty() || !draft.uuid.is_empty()
+                || (draft.path != "/EFI/Microsoft/Boot/bootmgfw.efi" && !draft.path.is_empty())
+        }
+    });
+    let keep_drafts = preserve_drafts && (s.pending_entries != s.snapshot.menu
+        || form_dirty || s.selected_theme != active_theme);
+    let saved_entries = if keep_drafts { Some((s.pending_entries.clone(),s.selected_entry,
+        s.menu_form_draft.clone(),s.selected_theme.clone())) } else { None };
     let previously_found = if deep { Vec::new() } else { s.snapshot.themes.clone() };
     let mut profile_received = false;
     if !deep {
@@ -263,9 +279,18 @@ fn apply_probe(s: &mut StudioState, raw: &str, deep: bool) -> Result<(), String>
             }
         }
         s.snapshot.themes.sort_by_key(|t| (t.name.to_lowercase(),t.path.clone()));
-        s.pending_entries = s.snapshot.menu.clone();
-        s.selected_entry = None;
-        s.selected_theme = s.snapshot.config.get("GRUB_THEME").cloned().unwrap_or_default();
+        if let Some((entries,selected,form,theme)) = saved_entries {
+            s.pending_entries = entries;
+            s.selected_entry = selected;
+            s.menu_form_draft = form;
+            s.selected_theme = theme;
+            s.log.push("Unsaved EFI/theme drafts kept during refresh".into());
+        } else {
+            s.pending_entries = s.snapshot.menu.clone();
+            s.selected_entry = None;
+            s.menu_form_draft = None;
+            s.selected_theme = s.snapshot.config.get("GRUB_THEME").cloned().unwrap_or_default();
+        }
     }
     Ok(())
 }
@@ -394,6 +419,7 @@ fn submit(window: &gtk::ApplicationWindow, shared: &Shared, args: Vec<String>, d
     }
     let probing = args.first().map(String::as_str) == Some("--probe");
     let initial_probe = probing && !shared.borrow().authorized;
+    let operation = args.first().cloned().unwrap_or_default();
     if !shared.borrow().authorized && !probing {
         show_message(window, "Polkit", "Select Unlock in the top bar to request administrator authentication.", true);
         return
@@ -426,12 +452,15 @@ fn submit(window: &gtk::ApplicationWindow, shared: &Shared, args: Vec<String>, d
                 Ok(Ok((message, scan))) => {
                     let mut s = state.borrow_mut();
                     if deep {
-                        if let Err(e) = apply_probe(&mut s, &message, true) { s.log.push(e); }
+                        if let Err(e) = apply_probe(&mut s, &message, true, false) { s.log.push(e); }
                     } else if let Some(scan) = scan {
-                        match apply_probe(&mut s, &scan, false) {
+                        match apply_probe(&mut s, &scan, false, probing && !initial_probe) {
                             Ok(()) => { s.authorized = true; s.log.push("Polkit authentication and privileged scan succeeded".into()); }
                             Err(e) => { s.authorized = false; s.log.push(e); }
                         }
+                    }
+                    if matches!(operation.as_str(), "--apply" | "--kernel-args" | "--restore") {
+                        s.settings_draft = None;
                     }
                     s.log.push(message.chars().take(1400).collect());
                     Ok(message)
@@ -690,7 +719,10 @@ fn page_settings(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     });
     form_row(&grid, &tr(state,"settings.timeout"), &timeout);
     let styles=["menu","hidden","countdown"];
-    let style=gtk::DropDown::from_strings(&styles);
+    let style_labels=[tr(state,"settings.style.menu"),tr(state,"settings.style.hidden"),
+        tr(state,"settings.style.countdown")];
+    let style_refs=style_labels.iter().map(String::as_str).collect::<Vec<_>>();
+    let style=gtk::DropDown::from_strings(&style_refs);
     style.set_selected(styles.iter().position(|x| *x==draft.style.as_str()).unwrap_or(0) as u32);
     style.set_sensitive(writable);
     let s=state.clone();
@@ -700,12 +732,21 @@ fn page_settings(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
         }
     });
     form_row(&grid,&tr(state,"settings.style"),&style);
-    let gfx=entry_with_text(&draft.gfx);
+    // Offer known-safe presets instead of requiring users to type the GRUB
+    // resolution syntax. Retain an existing distro-specific value as a choice.
+    let mut gfx_choices=["auto","640x480","800x600","1024x768","1280x720",
+        "1280x800","1366x768","1600x900","1920x1080","2560x1440","3840x2160"]
+        .iter().map(|value|value.to_string()).collect::<Vec<_>>();
+    if !gfx_choices.contains(&draft.gfx) {gfx_choices.push(draft.gfx.clone());}
+    let gfx_refs=gfx_choices.iter().map(String::as_str).collect::<Vec<_>>();
+    let gfx=gtk::DropDown::from_strings(&gfx_refs);
+    gfx.set_selected(gfx_choices.iter().position(|value|value==&draft.gfx).unwrap_or(0) as u32);
     gfx.set_sensitive(writable);
     let s=state.clone();
-    gfx.connect_changed(move |entry| {
+    let gfx_for_state=gfx_choices.clone();
+    gfx.connect_selected_notify(move |combo| {
         if let Some(draft)=s.borrow_mut().settings_draft.as_mut() {
-            draft.gfx=entry.text().to_string();
+            if let Some(value)=gfx_for_state.get(combo.selected() as usize) {draft.gfx=value.clone();}
         }
     });
     form_row(&grid,&tr(state,"settings.resolution"),&gfx);
@@ -719,9 +760,10 @@ fn page_settings(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     save.set_sensitive(writable);
     if !writable {save.set_tooltip_text(Some(&editing_hint(state)));}
     let w=window.clone(); let s=state.clone();
+    let gfx_for_save=gfx_choices.clone();
     save.connect_clicked(move |_| {
         let timeout=timeout.text().to_string();
-        let gfx=gfx.text().to_string();
+        let gfx=gfx_for_save.get(gfx.selected() as usize).cloned().unwrap_or_else(||"auto".into());
         let style=styles.get(style.selected() as usize).unwrap_or(&"menu").to_string();
         if !core::valid_timeout(&timeout) || !core::valid_style(&style) || !core::valid_resolution(&gfx)
             || !core::valid_theme_path(&current_theme) {
@@ -1228,7 +1270,7 @@ fn page_tools(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     page
 }
 fn page_about(_window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
-    let page=page_root(&tr(state,"about.title"),"Rust Edition · GTK4 · Wayland · 2.3.5");
+    let page=page_root(&tr(state,"about.title"),"Rust Edition · GTK4 · Wayland · 2.3.6");
     for number in 1..=9 {
         let title=tr(state,&format!("about.{number:02}.title"));
         let text=tr(state,&format!("about.{number:02}.text"));
@@ -1364,7 +1406,7 @@ fn ensure_chrome(window: &gtk::ApplicationWindow, state: &Shared) -> Chrome {
     titlebar.pack_start(&brand_icon);
     let brand=gtk::Box::new(gtk::Orientation::Vertical,1);
     add_text(&brand,"GRUB Studio","brand",false);
-    add_text(&brand,"UNIVERSAL  ·  2.3.5","brand-subtitle",false);
+    add_text(&brand,"UNIVERSAL  ·  2.3.6","brand-subtitle",false);
     titlebar.pack_start(&brand);
     let header=gtk::Box::new(gtk::Orientation::Horizontal,7);
     header.add_css_class("studio-header");
@@ -1625,7 +1667,8 @@ mod ui_tests {
     #[test]
     fn appearance_modes_and_ui_hints_are_translated() {
         for (locale,_) in LANGUAGES {
-            for key in ["theme.system","status.locked","hint.demo","hint.busy","hint.unlock","hint.readonly","hint.select","menu.discovery","menu.discovery.note"] {
+            for key in ["theme.system","status.locked","hint.demo","hint.busy","hint.unlock","hint.readonly","hint.select","menu.discovery","menu.discovery.note",
+                "settings.style.menu","settings.style.hidden","settings.style.countdown"] {
                 assert_ne!(translate(locale,key),key,"Missing {locale}: {key}");
             }
         }
@@ -1641,6 +1684,19 @@ mod ui_tests {
         assert_eq!(records[0].1,vec!["GRUB","UEFI · Boot0001"]);
     }
     #[test]
+    fn refreshing_preserves_unsaved_efi_changes() {
+        let mut state = initial_state(true);
+        let original = state.snapshot.menu[0].clone();
+        state.pending_entries[0].title = "Windows edited locally".into();
+        let response = format!("GRUB_STUDIO_PROBE_V2\nPROFILE\tbazzite\t1\tBazzite\t\nENTRY\t{}\t{}\t{}\t{}\t1\n",
+            original.id,original.title,original.uuid,original.path);
+        apply_probe(&mut state,&response,false,true).unwrap();
+        assert_eq!(state.pending_entries[0].title,"Windows edited locally");
+        assert_eq!(state.snapshot.menu[0].title,"Windows 11");
+        apply_probe(&mut state,&response,false,false).unwrap();
+        assert_eq!(state.pending_entries[0].title,"Windows 11");
+    }
+    #[test]
     fn header_uses_bundled_png_artwork() {
         let image=include_bytes!("../assets/grub-studio-256.png");
         assert!(image.starts_with(b"\x89PNG\r\n\x1a\n"),"application artwork must be PNG");
@@ -1649,7 +1705,7 @@ mod ui_tests {
 
 fn main() {
     let args:Vec<String>=std::env::args().skip(1).collect();
-    if args.iter().any(|a| a=="--version") { println!("GRUB Studio Universal 2.3.5 Rust Edition");return; }
+    if args.iter().any(|a| a=="--version") { println!("GRUB Studio Universal 2.3.6 Rust Edition");return; }
     if args.iter().any(|a| a=="--self-test") {
         let locales=serde_json::from_str::<serde_json::Value>(include_str!("../assets/translations.json")).expect("valid locale catalog");
         for (code,_) in LANGUAGES {assert!(locales[*code]["tools.title"].is_string(),"missing tools translation: {code}");}

@@ -1,4 +1,4 @@
-# GRUB Studio Universal — projekt interfejsu 2.3.5
+# GRUB Studio Universal — projekt interfejsu 2.3.6
 
 ## Cel
 
@@ -83,7 +83,7 @@ GitHub Actions uruchamia oba testy przed budową AppImage.
 Osobny test `--ui-resize-report` wymusza rozmiar 720 px poleceniem `xdotool`
 **po otwarciu okna** i sprawdza przejście z 196 do 62 px; dzięki temu test
 obejmuje też menedżery okien niewysyłające powiadomień o zmianie szerokości.
-Wersja 2.3.5 sprawdza obecność osadzonego PNG aplikacji, komplet komunikatów
+Wersja 2.3.6 sprawdza obecność osadzonego PNG aplikacji, komplet komunikatów
 uprawnień w siedmiu językach oraz zachowuje testy kursora i stałego paska akcji Motywów.
 
 **Decyzja projektowa:** usunięto pozorny podgląd motywu. Sam odczyt

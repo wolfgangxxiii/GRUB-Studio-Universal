@@ -58,7 +58,11 @@ fn atomic_write(path: &Path, content: &[u8], mode: u32) -> AdminResult<()> {
         f.set_permissions(fs::Permissions::from_mode(mode))
             .map_err(|e| error("Cannot set file permissions", e))?;
         f.sync_all().map_err(|e| error("Cannot sync staging file", e))?;
-        fs::rename(&temp, path).map_err(|e| error("Cannot atomically install file", e))
+        fs::rename(&temp, path).map_err(|e| error("Cannot atomically install file", e))?;
+        // A rename alone does not guarantee that the directory entry survives
+        // a sudden loss of power. Sync the parent after installing the file.
+        File::open(path.parent().ok_or("Path without parent")?)
+            .and_then(|dir| dir.sync_all()).map_err(|e| error("Cannot sync configuration directory", e))
     })();
     if result.is_err() { let _ = fs::remove_file(&temp); }
     result
@@ -92,7 +96,21 @@ fn supported_profile() -> AdminResult<Profile> {
         return Err("Expected GRUB target is missing".into())
     }
     if !Path::new("/boot").is_dir() { return Err("Boot directory missing".into()) }
+    resolved_grub_target(&p)?;
     Ok(p)
+}
+
+// Resolve a distro-owned configuration symlink without replacing it. In
+// particular, /etc/grub2-efi.cfg on Bazzite can point into /boot. Refuse an
+// unexpected target rather than generating a boot script outside /boot.
+fn resolved_grub_target(p: &Profile) -> AdminResult<PathBuf> {
+    let target = Path::new(p.family.target(p.efi));
+    let resolved = fs::canonicalize(target).map_err(|e| error("Cannot resolve GRUB output", e))?;
+    let boot = fs::canonicalize("/boot").map_err(|e| error("Cannot resolve /boot", e))?;
+    if !resolved.starts_with(&boot) || !safe_file(&resolved)? {
+        return Err("GRUB output is not a regular file under /boot".into());
+    }
+    Ok(resolved)
 }
 
 struct BootMount(bool);
@@ -118,13 +136,35 @@ impl Drop for BootMount {
 }
 fn regen(p: &Profile) -> AdminResult<()> {
     let _mount = BootMount::new(p)?;
-    let target = p.family.target(p.efi);
-    run_success(p.family.generator(), &["-o", target])?;
+    let target = resolved_grub_target(p)?;
+    let old_mode = fs::metadata(&target).map_err(|e| error("Cannot inspect GRUB output", e))?
+        .permissions().mode() & 0o777;
+    let staging = temp_file_path(&target)?;
+    OpenOptions::new().create_new(true).write(true).mode(0o600)
+        .open(&staging).map_err(|e| error("Cannot create temporary GRUB output", e))?;
     let checker = if inspect::program_path("grub2-script-check").is_some() { "grub2-script-check" }
                   else if inspect::program_path("grub-script-check").is_some() { "grub-script-check" }
                   else { "" };
-    if !checker.is_empty() { run_success(checker, &[target])?; }
-    Ok(())
+    // Keep the current boot configuration intact if generation or validation
+    // fails. Only install a checked, fully flushed replacement.
+    let result = (|| {
+        let path = staging.to_str().ok_or("Non-UTF-8 GRUB staging path")?;
+        run_success(p.family.generator(), &["-o", path])?;
+        if checker.is_empty() { return Err("Missing GRUB script checker; refusing to replace boot configuration".into()); }
+        run_success(checker, &[path])?;
+        let file = File::open(&staging).map_err(|e| error("Cannot verify generated GRUB output", e))?;
+        if file.metadata().map_err(|e| error("Cannot inspect generated GRUB output", e))?.len() == 0 {
+            return Err("Generated GRUB output is empty".into());
+        }
+        file.set_permissions(fs::Permissions::from_mode(old_mode))
+            .map_err(|e| error("Cannot preserve GRUB output permissions", e))?;
+        file.sync_all().map_err(|e| error("Cannot sync generated GRUB output", e))?;
+        fs::rename(&staging, &target).map_err(|e| error("Cannot install checked GRUB output", e))?;
+        File::open(target.parent().ok_or("GRUB output has no directory")?)
+            .and_then(|dir| dir.sync_all()).map_err(|e| error("Cannot sync GRUB output directory", e))
+    })();
+    if result.is_err() { let _ = fs::remove_file(&staging); }
+    result
 }
 fn backup_base(p: &Profile) -> PathBuf { PathBuf::from(p.family.backup_root()) }
 fn copy_regular_if_exists(from: &Path, to: &Path, missing: &Path) -> AdminResult<()> {
@@ -187,9 +227,12 @@ fn rollback_menu(backup_dir: &Path) -> AdminResult<()> {
 fn rollback_generated(p: &Profile, backup_dir: &Path) -> AdminResult<()> {
     if backup_dir.join("grub.cfg.orig").is_file() {
         let _mount = BootMount::new(p)?;
-        // Bazzite uses a validated, distribution-owned grub2.cfg symlink here.
-        fs::copy(backup_dir.join("grub.cfg.orig"), p.family.target(p.efi))
-            .map_err(|e| error("Could not restore previous generated GRUB file", e))?;
+        let target = resolved_grub_target(p)?;
+        let mode = fs::metadata(&target).map_err(|e| error("Cannot inspect GRUB output", e))?
+            .permissions().mode() & 0o777;
+        let previous = fs::read(backup_dir.join("grub.cfg.orig"))
+            .map_err(|e| error("Cannot read previous generated GRUB file", e))?;
+        atomic_write(&target, &previous, mode)?;
     }
     Ok(())
 }

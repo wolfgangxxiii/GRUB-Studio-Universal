@@ -1,4 +1,4 @@
-# GRUB Studio Universal 2.3.5 RC1 — raport jakości / QA
+# GRUB Studio Universal 2.3.6 RC1 — raport jakości / QA
 
 Data: 14 listopada 2026
 
@@ -18,6 +18,10 @@ Data: 14 listopada 2026
 - Tymczasową literę G w nagłówku zastąpiła rzeczywista grafika aplikacji osadzona bezpośrednio w binarium; przyciski i pola niedostępne bez uprawnień są wyszarzone.
 - Przed autoryzacją program pokazuje stan „Zablokowany” zamiast mylącego „Tylko odczyt”.
 - Usunięto pozorny podgląd menu GRUB i odczytywanie tła `desktop-image`; wcześniej pokazywał symulację niezależną od faktycznego `theme.txt`.
+- Generator GRUB zapisuje do pliku tymczasowego w katalogu docelowym i wymaga poprawnego wyniku `grub-script-check` / `grub2-script-check` przed atomową podmianą. Dowiązania dystrybucyjne są rozwiązywane bez ich zastępowania.
+- Odświeżenie nie niszczy zmodyfikowanych, niezapisanych wpisów EFI ani wyboru motywu. Własne ścieżki EFI odrzucają segmenty `.` i `..`.
+- Styl menu używa przetłumaczonych opisów, a rozdzielczości można wybrać z listy, także z zachowaniem bieżącej wartości niestandardowej.
+- Historyczne PNG oraz stare makiety usunięto z repozytorium; nowe zrzuty są przechowywane tylko jako artefakt pojedynczego uruchomienia CI.
 
 ## Kontrole automatyczne
 
@@ -25,6 +29,7 @@ Data: 14 listopada 2026
 | --- | --- |
 | `cargo test --all-targets` | Testy biblioteki + konfiguracji kursora KDE, obecności PNG programu i tłumaczeń w siedmiu językach |
 | Łączenie wpisów GRUB/EFI | Ten sam system zgłoszony z GRUB i UEFI wyświetla się jednokrotnie, z obiema informacjami źródłowymi |
+| Zachowanie danych i walidacja | Testy niezapisanych wpisów podczas odświeżenia oraz odrzucania ścieżek EFI zawierających `.` lub `..` |
 | `cargo build --release --bins` | Kompilacja aplikacji GTK4 i modułu uprzywilejowanego |
 | `--ui-smoke` w `xvfb-run` | 6 stron, **widoczna nawigacja 62 px**, brak przycisku jej ukrywania i dolny pasek działań wyłącznie na karcie Motywy; test motywu/rozmiaru kursora |
 | `--ui-smoke-wide` w `xvfb-run` | 6 stron, nawigacja **196 px** w oknie 1100 × 540 px |
@@ -33,18 +38,13 @@ Data: 14 listopada 2026
 | `build-appimage.sh` | Wytworzenie przenośnego AppImage x86_64 |
 | `AppImage --version` i `AppImage --self-test` | Sprawdzenie pliku wynikowego |
 
-Raport dla wersji 2.3.5 opiera się na [GitHub Actions](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions). Testy nie zapisują zmian do bootloadera. Test wyświetlania rzeczywistego kursora KDE/Wayland wymaga komputera użytkownika.
+Raport dla wersji 2.3.6 opiera się na [GitHub Actions](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions). Testy nie zapisują zmian do bootloadera. Test wyświetlania rzeczywistego kursora KDE/Wayland wymaga komputera użytkownika.
 
 ## Zrzuty z rzeczywistej aplikacji
 
-Zrzuty pochodzą z procesu GTK4 w wirtualnym środowisku X11; nie są renderami marketingowymi:
-
-- [Motywy — ciemny](preview/GRUB-Studio-2.3.5-Themes-Dark.png)
-- [Motywy — jasny](preview/GRUB-Studio-2.3.5-Themes-Light.png)
-- [Motywy — kompaktowy układ po polsku](preview/GRUB-Studio-2.3.5-Themes-Compact-PL.png)
-- [Menu — ciemny](preview/GRUB-Studio-2.3.5-Menu-Dark.png)
-- [Narzędzia — jasny](preview/GRUB-Studio-2.3.5-Tools-Light.png)
-- [Menu — kompaktowy układ po polsku](preview/GRUB-Studio-2.3.5-Menu-Compact-PL.png)
+Zrzuty tworzone w `xvfb` przez GitHub Actions można pobrać jako artefakt
+`grub-studio-gtk4-screenshots` z konkretnego uruchomienia workflow.
+Repozytorium źródłowe nie przechowuje starszych zrzutów ani makiet interfejsu.
 
 ## Ograniczenia weryfikacji
 
@@ -56,5 +56,6 @@ Wirtualny ekran X11 umożliwia porównanie geometrii kart i podstawowych interak
 4. Aktualizacja konfiguracji GRUB i ponowny rozruch na systemach UEFI z Windows.
 5. Skalowanie HiDPI 125–200%, obsługa dotyku, różne kompozytory Wayland oraz fizyczny wygląd wskaźnika KDE/Wayland.
 6. Uruchomienie AppImage na dystrybucjach innych niż obraz systemu kompilującego.
+7. Generowanie do pliku tymczasowego, atomowa podmiana i odtwarzanie przy prawdziwej konfiguracji EFI/GRUB, w tym zachowanie etykiet SELinux i dowiązań Bazzite.
 
 Przed zmianami bootloadera użytkownik powinien mieć dostęp do nośnika ratunkowego oraz kopii zapasowej. **Automatyczny PASS nie oznacza przetestowania zapisu GRUB na sprzęcie.**

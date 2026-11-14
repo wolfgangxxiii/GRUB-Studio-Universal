@@ -22,16 +22,12 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.5-rc.1/GRUB-Studio-Universal-v2.3.5-x86_64.AppImage"><strong>⬇️ Download AppImage · v2.3.5 RC1</strong></a>
+  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.6-rc.1/GRUB-Studio-Universal-v2.3.6-x86_64.AppImage"><strong>⬇️ Download AppImage · v2.3.6 RC1</strong></a>
   &nbsp;·&nbsp;
   <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases">All releases</a>
 </p>
 
-<p align="center">
-  <img src="preview/GRUB-Studio-2.3.5-Themes-Dark.png" alt="Actual GRUB Studio 2.3.5 GTK4 dark-mode screenshot with fixed navigation" width="49%">
-  <img src="preview/GRUB-Studio-2.3.5-Themes-Light.png" alt="Actual GRUB Studio 2.3.5 GTK4 light-mode screenshot with fixed navigation" width="49%">
-</p>
-<p align="center"><sub>Rzeczywiste zrzuty GTK4 / Actual GTK4 screenshots · tryb demonstracyjny / demo mode</sub></p>
+<p align="center"><sub>Actual GTK4 interface screenshots are generated as CI artifacts, without storing historical images in the source repository.</sub></p>
 
 ---
 
@@ -49,32 +45,32 @@
 | 🐧 **Dystrybucje** | Rozpoznawanie Bazzite, Fedora, Ubuntu/Debian, Arch/CachyOS i openSUSE. |
 | 🖥️ **Systemy** | Wspólny widok informacji GRUB/EFI bez duplikowania systemów o tej samej nazwie; opcjonalny skan `os-prober`. |
 | 🖼️ **Motywy GRUB** | Wykrywanie `theme.txt`, lista z lokalizacją plików, stan aktywności, import oraz przyciski zastosowania/wyłączenia dostępne nawet przy przewijaniu. Bez symulowanego podglądu. |
-| ⚙️ **Ustawienia** | Czas wyświetlania menu, tryb menu, rozdzielczość i parametry rozruchu. Niezapisane wartości formularza pozostają przy zmianie kart; bez prawa zapisu wyświetla się podsumowanie tylko do odczytu. |
-| 📋 **Wpisy rozruchowe** | Prostsza karta „Menu rozruchowe” z czytelnym stanem blokady i jednym panelem wykrywania; edycja własnych EFI tylko na obsługiwanych konfiguracjach. Niezapisane dane pozostają po zmianie kart. |
+| ⚙️ **Ustawienia** | Czas wyświetlania menu, przetłumaczone style menu, lista rozdzielczości i parametry rozruchu. Niezapisane wartości formularza pozostają przy zmianie kart; bez prawa zapisu wyświetla się podsumowanie tylko do odczytu. |
+| 📋 **Wpisy rozruchowe** | Prostsza karta „Menu rozruchowe” z czytelnym stanem blokady i jednym panelem wykrywania; edycja własnych EFI tylko na obsługiwanych konfiguracjach. Niezapisane dane pozostają także po ręcznym odświeżeniu. |
 | 🧰 **Narzędzia** | Kopie zapasowe i dziennik działań dostępne razem bez duplikowania pozycji menu. |
-| 🛡️ **Ochrona zmian** | Polkit, osobny status blokady i trybu tylko do odczytu, wyraźne nieaktywne przyciski, blokowanie pól bez uprawnień, walidacja i kopie bezpieczeństwa. |
+| 🛡️ **Ochrona zmian** | Polkit, osobny status blokady i trybu tylko do odczytu, walidacja ścieżek EFI i kopie bezpieczeństwa. Generator tworzy plik GRUB osobno, sprawdza składnię i dopiero wtedy zastępuje konfigurację rozruchową. |
 
 ### ⬇️ Pobieranie i uruchamianie
 
-**[Pobierz GRUB Studio Universal 2.3.5 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.5-rc.1/GRUB-Studio-Universal-v2.3.5-x86_64.AppImage)**
+**[Pobierz GRUB Studio Universal 2.3.6 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.6-rc.1/GRUB-Studio-Universal-v2.3.6-x86_64.AppImage)**
 
 AppImage nie wymaga instalacji pakietu ani ingerencji w obraz systemu Bazzite. Po pobraniu nadaj mu uprawnienia wykonywania:
 
 ```bash
-chmod +x GRUB-Studio-Universal-v2.3.5-x86_64.AppImage
-./GRUB-Studio-Universal-v2.3.5-x86_64.AppImage
+chmod +x GRUB-Studio-Universal-v2.3.6-x86_64.AppImage
+./GRUB-Studio-Universal-v2.3.6-x86_64.AppImage
 ```
 
-**[Pobierz sumę SHA-256](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.5-rc.1/GRUB-Studio-Universal-v2.3.5-SHA256.txt)** · [Zobacz wydanie i zmiany](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.3.5-rc.1)
+**[Pobierz sumę SHA-256](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.6-rc.1/GRUB-Studio-Universal-v2.3.6-SHA256.txt)** · [Zobacz wydanie i zmiany](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.3.6-rc.1)
 
-> **Wersja 2.3.5 RC:** Natywny `GtkHeaderBar` usuwa podwójny pasek okna. Ikony nawigacji są jednolitymi wektorami, bez zależności od kolorowych ikon dystrybucji. Wpisy GRUB i EFI są połączone w jednym panelu, a informacje o blokadzie i menu wyglądu stały się czytelniejsze. Zachowano stały pasek nawigacyjny i zabezpieczenia operacji GRUB. Zapis na komputerze nadal wymaga testu i Polkit/`pkexec`.
+> **Wersja 2.3.6 RC:** Oprócz natywnego `GtkHeaderBar`, jednolitych ikon i połączonego wykrywania GRUB/EFI dodano bezpieczniejsze generowanie `grub.cfg` przez tymczasowy plik i kontrolę składni, zachowanie niezapisanych wpisów przy odświeżaniu, dokładniejszą walidację EFI oraz czytelniejsze pola ustawień. Zapis na komputerze nadal wymaga testu i Polkit/`pkexec`.
 
 Szczegóły projektu wyglądu i przypisania funkcji do kart: **[docs/DESIGN.md](docs/DESIGN.md)**.
 
 ### 🔐 Bezpieczeństwo i kompatybilność
 
 - Aplikację uruchamia się jako **zwykły użytkownik**. O hasło administratora prosi systemowy **Polkit**; po odmowie pozostaje tryb tylko do odczytu.
-- Program **nie edytuje bezpośrednio** `grub.cfg`, nie uruchamia `grub-install` i nie zmienia kolejności startowej UEFI.
+- Program **nie edytuje ręcznie** `grub.cfg`: generuje go do pliku tymczasowego, sprawdza składnię i atomowo instaluje zatwierdzony wynik. Nie uruchamia `grub-install` ani nie zmienia kolejności UEFI.
 - Plik `/etc/default/grub`, jeśli go nie ma, może zostać utworzony **dopiero po zatwierdzeniu zapisu** w obsługiwanej konfiguracji.
 - Wykrywanie Windows w EFI potwierdza obecność wpisu lub pliku, **nie gwarantuje** poprawnego uruchomienia systemu.
 - Na Bazzite/OSTree obowiązują dodatkowe ograniczenia; zmiany wyglądu GRUB nie są oficjalnie wspierane przez Bazzite.
@@ -121,32 +117,32 @@ Masz pomysł lub znalazłeś błąd? Otwórz [Issues](https://github.com/wolfgan
 | 🐧 **Distributions** | Detection of Bazzite, Fedora, Ubuntu/Debian, Arch/CachyOS, and openSUSE. |
 | 🖥️ **Operating systems** | One combined GRUB/EFI discovery view, merging records with the same system name; optional `os-prober` scan. |
 | 🖼️ **GRUB themes** | Installed `theme.txt` discovery, selection, active-theme status, import, and pinned Apply/Disable buttons even in compact windows. The inaccurate simulated preview is gone. |
-| ⚙️ **Settings** | Menu timeout, display style, resolution, and supported boot options. Unsaved edits survive navigation, while unauthorized sessions show a read-only summary. |
-| 📋 **Boot entries** | Clear boot-menu view, consolidated system discovery, draft preservation and editing restricted to supported GRUB profiles. |
+| ⚙️ **Settings** | Menu timeout, localized menu styles, resolution presets, and supported boot options. Unsaved edits survive navigation, while unauthorized sessions show a read-only summary. |
+| 📋 **Boot entries** | Clear boot-menu view, consolidated system discovery, drafts retained across refresh, and editing restricted to supported GRUB profiles. |
 | 🧰 **Tools** | Backups and activity log consolidated into one destination. |
-| 🛡️ **Safety** | Polkit authentication, distinct locked/read-only statuses, visibly disabled controls, guarded settings, input validation, backups, and rollback attempts. |
+| 🛡️ **Safety** | Polkit authentication, distinct locked/read-only statuses, EFI path validation, backups, and checked temporary GRUB generation before atomic installation. |
 
 ### ⬇️ Download & run
 
-**[Download GRUB Studio Universal 2.3.5 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.5-rc.1/GRUB-Studio-Universal-v2.3.5-x86_64.AppImage)**
+**[Download GRUB Studio Universal 2.3.6 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.6-rc.1/GRUB-Studio-Universal-v2.3.6-x86_64.AppImage)**
 
 The portable AppImage does not require installing an application package or modifying the Bazzite base image:
 
 ```bash
-chmod +x GRUB-Studio-Universal-v2.3.5-x86_64.AppImage
-./GRUB-Studio-Universal-v2.3.5-x86_64.AppImage
+chmod +x GRUB-Studio-Universal-v2.3.6-x86_64.AppImage
+./GRUB-Studio-Universal-v2.3.6-x86_64.AppImage
 ```
 
-**[Download SHA-256 checksum](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.5-rc.1/GRUB-Studio-Universal-v2.3.5-SHA256.txt)** · [Release notes](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.3.5-rc.1)
+**[Download SHA-256 checksum](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.6-rc.1/GRUB-Studio-Universal-v2.3.6-SHA256.txt)** · [Release notes](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.3.6-rc.1)
 
-> **Version 2.3.5 RC:** A native GTK HeaderBar removes the double titlebar; in-app vector icons no longer depend on distro icon themes. Boot entries and discovered EFI systems share one panel without duplicate names. Read-only messaging, typography and appearance preferences have been refined. The always-visible navigation and GRUB safeguards remain. Real-hardware testing is still required; administration depends on Polkit/`pkexec`.
+> **Version 2.3.6 RC:** Builds on the native GTK HeaderBar and unified GRUB/EFI discovery with staged and syntax-checked GRUB output, draft preservation during refresh, stricter EFI paths, and friendlier settings. The always-visible navigation remains. Real-hardware testing is still required; administration depends on Polkit/`pkexec`.
 
 More about the layout, one-place-per-action design and testing: **[docs/DESIGN.md](docs/DESIGN.md)**.
 
 ### 🔐 Safety & compatibility
 
 - Run the GUI as a **regular user**. Administrative authorization is requested through **Polkit**, with a read-only mode when access is denied.
-- The application does **not directly modify** `grub.cfg`, run `grub-install`, or change the UEFI boot order.
+- The application generates `grub.cfg` into a temporary file, checks its syntax, then atomically replaces the generated configuration; it does not run `grub-install` or change UEFI boot order.
 - If `/etc/default/grub` is missing, it may be created **only after an explicitly approved write** on a supported setup.
 - A Windows EFI entry or file is **not proof** that Windows will successfully boot.
 - Bazzite/OSTree systems receive additional safety restrictions; GRUB theme modifications are not officially supported by Bazzite.

@@ -169,7 +169,7 @@ pub fn rewrite_grub_config(original: &str, updates: &BTreeMap<&str, String>) -> 
         let key = norm.split_once('=').map(|(k, _)| k.trim()).unwrap_or("");
         if !updates.contains_key(key) { text.push_str(line); text.push('\n'); }
     }
-    text.push_str("\n# GRUB Studio Universal 2.0 - managed settings\n");
+    text.push_str("\n# GRUB Studio Universal - managed settings\n");
     for (key, value) in updates {
         if !value.is_empty() { text.push_str(&format!("{key}=\"{value}\"\n")); }
     }
@@ -234,7 +234,8 @@ pub fn valid_entry(e: &MenuEntry) -> bool {
     if e.uuid.len() < 4 || e.uuid.len() > 64 || !e.uuid.bytes().all(|b| b.is_ascii_hexdigit() || b == b'-') { return false }
     if !e.path.starts_with("/EFI/") || !e.path.to_ascii_lowercase().ends_with(".efi") { return false }
     let parts: Vec<&str> = e.path[5..].split('/').collect();
-    if !(2..=6).contains(&parts.len()) || parts.iter().any(|p| p.is_empty() || !p.bytes().all(|b| b.is_ascii_alphanumeric() || matches!(b, b'.'|b'_'|b'-'))) { return false }
+    if !(2..=6).contains(&parts.len()) || parts.iter().any(|p| p.is_empty() || *p == "." || *p == ".."
+        || !p.bytes().all(|b| b.is_ascii_alphanumeric() || matches!(b, b'.'|b'_'|b'-'))) { return false }
     true
 }
 pub fn validate_entries(entries: &[MenuEntry]) -> Result<(), String> {
@@ -348,6 +349,11 @@ mod tests {
         assert!(render_grub_entries(&rows).unwrap().contains("chainloader /EFI/Microsoft/Boot/bootmgfw.efi"));
         let mut bad = e;
         bad.title = "danger' ; reboot".into();
+        assert!(!valid_entry(&bad));
+        bad.title = "Windows 11".into();
+        bad.path = "/EFI/Microsoft/../Boot/bootmgfw.efi".into();
+        assert!(!valid_entry(&bad));
+        bad.path = "/EFI/./Boot/bootmgfw.efi".into();
         assert!(!valid_entry(&bad));
     }
 }
