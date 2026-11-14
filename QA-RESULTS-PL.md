@@ -35,9 +35,9 @@ Zrzuty pochodzą z procesu GTK4 w wirtualnym środowisku X11; nie są renderami 
 - [Motywy — ciemny](preview/GRUB-Studio-2.3.1-Themes-Dark.png)
 - [Motywy — jasny](preview/GRUB-Studio-2.3.1-Themes-Light.png)
 - [Motywy — kompaktowy układ po polsku](preview/GRUB-Studio-2.3.1-Themes-Compact-PL.png)
-- [Menu — ciemny](preview/GRUB-Studio-2.3-Menu-Dark.png)
-- [Narzędzia — jasny](preview/GRUB-Studio-2.3-Tools-Light.png)
-- [Menu — kompaktowy układ po polsku](preview/GRUB-Studio-2.3-Menu-Compact-PL.png)
+- [Menu — ciemny](preview/GRUB-Studio-2.3.1-Menu-Dark.png)
+- [Narzędzia — jasny](preview/GRUB-Studio-2.3.1-Tools-Light.png)
+- [Menu — kompaktowy układ po polsku](preview/GRUB-Studio-2.3.1-Menu-Compact-PL.png)
 
 ## Ograniczenia weryfikacji
 
