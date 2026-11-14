@@ -71,8 +71,6 @@ impl SettingsDraft {
 struct Chrome {
     root: gtk::Box,
     header: gtk::Box,
-    titlebar: gtk::HeaderBar,
-    brand_icon: gtk::Picture,
     sidebar: gtk::Box,
     scroller: gtk::ScrolledWindow,
     theme_actions: gtk::Box,
@@ -1270,7 +1268,7 @@ fn page_tools(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     page
 }
 fn page_about(_window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
-    let page=page_root(&tr(state,"about.title"),"Rust Edition · GTK4 · Wayland · 2.3.6");
+    let page=page_root(&tr(state,"about.title"),"Rust Edition · GTK4 · Wayland · 2.3.7");
     for number in 1..=9 {
         let title=tr(state,&format!("about.{number:02}.title"));
         let text=tr(state,&format!("about.{number:02}.text"));
@@ -1392,26 +1390,12 @@ fn ensure_chrome(window: &gtk::ApplicationWindow, state: &Shared) -> Chrome {
     let root=gtk::Box::new(gtk::Orientation::Vertical,0);
     root.add_css_class("app-root");
     root.set_size_request(620,440);
-    // GTK HeaderBar provides native minimize/maximize/close controls and
-    // window dragging.  It replaces the old stacked system titlebar + header.
-    let titlebar=gtk::HeaderBar::new();
-    titlebar.add_css_class("studio-titlebar");
-    titlebar.set_show_title_buttons(true);
-    titlebar.set_title_widget(Some(&gtk::Label::new(None)));
-    let logo_bytes=glib::Bytes::from_static(include_bytes!("../assets/grub-studio-40.png"));
-    let logo_texture=gdk::Texture::from_bytes(&logo_bytes).expect("bundled application icon is PNG");
-    let brand_icon=gtk::Picture::for_paintable(&logo_texture);
-    brand_icon.set_size_request(32,32);
-    brand_icon.add_css_class("brand-app-icon");
-    titlebar.pack_start(&brand_icon);
-    let brand=gtk::Box::new(gtk::Orientation::Vertical,1);
-    add_text(&brand,"GRUB Studio","brand",false);
-    add_text(&brand,"UNIVERSAL  ·  2.3.6","brand-subtitle",false);
-    titlebar.pack_start(&brand);
-    let header=gtk::Box::new(gtk::Orientation::Horizontal,7);
+    // Keep all custom controls in the application content. GTK and the window
+    // manager retain responsibility for the actual window decorations. This
+    // avoids custom HeaderBar layout regressions on KDE/Wayland.
+    let header=gtk::Box::new(gtk::Orientation::Horizontal,9);
     header.add_css_class("studio-header");
-    titlebar.pack_end(&header);
-    window.set_titlebar(Some(&titlebar));
+    root.append(&header);
 
     let body=gtk::Box::new(gtk::Orientation::Horizontal,0);
     body.add_css_class("studio-body");
@@ -1462,7 +1446,7 @@ fn ensure_chrome(window: &gtk::ApplicationWindow, state: &Shared) -> Chrome {
     let footer=gtk::Box::new(gtk::Orientation::Horizontal,8);
     footer.add_css_class("studio-footer");
     root.append(&footer);
-    let chrome=Chrome {root,header,titlebar,brand_icon,sidebar,scroller,theme_actions,footer};
+    let chrome=Chrome {root,header,sidebar,scroller,theme_actions,footer};
     window.set_child(Some(&chrome.root));
     state.borrow_mut().chrome=Some(chrome.clone());
     chrome
@@ -1472,18 +1456,25 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
     let chrome=ensure_chrome(window,state);
     chrome.root.remove_css_class("grub-light");
     chrome.root.remove_css_class("grub-dark");
-    window.remove_css_class("grub-light");
-    window.remove_css_class("grub-dark");
     let use_dark=match s.appearance.as_str() {
         "light"=>false,"dark"=>true,_=>system_prefers_dark(),
     };
     chrome.root.add_css_class(if use_dark { "grub-dark" } else { "grub-light" });
-    window.add_css_class(if use_dark { "grub-dark" } else { "grub-light" });
 
     clear_box(&chrome.header);
     let header=&chrome.header;
-    // Navigation stays permanently visible. Header controls live in the
-    // single native titlebar, preserving valuable vertical space.
+    let logo_bytes=glib::Bytes::from_static(include_bytes!("../assets/grub-studio-256.png"));
+    let logo_texture=gdk::Texture::from_bytes(&logo_bytes).expect("bundled application icon is PNG");
+    let brand_icon=gtk::Picture::for_paintable(&logo_texture);
+    brand_icon.set_size_request(36,36);
+    brand_icon.add_css_class("brand-app-icon");
+    header.append(&brand_icon);
+    let brand=gtk::Box::new(gtk::Orientation::Vertical,1);
+    brand.set_hexpand(true);
+    add_text(&brand,"GRUB Studio","brand",false);
+    add_text(&brand,"UNIVERSAL  ·  2.3.7","brand-subtitle",false);
+    header.append(&brand);
+    // Custom controls never become part of the window manager's title bar.
     let status=if s.demo {"DEMO".into()}
         else if s.busy {tr(state,"status.scanning")}
         else if s.authorized&&s.snapshot.profile.writable {tr(state,"status.ready")}
@@ -1705,7 +1696,7 @@ mod ui_tests {
 
 fn main() {
     let args:Vec<String>=std::env::args().skip(1).collect();
-    if args.iter().any(|a| a=="--version") { println!("GRUB Studio Universal 2.3.6 Rust Edition");return; }
+    if args.iter().any(|a| a=="--version") { println!("GRUB Studio Universal 2.3.7 Rust Edition");return; }
     if args.iter().any(|a| a=="--self-test") {
         let locales=serde_json::from_str::<serde_json::Value>(include_str!("../assets/translations.json")).expect("valid locale catalog");
         for (code,_) in LANGUAGES {assert!(locales[*code]["tools.title"].is_string(),"missing tools translation: {code}");}
@@ -1777,10 +1768,12 @@ fn main() {
                 }
                 st.borrow_mut().active=routes[next].into();
                 rebuild(&w,&st);
+                assert!(w.titlebar().is_none(),"window decorations must remain system-managed");
                 if let Some(chrome)=st.borrow().chrome.as_ref() {
                     assert!(chrome.sidebar.is_visible(),"navigation must never be hidden");
-                    assert!(chrome.titlebar.is_visible() && chrome.brand_icon.is_visible(),
-                        "native titlebar must contain the application artwork");
+                    assert!(chrome.header.first_child()
+                        .and_then(|child|child.downcast::<gtk::Picture>().ok()).is_some(),
+                        "application artwork must be in the stable content header");
                     assert_eq!(chrome.theme_actions.is_visible(),routes[next]=="themes",
                         "theme actions must only appear on the Themes page");
                 }

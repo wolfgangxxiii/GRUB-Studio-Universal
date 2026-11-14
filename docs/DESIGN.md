@@ -1,4 +1,4 @@
-# GRUB Studio Universal — projekt interfejsu 2.3.6
+# GRUB Studio Universal — projekt interfejsu 2.3.7
 
 ## Cel
 
@@ -11,8 +11,9 @@ szczegółów na żądanie z [GNOME HIG](https://developer.gnome.org/hig/).
 
 - **Stała powłoka:** pasek górny, nawigacja i pasek stanu są tworzone raz.
   Zmiana karty zastępuje wyłącznie zawartość obszaru roboczego.
-- **Tytuł okna:** standardowy `GtkHeaderBar` dostarcza kontrolki zamykania,
-  minimalizacji i maksymalizacji, zastępując podwójny pasek widoczny w 2.3.4.
+- **Tytuł okna:** dekoracjami i systemowymi przyciskami zarządza GTK/menedżer
+  okien. Osobny prosty pasek narzędzi należy do zawartości aplikacji; nie
+  przesuwamy formularzy i przycisków do własnego `GtkHeaderBar`.
 - **Nawigacja:** sześć sekcji, zawsze widocznych w panelu bocznym. Nie ma
   przycisku do chowania ani ponownego wyświetlania nawigacji. Panel ma
   szerokość 196 px w dużym oknie i 62 px z samymi ikonami poniżej 860 px.
@@ -83,7 +84,7 @@ GitHub Actions uruchamia oba testy przed budową AppImage.
 Osobny test `--ui-resize-report` wymusza rozmiar 720 px poleceniem `xdotool`
 **po otwarciu okna** i sprawdza przejście z 196 do 62 px; dzięki temu test
 obejmuje też menedżery okien niewysyłające powiadomień o zmianie szerokości.
-Wersja 2.3.6 sprawdza obecność osadzonego PNG aplikacji, komplet komunikatów
+Wersja 2.3.7 sprawdza obecność osadzonego PNG aplikacji, komplet komunikatów
 uprawnień w siedmiu językach oraz zachowuje testy kursora i stałego paska akcji Motywów.
 
 **Decyzja projektowa:** usunięto pozorny podgląd motywu. Sam odczyt

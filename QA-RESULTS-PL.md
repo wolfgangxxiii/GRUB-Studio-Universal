@@ -1,4 +1,4 @@
-# GRUB Studio Universal 2.3.6 RC1 — raport jakości / QA
+# GRUB Studio Universal 2.3.7 RC1 — raport jakości / QA
 
 Data: 14 listopada 2026
 
@@ -6,7 +6,7 @@ Data: 14 listopada 2026
 
 - **Sześć stron**: Przegląd, Menu rozruchowe, Motywy, Ustawienia GRUB, Narzędzia, O programie i bezpieczeństwo.
 - Wykryte wpisy GRUB i EFI są połączone w **jednym panelu Menu rozruchowego**. Identyczne nazwy systemów nie są powtarzane; ich źródła są widoczne razem. Kopie zapasowe i dziennik działań pozostają w Narzędziach.
-- Podwójny nagłówek zastąpił natywny `GtkHeaderBar` z systemowymi przyciskami okna i rzeczywistą grafiką programu.
+- W wersji stabilizacyjnej 2.3.7 wycofano niestandardowy układ `GtkHeaderBar`; system steruje dekoracjami okna, a grafika programu i sterowanie znajdują się w prostym pasku wewnątrz aplikacji.
 - Ikony bocznej nawigacji są rysowanymi w aplikacji monochromatycznymi wektorami; nie zmieniają stylu na kolorowe ikony zależnie od dystrybucji.
 - Boczne menu jest **zawsze widoczne**. Usunięto przycisk chowania/ponownego pokazywania panelu. Szerokość **196 px** w szerokim oknie i **62 px** w wąskim; ikony kompaktowe mają podpowiedzi. Panel nie zmienia rozmiaru przy przełączaniu stron.
 - Karta Motywy wykrywa katalogi `theme.txt`, pokazuje zainstalowane motywy i stan aktywności. Ścieżki widać bezpośrednio na liście, a operacje pozostają w nieruchomym dolnym pasku.
@@ -38,7 +38,7 @@ Data: 14 listopada 2026
 | `build-appimage.sh` | Wytworzenie przenośnego AppImage x86_64 |
 | `AppImage --version` i `AppImage --self-test` | Sprawdzenie pliku wynikowego |
 
-Raport dla wersji 2.3.6 opiera się na [GitHub Actions](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions). Testy nie zapisują zmian do bootloadera. Test wyświetlania rzeczywistego kursora KDE/Wayland wymaga komputera użytkownika.
+Raport dla wersji 2.3.7 opiera się na [GitHub Actions](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions). Testy nie zapisują zmian do bootloadera. Test wyświetlania rzeczywistego kursora KDE/Wayland wymaga komputera użytkownika.
 
 ## Zrzuty z rzeczywistej aplikacji
 
@@ -48,7 +48,7 @@ Repozytorium źródłowe nie przechowuje starszych zrzutów ani makiet interfejs
 
 ## Ograniczenia weryfikacji
 
-Wirtualny ekran X11 umożliwia porównanie geometrii kart i podstawowych interakcji, lecz **nie zastępuje testu na rzeczywistym komputerze**. Szczególnie nowe dekoracje `GtkHeaderBar` należy sprawdzić na KDE Plasma / Wayland. Pozostają także do ręcznego sprawdzenia:
+Wirtualny ekran X11 umożliwia porównanie geometrii kart i podstawowych interakcji, lecz **nie zastępuje testu na rzeczywistym komputerze**. Szczególnie wycofanie własnego `GtkHeaderBar` należy zweryfikować na KDE Plasma / Wayland. Pozostają także do ręcznego sprawdzenia:
 
 1. Graficzny monit Polkit z hasłem administratora przy uruchomieniu na KDE/Wayland i GNOME/Wayland.
 2. Odczyt zasobów `/boot` przy uprawnieniach i etykietach SELinux Bazzite.
