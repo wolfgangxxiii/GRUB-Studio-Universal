@@ -1356,7 +1356,7 @@ fn ensure_chrome(window: &gtk::ApplicationWindow, state: &Shared) -> Chrome {
     titlebar.add_css_class("studio-titlebar");
     titlebar.set_show_title_buttons(true);
     titlebar.set_title_widget(Some(&gtk::Label::new(None)));
-    let logo_bytes=glib::Bytes::from_static(include_bytes!("../assets/grub-studio-256.png"));
+    let logo_bytes=glib::Bytes::from_static(include_bytes!("../assets/grub-studio-40.png"));
     let logo_texture=gdk::Texture::from_bytes(&logo_bytes).expect("bundled application icon is PNG");
     let brand_icon=gtk::Picture::for_paintable(&logo_texture);
     brand_icon.set_size_request(32,32);

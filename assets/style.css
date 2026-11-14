@@ -8,6 +8,14 @@
 
 /* Layout: chrome is persistent; only page-scroller's child changes. */
 .studio-titlebar { min-height: 48px; padding: 2px 9px; box-shadow: none; }
+.grub-dark .studio-titlebar windowcontrols button,
+.grub-dark .studio-titlebar windowcontrols button image {
+  color: #c4d0e0;
+}
+.grub-dark .studio-titlebar windowcontrols button:hover {
+  background: #303d50;
+  color: #ffffff;
+}
 .studio-header { padding: 2px 1px; }
 .studio-sidebar { min-width: 196px; padding: 12px 8px 10px; }
 .page-scroller { min-width: 0; }
