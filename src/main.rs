@@ -933,7 +933,8 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     current_name.set_xalign(0.0);
     current_name.set_hexpand(true);
     current_name.set_ellipsize(gtk::pango::EllipsizeMode::End);
-    current_name.set_tooltip_text(Some(if selected.is_empty(){&tr(state,"themes.selectfirst")}else{&selected}));
+    let selected_tip=if selected.is_empty(){tr(state,"themes.selectfirst")}else{selected.clone()};
+    current_name.set_tooltip_text(Some(&selected_tip));
     theme_bar.append(&current_name);
     let current_state_word=if !selected.is_empty() && selected==active {tr(state,"themes.active")}else{tr(state,"themes.detected")};
     let current_status=gtk::Label::new(Some(&current_state_word));
@@ -950,7 +951,8 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
         activate.remove_css_class("suggested-action");
         activate.add_css_class("flat");
     }
-    activate.set_tooltip_text(Some(if writable {&tr(state,"themes.selectfirst")} else {&editing_hint(state)}));
+    let activate_tip=if writable {tr(state,"themes.selectfirst")} else {editing_hint(state)};
+    activate.set_tooltip_text(Some(&activate_tip));
     let w=window.clone();let s=state.clone();
     activate.connect_clicked(move |_| {
         let c=s.borrow().snapshot.config.clone();let selected=s.borrow().selected_theme.clone();
@@ -995,9 +997,10 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
                 current_status.add_css_class(if theme.path==active_theme {"theme-state-active"}else{"theme-state-idle"});
                 let can_apply=can_edit(&s.borrow()) && theme.path!=active_theme;
                 activate.set_sensitive(can_apply);
-                activate.set_tooltip_text(Some(if can_apply {&tr(&s,"themes.use")}
-                    else if !can_edit(&s.borrow()) {&editing_hint(&s)}
-                    else {&tr(&s,"themes.active")}));
+                let tip=if can_apply {tr(&s,"themes.use")}
+                    else if !can_edit(&s.borrow()) {editing_hint(&s)}
+                    else {tr(&s,"themes.active")};
+                activate.set_tooltip_text(Some(&tip));
                 activate.remove_css_class(if can_apply {"flat"}else{"suggested-action"});
                 activate.add_css_class(if can_apply {"suggested-action"}else{"flat"});
             }
