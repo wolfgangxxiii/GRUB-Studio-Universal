@@ -1855,8 +1855,10 @@ fn main() {
                 let third=grid.child_at(0,1).expect("bottom-left metric missing");
                 let fourth=grid.child_at(1,1).expect("bottom-right metric missing");
                 assert!(grid.width()>500,"dashboard grid must occupy the full content width");
-                assert_eq!(first.width(),second.width(),"metric columns differ");
-                assert_eq!(third.width(),fourth.width(),"second metric row columns differ");
+                // GTK distributes an odd number of pixels with a one-pixel
+                // difference between homogeneous columns; this is expected.
+                assert!((first.width()-second.width()).abs()<=1,"metric columns differ");
+                assert!((third.width()-fourth.width()).abs()<=1,"second metric row columns differ");
                 assert_eq!(first.height(),third.height(),"metric rows differ in height");
                 assert!((grid.width() - first.width() - second.width()
                     - grid.column_spacing() as i32).abs()<=4,
