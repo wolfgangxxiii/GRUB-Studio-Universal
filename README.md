@@ -22,7 +22,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.6-rc.1/GRUB-Studio-Universal-v2.3.6-x86_64.AppImage"><strong>⬇️ Download AppImage · v2.3.6 RC1</strong></a>
+  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.7-rc.1/GRUB-Studio-Universal-v2.3.7-x86_64.AppImage"><strong>⬇️ Download AppImage · v2.3.7 RC1</strong></a>
   &nbsp;·&nbsp;
   <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases">All releases</a>
 </p>
@@ -41,7 +41,7 @@
 
 | Obszar | Możliwości |
 | --- | --- |
-| 🎨 **Interfejs** | **Jeden natywny pasek tytułu GTK**, spójne wektorowe ikony niezależne od motywu systemu, zawsze widoczna nawigacja 196/62 px, jasny/ciemny wygląd, siedem języków i kursor zgodny z ustawieniami systemu. |
+| 🎨 **Interfejs** | **Stabilne dekoracje okna obsługiwane przez system**, oddzielny pasek narzędzi w aplikacji, spójne ikony wektorowe, zawsze widoczna nawigacja 196/62 px, jasny/ciemny wygląd, siedem języków i kursor systemowy. |
 | 🐧 **Dystrybucje** | Rozpoznawanie Bazzite, Fedora, Ubuntu/Debian, Arch/CachyOS i openSUSE. |
 | 🖥️ **Systemy** | Wspólny widok informacji GRUB/EFI bez duplikowania systemów o tej samej nazwie; opcjonalny skan `os-prober`. |
 | 🖼️ **Motywy GRUB** | Wykrywanie `theme.txt`, lista z lokalizacją plików, stan aktywności, import oraz przyciski zastosowania/wyłączenia dostępne nawet przy przewijaniu. Bez symulowanego podglądu. |
@@ -52,18 +52,18 @@
 
 ### ⬇️ Pobieranie i uruchamianie
 
-**[Pobierz GRUB Studio Universal 2.3.6 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.6-rc.1/GRUB-Studio-Universal-v2.3.6-x86_64.AppImage)**
+**[Pobierz GRUB Studio Universal 2.3.7 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.7-rc.1/GRUB-Studio-Universal-v2.3.7-x86_64.AppImage)**
 
 AppImage nie wymaga instalacji pakietu ani ingerencji w obraz systemu Bazzite. Po pobraniu nadaj mu uprawnienia wykonywania:
 
 ```bash
-chmod +x GRUB-Studio-Universal-v2.3.6-x86_64.AppImage
-./GRUB-Studio-Universal-v2.3.6-x86_64.AppImage
+chmod +x GRUB-Studio-Universal-v2.3.7-x86_64.AppImage
+./GRUB-Studio-Universal-v2.3.7-x86_64.AppImage
 ```
 
-**[Pobierz sumę SHA-256](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.6-rc.1/GRUB-Studio-Universal-v2.3.6-SHA256.txt)** · [Zobacz wydanie i zmiany](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.3.6-rc.1)
+**[Pobierz sumę SHA-256](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.7-rc.1/GRUB-Studio-Universal-v2.3.7-SHA256.txt)** · [Zobacz wydanie i zmiany](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.3.7-rc.1)
 
-> **Wersja 2.3.6 RC:** Oprócz natywnego `GtkHeaderBar`, jednolitych ikon i połączonego wykrywania GRUB/EFI dodano bezpieczniejsze generowanie `grub.cfg` przez tymczasowy plik i kontrolę składni, zachowanie niezapisanych wpisów przy odświeżaniu, dokładniejszą walidację EFI oraz czytelniejsze pola ustawień. Zapis na komputerze nadal wymaga testu i Polkit/`pkexec`.
+> **Wersja 2.3.7 RC:** Przywrócono prosty układ okna bez własnego `GtkHeaderBar`: system odpowiada za dekoracje okna, a przyciski aplikacji pozostają w jej obszarze. Zachowano stałą nawigację, poprawki bezpieczeństwa zapisu `grub.cfg`, ochronę niezapisanych wpisów EFI oraz wygodniejsze ustawienia z 2.3.6. Zapis na komputerze nadal wymaga testu i Polkit/`pkexec`.
 
 Szczegóły projektu wyglądu i przypisania funkcji do kart: **[docs/DESIGN.md](docs/DESIGN.md)**.
 
@@ -113,7 +113,7 @@ Masz pomysł lub znalazłeś błąd? Otwórz [Issues](https://github.com/wolfgan
 
 | Area | Features |
 | --- | --- |
-| 🎨 **Interface** | **Native GTK HeaderBar**, consistent built-in monochrome vector icons, an always-visible 196/62 px sidebar, system cursor, light/dark modes and seven languages. |
+| 🎨 **Interface** | **System-managed window decorations**, separate in-app toolbar, built-in monochrome vector icons, an always-visible 196/62 px sidebar, system cursor, light/dark modes and seven languages. |
 | 🐧 **Distributions** | Detection of Bazzite, Fedora, Ubuntu/Debian, Arch/CachyOS, and openSUSE. |
 | 🖥️ **Operating systems** | One combined GRUB/EFI discovery view, merging records with the same system name; optional `os-prober` scan. |
 | 🖼️ **GRUB themes** | Installed `theme.txt` discovery, selection, active-theme status, import, and pinned Apply/Disable buttons even in compact windows. The inaccurate simulated preview is gone. |
@@ -124,18 +124,18 @@ Masz pomysł lub znalazłeś błąd? Otwórz [Issues](https://github.com/wolfgan
 
 ### ⬇️ Download & run
 
-**[Download GRUB Studio Universal 2.3.6 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.6-rc.1/GRUB-Studio-Universal-v2.3.6-x86_64.AppImage)**
+**[Download GRUB Studio Universal 2.3.7 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.7-rc.1/GRUB-Studio-Universal-v2.3.7-x86_64.AppImage)**
 
 The portable AppImage does not require installing an application package or modifying the Bazzite base image:
 
 ```bash
-chmod +x GRUB-Studio-Universal-v2.3.6-x86_64.AppImage
-./GRUB-Studio-Universal-v2.3.6-x86_64.AppImage
+chmod +x GRUB-Studio-Universal-v2.3.7-x86_64.AppImage
+./GRUB-Studio-Universal-v2.3.7-x86_64.AppImage
 ```
 
-**[Download SHA-256 checksum](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.6-rc.1/GRUB-Studio-Universal-v2.3.6-SHA256.txt)** · [Release notes](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.3.6-rc.1)
+**[Download SHA-256 checksum](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.7-rc.1/GRUB-Studio-Universal-v2.3.7-SHA256.txt)** · [Release notes](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.3.7-rc.1)
 
-> **Version 2.3.6 RC:** Builds on the native GTK HeaderBar and unified GRUB/EFI discovery with staged and syntax-checked GRUB output, draft preservation during refresh, stricter EFI paths, and friendlier settings. The always-visible navigation remains. Real-hardware testing is still required; administration depends on Polkit/`pkexec`.
+> **Version 2.3.7 RC:** Returns to simpler system-managed window decorations and a separate in-app toolbar to reduce KDE/Wayland titlebar regressions. Keeps the permanent sidebar, combined GRUB/EFI discovery, checked temporary GRUB generation, draft preservation, stricter EFI paths and settings improvements. Real-hardware testing is still required; administration depends on Polkit/`pkexec`.
 
 More about the layout, one-place-per-action design and testing: **[docs/DESIGN.md](docs/DESIGN.md)**.
 

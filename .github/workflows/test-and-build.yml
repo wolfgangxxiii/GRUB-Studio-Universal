@@ -100,24 +100,24 @@ jobs:
         env:
           APPIMAGE_EXTRACT_AND_RUN: "1"
         run: |
-          test -s GRUB-Studio-Universal-v2.3.6-x86_64.AppImage
-          file GRUB-Studio-Universal-v2.3.6-x86_64.AppImage
-          ./GRUB-Studio-Universal-v2.3.6-x86_64.AppImage --version
-          ./GRUB-Studio-Universal-v2.3.6-x86_64.AppImage --self-test
-          sha256sum GRUB-Studio-Universal-v2.3.6-x86_64.AppImage > GRUB-Studio-Universal-v2.3.6-SHA256.txt
+          test -s GRUB-Studio-Universal-v2.3.7-x86_64.AppImage
+          file GRUB-Studio-Universal-v2.3.7-x86_64.AppImage
+          ./GRUB-Studio-Universal-v2.3.7-x86_64.AppImage --version
+          ./GRUB-Studio-Universal-v2.3.7-x86_64.AppImage --self-test
+          sha256sum GRUB-Studio-Universal-v2.3.7-x86_64.AppImage > GRUB-Studio-Universal-v2.3.7-SHA256.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: grub-studio-universal-v2.3.6-release-candidate
+          name: grub-studio-universal-v2.3.7-release-candidate
           path: |
-            GRUB-Studio-Universal-v2.3.6-x86_64.AppImage
-            GRUB-Studio-Universal-v2.3.6-SHA256.txt
+            GRUB-Studio-Universal-v2.3.7-x86_64.AppImage
+            GRUB-Studio-Universal-v2.3.7-SHA256.txt
       - name: Publish downloadable preview release
         if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if gh release view v2.3.6-rc.1 >/dev/null 2>&1; then
-            gh release upload v2.3.6-rc.1 GRUB-Studio-Universal-v2.3.6-x86_64.AppImage GRUB-Studio-Universal-v2.3.6-SHA256.txt --clobber
+          if gh release view v2.3.7-rc.1 >/dev/null 2>&1; then
+            gh release upload v2.3.7-rc.1 GRUB-Studio-Universal-v2.3.7-x86_64.AppImage GRUB-Studio-Universal-v2.3.7-SHA256.txt --clobber
           else
-            gh release create v2.3.6-rc.1 GRUB-Studio-Universal-v2.3.6-x86_64.AppImage GRUB-Studio-Universal-v2.3.6-SHA256.txt --title 'GRUB Studio Universal 2.3.6 — safer GRUB writes and cleaner interface' --notes 'Includes native GTK HeaderBar, permanent responsive navigation and unified EFI/GRUB discovery from 2.3.5. New: stage GRUB output to a temporary file, validate it with grub-script-check before atomic replacement, preserve unsaved EFI/theme drafts across refresh, reject EFI dot segments, localize menu modes and offer resolution presets. Historical GUI screenshots are no longer committed; QA captures remain available as workflow artifacts. Real hardware Polkit, SELinux and boot writes still require testing.' --prerelease --target "$GITHUB_SHA"
+            gh release create v2.3.7-rc.1 GRUB-Studio-Universal-v2.3.7-x86_64.AppImage GRUB-Studio-Universal-v2.3.7-SHA256.txt --title 'GRUB Studio Universal 2.3.7 — stable system window decorations' --notes 'Stabilization release: removes the custom GTK HeaderBar integration and returns controls to a simple in-app toolbar, leaving window decorations to the system. Preserves permanent responsive navigation, combined EFI/GRUB discovery, staged and syntax-checked GRUB output, draft preservation and validation improvements from 2.3.6. Historical GUI screenshots remain out of the source tree. Real-hardware KDE/Wayland, Polkit, SELinux and boot writes still require testing.' --prerelease --target "$GITHUB_SHA"
           fi
