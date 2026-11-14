@@ -22,7 +22,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.2-rc.1/GRUB-Studio-Universal-v2.3.2-x86_64.AppImage"><strong>⬇️ Download AppImage · v2.3.2 RC1</strong></a>
+  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.3-rc.1/GRUB-Studio-Universal-v2.3.3-x86_64.AppImage"><strong>⬇️ Download AppImage · v2.3.3 RC1</strong></a>
   &nbsp;·&nbsp;
   <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases">All releases</a>
 </p>
@@ -45,29 +45,29 @@
 
 | Obszar | Możliwości |
 | --- | --- |
-| 🎨 **Interfejs** | Nawigacja 196/62 px, sześć sekcji, wygląd systemowy/jasny/ciemny, siedem języków i kursor KDE Plasma zgodny z ustawieniami użytkownika. |
+| 🎨 **Interfejs** | Własne logo programu w nagłówku, nawigacja 196/62 px, wygląd systemowy/jasny/ciemny, siedem języków i kursor KDE Plasma zgodny z ustawieniami użytkownika. |
 | 🐧 **Dystrybucje** | Rozpoznawanie Bazzite, Fedora, Ubuntu/Debian, Arch/CachyOS i openSUSE. |
 | 🖥️ **Systemy** | Wykrywanie śladów Windows i innych systemów przez UEFI/EFI; opcjonalny skan `os-prober`. |
 | 🖼️ **Motywy GRUB** | Wykrywanie `theme.txt`, lista z lokalizacją plików, stan aktywności, import oraz przyciski zastosowania/wyłączenia dostępne nawet przy przewijaniu. Bez symulowanego podglądu. |
 | ⚙️ **Ustawienia** | Czas wyświetlania menu, tryb menu, rozdzielczość, motyw i wybrane ustawienia domyślne. |
 | 📋 **Wpisy rozruchowe** | Adaptacyjny edytor z listą i formularzem obok siebie, akcje porządkowania i usuwania w menu kontekstowym, edycja **własnych** pozycji tylko na obsługiwanych instalacjach GRUB. |
 | 🧰 **Narzędzia** | Kopie zapasowe i dziennik działań dostępne razem bez duplikowania pozycji menu. |
-| 🛡️ **Ochrona zmian** | Polkit, kontrola uprawnień, walidacja danych, kopie zapasowe i próba cofnięcia zmian przy błędzie. |
+| 🛡️ **Ochrona zmian** | Polkit, osobny status blokady i trybu tylko do odczytu, wyraźne nieaktywne przyciski, blokowanie pól bez uprawnień, walidacja i kopie bezpieczeństwa. |
 
 ### ⬇️ Pobieranie i uruchamianie
 
-**[Pobierz GRUB Studio Universal 2.3.2 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.2-rc.1/GRUB-Studio-Universal-v2.3.2-x86_64.AppImage)**
+**[Pobierz GRUB Studio Universal 2.3.3 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.3-rc.1/GRUB-Studio-Universal-v2.3.3-x86_64.AppImage)**
 
 AppImage nie wymaga instalacji pakietu ani ingerencji w obraz systemu Bazzite. Po pobraniu nadaj mu uprawnienia wykonywania:
 
 ```bash
-chmod +x GRUB-Studio-Universal-v2.3.2-x86_64.AppImage
-./GRUB-Studio-Universal-v2.3.2-x86_64.AppImage
+chmod +x GRUB-Studio-Universal-v2.3.3-x86_64.AppImage
+./GRUB-Studio-Universal-v2.3.3-x86_64.AppImage
 ```
 
-**[Pobierz sumę SHA-256](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.2-rc.1/GRUB-Studio-Universal-v2.3.2-SHA256.txt)** · [Zobacz wydanie i zmiany](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.3.2-rc.1)
+**[Pobierz sumę SHA-256](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.3-rc.1/GRUB-Studio-Universal-v2.3.3-SHA256.txt)** · [Zobacz wydanie i zmiany](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.3.3-rc.1)
 
-> **Wersja 2.3.2 RC:** Kursor i jego rozmiar odczytywane są z ustawień sesji lub KDE Plasma, można wybrać wygląd systemowy, a akcje motywów znajdują się w stałym dolnym pasku. Testy GUI sprawdzają nawigację, zmianę szerokości i preferencje kursora. Zapis na komputerze nadal wymaga testu i Polkit/`pkexec`.
+> **Wersja 2.3.3 RC:** Logo aplikacji zastępuje tymczasową literę G. Stany blokady i tylko do odczytu są rozróżnione, nieaktywne przyciski są czytelniej oznaczone, a pola ustawień niedostępne bez odpowiednich uprawnień. Zachowano poprawki kursora KDE i stały pasek akcji Motywów. Zapis na komputerze nadal wymaga testu i Polkit/`pkexec`.
 
 Szczegóły projektu wyglądu i przypisania funkcji do kart: **[docs/DESIGN.md](docs/DESIGN.md)**.
 
@@ -124,22 +124,22 @@ Masz pomysł lub znalazłeś błąd? Otwórz [Issues](https://github.com/wolfgan
 | ⚙️ **Settings** | Menu timeout, display style, resolution, theme, and selected default options. |
 | 📋 **Boot entries** | Responsive list-and-form editor for user-created EFI entries, contextual actions and OS discovery on supported conventional GRUB installations. |
 | 🧰 **Tools** | Backups and activity log consolidated into one destination. |
-| 🛡️ **Safety** | Polkit authentication, input validation, backups, and rollback attempts on failure. |
+| 🛡️ **Safety** | Polkit authentication, distinct locked/read-only statuses, visibly disabled controls, guarded settings, input validation, backups, and rollback attempts. |
 
 ### ⬇️ Download & run
 
-**[Download GRUB Studio Universal 2.3.2 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.2-rc.1/GRUB-Studio-Universal-v2.3.2-x86_64.AppImage)**
+**[Download GRUB Studio Universal 2.3.3 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.3-rc.1/GRUB-Studio-Universal-v2.3.3-x86_64.AppImage)**
 
 The portable AppImage does not require installing an application package or modifying the Bazzite base image:
 
 ```bash
-chmod +x GRUB-Studio-Universal-v2.3.2-x86_64.AppImage
-./GRUB-Studio-Universal-v2.3.2-x86_64.AppImage
+chmod +x GRUB-Studio-Universal-v2.3.3-x86_64.AppImage
+./GRUB-Studio-Universal-v2.3.3-x86_64.AppImage
 ```
 
-**[Download SHA-256 checksum](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.2-rc.1/GRUB-Studio-Universal-v2.3.2-SHA256.txt)** · [Release notes](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.3.2-rc.1)
+**[Download SHA-256 checksum](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.3-rc.1/GRUB-Studio-Universal-v2.3.3-SHA256.txt)** · [Release notes](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.3.3-rc.1)
 
-> **Version 2.3.2 RC:** GTK4 now reads the host cursor theme/size from the session or KDE Plasma configuration, offers a Follow System appearance mode and keeps theme actions pinned at the bottom. GUI smoke tests cover six views, window resizing and cursor preferences. Real-hardware testing is still required; administration depends on Polkit/`pkexec`.
+> **Version 2.3.3 RC:** Embedded application artwork replaces the temporary G marker; locked vs read-only statuses are distinct, unavailable actions are visually dimmed, and settings fields are disabled when writes are not authorized. KDE cursor settings and pinned theme controls remain. Real-hardware testing is still required; administration depends on Polkit/`pkexec`.
 
 More about the layout, one-place-per-action design and testing: **[docs/DESIGN.md](docs/DESIGN.md)**.
 

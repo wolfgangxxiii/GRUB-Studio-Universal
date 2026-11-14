@@ -522,7 +522,9 @@ fn page_home(_window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     add_text(&banner, &snapshot.profile.name, "hero-title", true);
     add_text(&banner, &format!("{} · {} · {}",
         snapshot.profile.family.label(), snapshot.profile.bootloader,
-        if state.borrow().authorized && snapshot.profile.writable { tr(state, "status.ready") } else { tr(state, "status.readonly") }),
+        if !state.borrow().authorized {tr(state,"status.locked")}
+        else if snapshot.profile.writable {tr(state,"status.ready")}
+        else {tr(state,"status.readonly")}),
         "muted", true);
     if !snapshot.profile.writable {
         add_text(&banner, &snapshot.profile.reasons.join(" • "), "warning", true);
@@ -592,14 +594,18 @@ fn page_settings(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     let page=page_root(&tr(state,"settings.title"), &tr(state,"settings.sub"));
     let config=state.borrow().snapshot.config.clone();
     let writable=can_edit(&state.borrow());
+    if !writable {add_text(&page,editing_hint(state),"warning",true);}
     let grid=section(&page,&tr(state,"settings.general"));
     let timeout=entry_with_text(config.get("GRUB_TIMEOUT").map(String::as_str).unwrap_or("5"));
+    timeout.set_sensitive(writable);
     form_row(&grid, &tr(state,"settings.timeout"), &timeout);
     let styles=["menu","hidden","countdown"];
     let style=gtk::DropDown::from_strings(&styles);
     style.set_selected(styles.iter().position(|x| Some(*x)==config.get("GRUB_TIMEOUT_STYLE").map(String::as_str)).unwrap_or(0) as u32);
+    style.set_sensitive(writable);
     form_row(&grid,&tr(state,"settings.style"),&style);
     let gfx=entry_with_text(config.get("GRUB_GFXMODE").map(String::as_str).unwrap_or("auto"));
+    gfx.set_sensitive(writable);
     form_row(&grid,&tr(state,"settings.resolution"),&gfx);
     // Theme selection belongs exclusively to the Theme Library. Saving
     // basic settings must preserve GRUB_THEME and never accidentally apply
@@ -609,6 +615,7 @@ fn page_settings(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     let row=action_row();
     let save=button(&tr(state,"settings.save"),true);
     save.set_sensitive(writable);
+    if !writable {save.set_tooltip_text(Some(&editing_hint(state)));}
     let w=window.clone(); let s=state.clone();
     save.connect_clicked(move |_| {
         let timeout=timeout.text().to_string();
@@ -636,6 +643,7 @@ fn page_settings(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     let kernel=section(&page,&tr(state,"menu.kernel"));
     add_text(&kernel,&tr(state,"menu.kernel.note"),"muted",true);
     let kargs=entry_with_text(config.get("GRUB_CMDLINE_LINUX_DEFAULT").map(String::as_str).unwrap_or(""));
+    kargs.set_sensitive(writable && matches!(state.borrow().snapshot.profile.family,core::Family::Arch|core::Family::Debian));
     kernel.append(&kargs);
     let save_kernel=button(&tr(state,"menu.kernel.save"),false);
     save_kernel.set_sensitive(writable && matches!(state.borrow().snapshot.profile.family,core::Family::Arch|core::Family::Debian));
@@ -1083,7 +1091,7 @@ fn page_tools(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     page
 }
 fn page_about(_window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
-    let page=page_root(&tr(state,"about.title"),"Rust Edition · GTK4 · Wayland · 2.3.2");
+    let page=page_root(&tr(state,"about.title"),"Rust Edition · GTK4 · Wayland · 2.3.3");
     for number in 1..=9 {
         let title=tr(state,&format!("about.{number:02}.title"));
         let text=tr(state,&format!("about.{number:02}.text"));
@@ -1218,13 +1226,18 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
         rebuild(&w,&state2);
     });
     header.append(&hamburger);
-    let emblem=gtk::Label::new(Some("G"));
-    emblem.add_css_class("brand-icon");
+    // Embed the actual app artwork: GtkIconTheme may not resolve AppImage
+    // desktop icons until after the window has opened on some distributions.
+    let logo_bytes=glib::Bytes::from_static(include_bytes!("../assets/grub-studio-256.png"));
+    let logo_texture=gdk::Texture::from_bytes(&logo_bytes).expect("bundled application icon is PNG");
+    let emblem=gtk::Picture::for_paintable(&logo_texture);
+    emblem.set_size_request(36,36);
+    emblem.add_css_class("brand-app-icon");
     header.append(&emblem);
     let branding=gtk::Box::new(gtk::Orientation::Vertical,1);
     branding.set_hexpand(true);
     add_text(&branding,"GRUB Studio","brand",false);
-    add_text(&branding,"UNIVERSAL  ·  2.3.2","brand-subtitle",false);
+    add_text(&branding,"UNIVERSAL  ·  2.3.3","brand-subtitle",false);
     header.append(&branding);
     let status=if s.demo {"DEMO".into()}
         else if s.busy {tr(state,"status.scanning")}
@@ -1406,16 +1419,21 @@ mod ui_tests {
     #[test]
     fn appearance_modes_and_ui_hints_are_translated() {
         for (locale,_) in LANGUAGES {
-            for key in ["theme.system","hint.demo","hint.busy","hint.unlock","hint.readonly","hint.select"] {
+            for key in ["theme.system","status.locked","hint.demo","hint.busy","hint.unlock","hint.readonly","hint.select"] {
                 assert_ne!(translate(locale,key),key,"Missing {locale}: {key}");
             }
         }
+    }
+    #[test]
+    fn header_uses_bundled_png_artwork() {
+        let image=include_bytes!("../assets/grub-studio-256.png");
+        assert!(image.starts_with(b"\x89PNG\r\n\x1a\n"),"application artwork must be PNG");
     }
 }
 
 fn main() {
     let args:Vec<String>=std::env::args().skip(1).collect();
-    if args.iter().any(|a| a=="--version") { println!("GRUB Studio Universal 2.3.2 Rust Edition");return; }
+    if args.iter().any(|a| a=="--version") { println!("GRUB Studio Universal 2.3.3 Rust Edition");return; }
     if args.iter().any(|a| a=="--self-test") {
         let locales=serde_json::from_str::<serde_json::Value>(include_str!("../assets/translations.json")).expect("valid locale catalog");
         for (code,_) in LANGUAGES {assert!(locales[*code]["tools.title"].is_string(),"missing tools translation: {code}");}

@@ -1,4 +1,4 @@
-/* GRUB Studio Universal 2.3.2 — task-focused GTK4/Wayland/X11 layout.
+/* GRUB Studio Universal 2.3.3 — task-focused GTK4/Wayland/X11 layout.
  * 196px / 62px responsive navigation, typography hierarchy, restrained colors, one
  * primary action per context. Both palettes meet comfortable text contrast.
  */
@@ -17,11 +17,7 @@
 .theme-toolbar-actions .action-button { min-height: 34px; }
 .brand { font-weight: 800; font-size: 15px; letter-spacing: .2px; }
 .brand-subtitle { font-weight: 650; font-size: 10px; letter-spacing: 1.4px; }
-.brand-icon {
-  min-width: 32px; min-height: 32px;
-  border-radius: 10px; font-weight: 800; font-size: 17px;
-  color: #f9fbfe; background: #3778c9;
-}
+.brand-app-icon { min-width: 36px; min-height: 36px; }
 .status-badge {
   padding: 6px 10px; border-radius: 14px;
   font-size: 10px; font-weight: 700;
@@ -72,6 +68,11 @@
   min-height: 31px; padding: 6px 13px;
   border-radius: 7px; font-size: 12px; font-weight: 650;
 }
+/* Disabled writes must not resemble an available primary action. */
+.action-button:disabled, .icon-button:disabled,
+.popup-action:disabled, .prefs-trigger:disabled { opacity: .48; }
+.grub-dark entry:disabled, .grub-dark dropdown:disabled,
+.grub-light entry:disabled, .grub-light dropdown:disabled { opacity: .62; }
 .stats-grid { margin-top: 2px; }
 .metric-card { min-height: 60px; padding: 12px 15px; }
 .metric-label { font-size: 10px; font-weight: 750; letter-spacing: .7px; }

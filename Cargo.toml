@@ -1,6 +1,6 @@
 [package]
 name = "grub-studio-universal"
-version = "2.3.2"
+version = "2.3.3"
 edition = "2021"
 license = "GPL-3.0-or-later"
 description = "Native Wayland GRUB configuration studio with a privilege-separated helper"

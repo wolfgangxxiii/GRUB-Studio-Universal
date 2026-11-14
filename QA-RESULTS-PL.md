@@ -1,4 +1,4 @@
-# GRUB Studio Universal 2.3.2 RC1 — raport jakości / QA
+# GRUB Studio Universal 2.3.3 RC1 — raport jakości / QA
 
 Data: 14 listopada 2026
 
@@ -11,13 +11,15 @@ Data: 14 listopada 2026
 - Lista motywów mieści kilka wierszy i ma przewijanie dla większych kolekcji.
 - Edytor EFI ma układ lista/formularz w dwóch kolumnach, które układają się pionowo na wąskim ekranie. Operacje kontekstowe są schowane w menu.
 - Ustawienia wyglądu (systemowy/jasny/ciemny) i języka są połączone w jednym menu. Kursor GTK4 używa ustawień sesji lub KDE Plasma i nie dostaje własnego motywu z AppImage.
+- Tymczasową literę G w nagłówku zastąpiła rzeczywista grafika aplikacji osadzona bezpośrednio w binarium; przyciski i pola niedostępne bez uprawnień są wyszarzone.
+- Przed autoryzacją program pokazuje stan „Zablokowany” zamiast mylącego „Tylko odczyt”.
 - Usunięto pozorny podgląd menu GRUB i odczytywanie tła `desktop-image`; wcześniej pokazywał symulację niezależną od faktycznego `theme.txt`.
 
 ## Kontrole automatyczne
 
 | Kontrola | Oczekiwany wynik / sposób sprawdzenia |
 | --- | --- |
-| `cargo test --all-targets` | Testy biblioteki + konfiguracji kursora KDE, pierwszeństwa zmiennych środowiskowych i tłumaczeń w siedmiu językach |
+| `cargo test --all-targets` | Testy biblioteki + konfiguracji kursora KDE, obecności PNG programu i tłumaczeń w siedmiu językach |
 | `cargo build --release --bins` | Kompilacja aplikacji GTK4 i modułu uprzywilejowanego |
 | `--ui-smoke` w `xvfb-run` | 6 stron, nawigacja **62 px** i dolny pasek działań wyłącznie na karcie Motywy; test motywu/rozmiaru kursora |
 | `--ui-smoke-wide` w `xvfb-run` | 6 stron, nawigacja **196 px** w oknie 1100 × 540 px |
@@ -26,7 +28,7 @@ Data: 14 listopada 2026
 | `build-appimage.sh` | Wytworzenie przenośnego AppImage x86_64 |
 | `AppImage --version` i `AppImage --self-test` | Sprawdzenie pliku wynikowego |
 
-Raport dla wersji 2.3.2 opiera się na [GitHub Actions](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions). Testy nie zapisują zmian do bootloadera. Test wyświetlania rzeczywistego kursora KDE/Wayland wymaga komputera użytkownika.
+Raport dla wersji 2.3.3 opiera się na [GitHub Actions](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions). Testy nie zapisują zmian do bootloadera. Test wyświetlania rzeczywistego kursora KDE/Wayland wymaga komputera użytkownika.
 
 ## Zrzuty z rzeczywistej aplikacji
 

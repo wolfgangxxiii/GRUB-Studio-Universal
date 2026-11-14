@@ -1,4 +1,4 @@
-# GRUB Studio Universal — projekt interfejsu 2.3.2
+# GRUB Studio Universal — projekt interfejsu 2.3.3
 
 ## Cel
 
@@ -16,12 +16,16 @@ szczegółów na żądanie z [GNOME HIG](https://developer.gnome.org/hig/).
   Długie nazwy nie zmieniają szerokości panelu; zwinięte ikony mają podpowiedzi.
 - **Pasek górny:** identyfikacja aplikacji, stan uprawnień, odblokowanie przez
   Polkit, globalne odświeżenie i jedno menu preferencji (kolorystyka oraz język).
-  Odblokowanie zastępuje powtarzający jego znaczenie znacznik blokady.
+  Odblokowanie zastępuje powtarzający jego znaczenie znacznik blokady. Grafika
+  programu jest osadzona w binarium, więc działa również w AppImage bez motywu ikon.
 - **Obszar treści:** nagłówek karty, zwięzły opis i jeden poziom istotnych
   paneli. Zadania drugorzędne są składane w rozwijane sekcje.
 - **Kolory i kursor systemowy:** tryby systemowy/jasny/ciemny; motyw i wielkość
   kursora z sesji (`XCURSOR_*`) lub KDE Plasma (`kcminputrc`). Nie dołączamy
   do AppImage własnego pakietu kursorów.
+- **Stany operacji:** brak autoryzacji jest odrębny od trybu tylko do odczytu.
+  Zablokowane przyciski są wyszarzone, a niedostępne pola konfiguracji nie
+  sugerują możliwości zapisania zmian.
 
 ## Jedno miejsce dla każdej czynności
 
@@ -68,8 +72,8 @@ GitHub Actions uruchamia oba testy przed budową AppImage.
 Osobny test `--ui-resize-report` wymusza rozmiar 720 px poleceniem `xdotool`
 **po otwarciu okna** i sprawdza przejście z 196 do 62 px; dzięki temu test
 obejmuje też menedżery okien niewysyłające powiadomień o zmianie szerokości.
-Wersja 2.3.2 zawiera dodatkowe testy priorytetu konfiguracji kursora, uzupełnione
-komunikaty w siedmiu językach oraz asercję stałego paska akcji wyłącznie na karcie Motywy.
+Wersja 2.3.3 sprawdza obecność osadzonego PNG aplikacji, komplet komunikatów
+uprawnień w siedmiu językach oraz zachowuje testy kursora i stałego paska akcji Motywów.
 
 **Decyzja projektowa:** usunięto pozorny podgląd motywu. Sam odczyt
 `desktop-image` nie wystarcza, aby wiarygodnie pokazać układ, czcionki,

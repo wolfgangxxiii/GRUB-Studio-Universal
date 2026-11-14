@@ -100,24 +100,24 @@ jobs:
         env:
           APPIMAGE_EXTRACT_AND_RUN: "1"
         run: |
-          test -s GRUB-Studio-Universal-v2.3.2-x86_64.AppImage
-          file GRUB-Studio-Universal-v2.3.2-x86_64.AppImage
-          ./GRUB-Studio-Universal-v2.3.2-x86_64.AppImage --version
-          ./GRUB-Studio-Universal-v2.3.2-x86_64.AppImage --self-test
-          sha256sum GRUB-Studio-Universal-v2.3.2-x86_64.AppImage > GRUB-Studio-Universal-v2.3.2-SHA256.txt
+          test -s GRUB-Studio-Universal-v2.3.3-x86_64.AppImage
+          file GRUB-Studio-Universal-v2.3.3-x86_64.AppImage
+          ./GRUB-Studio-Universal-v2.3.3-x86_64.AppImage --version
+          ./GRUB-Studio-Universal-v2.3.3-x86_64.AppImage --self-test
+          sha256sum GRUB-Studio-Universal-v2.3.3-x86_64.AppImage > GRUB-Studio-Universal-v2.3.3-SHA256.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: grub-studio-universal-v2.3.2-release-candidate
+          name: grub-studio-universal-v2.3.3-release-candidate
           path: |
-            GRUB-Studio-Universal-v2.3.2-x86_64.AppImage
-            GRUB-Studio-Universal-v2.3.2-SHA256.txt
+            GRUB-Studio-Universal-v2.3.3-x86_64.AppImage
+            GRUB-Studio-Universal-v2.3.3-SHA256.txt
       - name: Publish downloadable preview release
         if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if gh release view v2.3.2-rc.1 >/dev/null 2>&1; then
-            gh release upload v2.3.2-rc.1 GRUB-Studio-Universal-v2.3.2-x86_64.AppImage GRUB-Studio-Universal-v2.3.2-SHA256.txt --clobber
+          if gh release view v2.3.3-rc.1 >/dev/null 2>&1; then
+            gh release upload v2.3.3-rc.1 GRUB-Studio-Universal-v2.3.3-x86_64.AppImage GRUB-Studio-Universal-v2.3.3-SHA256.txt --clobber
           else
-            gh release create v2.3.2-rc.1 GRUB-Studio-Universal-v2.3.2-x86_64.AppImage GRUB-Studio-Universal-v2.3.2-SHA256.txt --title 'GRUB Studio Universal 2.3.2 — cursor and GUI refinements' --notes 'Respects KDE Plasma cursor theme and size via session settings, enables Follow System appearance, and keeps theme Apply/Disable actions visible at compact sizes. Adds cursor precedence tests, translated disabled-button hints and GTK4 smoke coverage. Run as a normal user; Polkit prompts for supported GRUB changes. Please verify cursor behavior on real KDE/Wayland desktops.' --prerelease --target "$GITHUB_SHA"
+            gh release create v2.3.3-rc.1 GRUB-Studio-Universal-v2.3.3-x86_64.AppImage GRUB-Studio-Universal-v2.3.3-SHA256.txt --title 'GRUB Studio Universal 2.3.3 — application icon and clearer controls' --notes 'Replaces the temporary G header mark with embedded GRUB Studio artwork, visibly dims unavailable actions, differentiates locked from read-only status, and disables editing in unsupported/locked settings. Preserves the KDE cursor, compact theme toolbar and Polkit protections from v2.3.2. Run as a normal user; verify real changes on your distribution.' --prerelease --target "$GITHUB_SHA"
           fi
