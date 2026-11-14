@@ -1,4 +1,4 @@
-# GRUB Studio Universal — projekt interfejsu 2.3.1
+# GRUB Studio Universal — projekt interfejsu 2.3.2
 
 ## Cel
 
@@ -19,8 +19,9 @@ szczegółów na żądanie z [GNOME HIG](https://developer.gnome.org/hig/).
   Odblokowanie zastępuje powtarzający jego znaczenie znacznik blokady.
 - **Obszar treści:** nagłówek karty, zwięzły opis i jeden poziom istotnych
   paneli. Zadania drugorzędne są składane w rozwijane sekcje.
-- **Ciemny i jasny motyw:** wspólny akcent niebieski, spokojne tło oraz wyraźny
-  kontrast tekstu i pól formularzy.
+- **Kolory i kursor systemowy:** tryby systemowy/jasny/ciemny; motyw i wielkość
+  kursora z sesji (`XCURSOR_*`) lub KDE Plasma (`kcminputrc`). Nie dołączamy
+  do AppImage własnego pakietu kursorów.
 
 ## Jedno miejsce dla każdej czynności
 
@@ -28,7 +29,7 @@ szczegółów na żądanie z [GNOME HIG](https://developer.gnome.org/hig/).
 | --- | --- |
 | Pulpit | Status, aktywny motyw, liczba motywów i systemów, profil rozruchu. Bez powtórzonych przycisków nawigacji. |
 | Menu GRUB | Własne wpisy EFI: dodaj, edytuj, zapisz. Przesunięcie, ukrycie i usunięcie dostępne są w kontekstowym menu zaznaczonego wpisu. W osobnym menu: wybór domyślnego wpisu i odrzucenie zmian. Rozwijane informacje o wpisach wygenerowanych i wykrytych systemach; opcjonalny `os-prober`. |
-| Motywy | Wykrywanie zainstalowanych plików `theme.txt`, lista motywów ze stanem aktywności, pełna ścieżka zaznaczonego pliku, import, zastosowanie i wyłączenie motywu. Brak symulowanego menu GRUB. |
+| Motywy | Wykrywanie zainstalowanych plików `theme.txt`, lista ze ścieżkami plików, import i stały dolny pasek „Zastosuj / Bez motywu”, który nie znika przy przewijaniu. Brak symulowanego menu GRUB. |
 | Ustawienia | Czas menu, tryb, rozdzielczość, widoczność i obsługiwane parametry jądra. Bez drugiego selektora motywów. |
 | Narzędzia | Tworzenie/przywracanie kopii oraz dziennik w oddzielnych rozwijanych panelach. |
 | Informacje | Dokumentacja obsługi i bezpieczeństwa. |
@@ -44,8 +45,8 @@ bez uprawnień. Funkcje zapisu GRUB zachowują walidację i kopię bezpieczeńst
 - Edytor wpisów zawija przyciski do kolejnego wiersza.
 - Na szerokim ekranie edytor ma dwie kolumny (lista wpisów i formularz);
   przy mniejszej szerokości kolumny ustawiają się jedna pod drugą.
-- Biblioteka motywów jest jednokolumnowa: lista na całej szerokości,
-  poniżej szczegóły wybranego pliku i działania, również na małym ekranie.
+- Biblioteka motywów jest jednokolumnowa: ścieżki są widoczne na liście,
+  wybrany motyw i działania są w nieruchomym dolnym pasku, również przy 700 × 540 px.
 - Preferencje wyglądu i języka nie zabierają osobnego miejsca w górnym pasku.
 - Działania na zaznaczonym wpisie są dostępne w menu kontekstowym, a nie w sześciu równych przyciskach.
 - Elementy nawigacji nie zwiększają szerokości pod wpływem tekstu innej karty.
@@ -67,8 +68,8 @@ GitHub Actions uruchamia oba testy przed budową AppImage.
 Osobny test `--ui-resize-report` wymusza rozmiar 720 px poleceniem `xdotool`
 **po otwarciu okna** i sprawdza przejście z 196 do 62 px; dzięki temu test
 obejmuje też menedżery okien niewysyłające powiadomień o zmianie szerokości.
-Wersja 2.3.1 zawiera dodatkowy test kompletności kluczowych komunikatów we wszystkich
-siedmiu językach oraz zrzut wąskiego układu menu z polskimi etykietami.
+Wersja 2.3.2 zawiera dodatkowe testy priorytetu konfiguracji kursora, uzupełnione
+komunikaty w siedmiu językach oraz asercję stałego paska akcji wyłącznie na karcie Motywy.
 
 **Decyzja projektowa:** usunięto pozorny podgląd motywu. Sam odczyt
 `desktop-image` nie wystarcza, aby wiarygodnie pokazać układ, czcionki,

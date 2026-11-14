@@ -47,6 +47,7 @@ struct Chrome {
     header: gtk::Box,
     sidebar: gtk::Box,
     scroller: gtk::ScrolledWindow,
+    theme_actions: gtk::Box,
     footer: gtk::Box,
 }
 type Shared = Rc<RefCell<StudioState>>;
@@ -74,7 +75,7 @@ fn load_prefs() -> (String, String) {
     let locale = std::env::var("LC_ALL").or_else(|_| std::env::var("LANG")).unwrap_or_else(|_| "en".into());
     let prefix = locale.split(|c| c == '_' || c == '-' || c == '.').next().unwrap_or("en");
     let default_lang = if locale.starts_with("pt") { "pt_BR" } else if LANGUAGES.iter().any(|(id, _)| *id == prefix) { prefix } else { "en" };
-    let mut result = ("dark".to_string(), default_lang.to_string());
+    let mut result = ("system".to_string(), default_lang.to_string());
     let path = preferences_path();
     if let Ok(meta) = fs::symlink_metadata(&path) {
         if !meta.file_type().is_symlink() && meta.len() < 8192 {
@@ -258,6 +259,82 @@ fn initial_state(demo: bool) -> StudioState {
 }
 fn can_edit(s: &StudioState) -> bool {
     s.authorized && !s.demo && s.snapshot.profile.writable && !s.busy
+}
+fn editing_hint(state: &Shared) -> String {
+    let s=state.borrow();
+    if s.demo {return translate(&s.language,"hint.demo");}
+    if s.busy {return translate(&s.language,"hint.busy");}
+    if !s.authorized {return translate(&s.language,"hint.unlock");}
+    if !s.snapshot.profile.writable {
+        return s.snapshot.profile.reasons.first().cloned()
+            .unwrap_or_else(||translate(&s.language,"hint.readonly"));
+    }
+    translate(&s.language,"hint.select")
+}
+fn kconfig_value(content: &str, section: &str, key: &str) -> Option<String> {
+    let mut current="";
+    for raw in content.lines() {
+        let line=raw.trim();
+        if line.starts_with('#') || line.starts_with(';') || line.is_empty() {continue;}
+        if line.starts_with('[') && line.ends_with(']') {
+            current=&line[1..line.len()-1];continue;
+        }
+        if current!=section {continue;}
+        if let Some((name,value))=line.split_once('=') {
+            if name.trim()==key {return Some(value.trim().to_owned());}
+        }
+    }
+    None
+}
+fn desktop_config_path(name: &str) -> PathBuf {
+    let fallback=std::env::var_os("HOME").map(PathBuf::from).unwrap_or_else(||PathBuf::from("/dev/null"));
+    std::env::var_os("XDG_CONFIG_HOME").map(PathBuf::from)
+        .unwrap_or_else(||fallback.join(".config")).join(name)
+}
+fn cursor_choice(kde_config: &str, env_theme: Option<&str>, env_size: Option<&str>) -> (Option<String>, Option<i32>) {
+    let theme=env_theme.filter(|name| !name.trim().is_empty()).map(str::to_owned)
+        .or_else(||kconfig_value(kde_config,"Mouse","cursorTheme"))
+        .filter(|name| !name.is_empty() && name.len()<=128 && name.bytes().all(|b|
+            b.is_ascii_alphanumeric() || matches!(b,b'-'|b'_'|b'.')));
+    let size=env_size.map(str::to_owned)
+        .or_else(||kconfig_value(kde_config,"Mouse","cursorSize"))
+        .and_then(|value|value.parse::<i32>().ok()).filter(|size|(8..=256).contains(size));
+    (theme,size)
+}
+fn apply_desktop_cursor() {
+    // linuxdeploy brings GTK and libXcursor, but the theme itself belongs to
+    // the host KDE session. Honor the session environment first and Plasma's
+    // kcminputrc second. Never ship or force a cursor theme in the AppImage.
+    let kde=fs::read_to_string(desktop_config_path("kcminputrc")).unwrap_or_default();
+    let theme=std::env::var("XCURSOR_THEME").ok();
+    let size=std::env::var("XCURSOR_SIZE").ok();
+    let (theme,size)=cursor_choice(&kde,theme.as_deref(),size.as_deref());
+    if let Some(settings)=gtk::Settings::default() {
+        if let Some(theme)=theme {settings.set_property("gtk-cursor-theme-name",theme);}
+        if let Some(size)=size {settings.set_property("gtk-cursor-theme-size",size);}
+    }
+}
+fn system_prefers_dark() -> bool {
+    if let Some(settings)=gtk::Settings::default() {
+        let theme: String=settings.property("gtk-theme-name");
+        if theme.to_ascii_lowercase().contains("dark") {return true;}
+        if settings.property::<bool>("gtk-application-prefer-dark-theme") {return true;}
+    }
+    // KDE doesn't always bridge its color scheme into GTK settings.
+    let kde=fs::read_to_string(desktop_config_path("kdeglobals")).unwrap_or_default();
+    if let Some(name)=kconfig_value(&kde,"General","ColorScheme") {
+        let lower=name.to_ascii_lowercase();
+        if lower.contains("dark") || lower.contains("breeze-dark") {return true;}
+        if lower.contains("light") || lower=="breeze" {return false;}
+    }
+    if let Some(rgb)=kconfig_value(&kde,"Colors:Window","BackgroundNormal") {
+        let items=rgb.split(',').map(|n|n.trim().parse::<u8>()).collect::<Result<Vec<_>,_>>();
+        if let Ok(items)=items {if items.len()==3 {
+            let brightness=items[0] as u32*299+items[1] as u32*587+items[2] as u32*114;
+            return brightness<128_000;
+        }}
+    }
+    false
 }
 fn show_message(window: &gtk::ApplicationWindow, title: &str, body: &str, error: bool) {
     let dialog = gtk::MessageDialog::builder()
@@ -847,34 +924,25 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     list_header.append(&install);
     page.append(&list);
 
-    // The previous simulated GRUB screen was not a renderer of theme.txt and
-    // misled users into expecting an accurate preview. Show only verifiable
-    // metadata and real actions; no simulated menu or wallpaper thumbnails.
-    let details_card=card();
-    details_card.add_css_class("theme-details");
-    add_text(&details_card,&tr(state,"themes.details"),"section-heading",true);
+    // Keep primary actions fixed to the bottom of the window. At 700x540
+    // the theme list may scroll, but Apply and Disable never scroll away.
+    let theme_bar=state.borrow().chrome.as_ref().expect("persistent chrome").theme_actions.clone();
     let selected_name=themes.iter().find(|t|t.path==selected).map(|t|t.name.as_str()).unwrap_or("—");
     let current_name=gtk::Label::new(Some(selected_name));
-    current_name.add_css_class("theme-selected-name");
+    current_name.add_css_class("theme-toolbar-name");
     current_name.set_xalign(0.0);
     current_name.set_hexpand(true);
     current_name.set_ellipsize(gtk::pango::EllipsizeMode::End);
+    current_name.set_tooltip_text(Some(if selected.is_empty(){&tr(state,"themes.selectfirst")}else{&selected}));
+    theme_bar.append(&current_name);
     let current_state_word=if !selected.is_empty() && selected==active {tr(state,"themes.active")}else{tr(state,"themes.detected")};
     let current_status=gtk::Label::new(Some(&current_state_word));
     current_status.set_visible(!selected.is_empty());
     current_status.add_css_class("theme-selected-status");
     current_status.add_css_class(if selected==active && !selected.is_empty() {"theme-state-active"}else{"theme-state-idle"});
-    let selection_heading=gtk::Box::new(gtk::Orientation::Horizontal,8);
-    selection_heading.append(&current_name);
-    selection_heading.append(&current_status);
-    details_card.append(&selection_heading);
-    let selected_info=gtk::Label::new(Some(if selected.is_empty() {"—"}else{&selected}));
-    selected_info.add_css_class("muted");
-    selected_info.add_css_class("theme-file-location");
-    selected_info.set_xalign(0.0);selected_info.set_wrap(true);
-    selected_info.set_selectable(true);
-    details_card.append(&selected_info);
+    theme_bar.append(&current_status);
     let controls=action_row();
+    controls.add_css_class("theme-toolbar-actions");
     let activate=button(&tr(state,"themes.use"),true);
     let can_apply_theme=writable && themes.iter().any(|t|t.path==selected) && selected!=active;
     activate.set_sensitive(can_apply_theme);
@@ -882,11 +950,12 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
         activate.remove_css_class("suggested-action");
         activate.add_css_class("flat");
     }
+    activate.set_tooltip_text(Some(if writable {&tr(state,"themes.selectfirst")} else {&editing_hint(state)}));
     let w=window.clone();let s=state.clone();
     activate.connect_clicked(move |_| {
         let c=s.borrow().snapshot.config.clone();let selected=s.borrow().selected_theme.clone();
         if selected.is_empty() || !core::valid_theme_path(&selected){
-            show_message(&w,"GRUB Studio","Select an installed theme",true);return;
+            show_message(&w,"GRUB Studio",&tr(&s,"themes.selectfirst"),true);return;
         }
         guarded_submit(&w,&s,vec!["--apply".into(),
             c.get("GRUB_TIMEOUT").cloned().unwrap_or_else(||"5".into()),
@@ -896,6 +965,7 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     controls.append(&activate);
     let disable=button(&tr(state,"themes.disable"),false);
     disable.set_sensitive(writable && !active.is_empty());
+    if !writable {disable.set_tooltip_text(Some(&editing_hint(state)));}
     let w=window.clone();let s=state.clone();
     disable.connect_clicked(move |_| {
         let c=s.borrow().snapshot.config.clone();
@@ -905,8 +975,8 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
             c.get("GRUB_GFXMODE").cloned().unwrap_or_else(||"auto".into()),String::new()],tr(&s,"themes.disable"));
     });
     controls.append(&disable);
-    details_card.append(&controls);
-    page.append(&details_card);
+    theme_bar.append(&controls);
+    theme_bar.set_visible(true);
     let s=state.clone();
     let themes_for_selection=themes.clone();
     let active_theme=active.clone();
@@ -916,8 +986,8 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
         if let Some(row)=row {
             if let Some(theme)=themes_for_selection.get(row.index() as usize) {
                 s.borrow_mut().selected_theme=theme.path.clone();
-                selected_info.set_text(&theme.path);
                 current_name.set_text(&theme.name);
+                current_name.set_tooltip_text(Some(&theme.path));
                 current_status.set_visible(true);
                 current_status.set_text(if theme.path==active_theme {&active_word}else{&detected_word});
                 current_status.remove_css_class("theme-state-active");
@@ -925,6 +995,9 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
                 current_status.add_css_class(if theme.path==active_theme {"theme-state-active"}else{"theme-state-idle"});
                 let can_apply=can_edit(&s.borrow()) && theme.path!=active_theme;
                 activate.set_sensitive(can_apply);
+                activate.set_tooltip_text(Some(if can_apply {&tr(&s,"themes.use")}
+                    else if !can_edit(&s.borrow()) {&editing_hint(&s)}
+                    else {&tr(&s,"themes.active")}));
                 activate.remove_css_class(if can_apply {"flat"}else{"suggested-action"});
                 activate.add_css_class(if can_apply {"suggested-action"}else{"flat"});
             }
@@ -1007,7 +1080,7 @@ fn page_tools(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     page
 }
 fn page_about(_window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
-    let page=page_root(&tr(state,"about.title"),"Rust Edition · GTK4 · Wayland · 2.3.1");
+    let page=page_root(&tr(state,"about.title"),"Rust Edition · GTK4 · Wayland · 2.3.2");
     for number in 1..=9 {
         let title=tr(state,&format!("about.{number:02}.title"));
         let text=tr(state,&format!("about.{number:02}.text"));
@@ -1109,10 +1182,14 @@ fn ensure_chrome(window: &gtk::ApplicationWindow, state: &Shared) -> Chrome {
     body.append(&scroller);
     root.append(&body);
 
+    let theme_actions=gtk::Box::new(gtk::Orientation::Horizontal,10);
+    theme_actions.add_css_class("theme-action-bar");
+    theme_actions.set_visible(false);
+    root.append(&theme_actions);
     let footer=gtk::Box::new(gtk::Orientation::Horizontal,8);
     footer.add_css_class("studio-footer");
     root.append(&footer);
-    let chrome=Chrome {root,header,sidebar,scroller,footer};
+    let chrome=Chrome {root,header,sidebar,scroller,theme_actions,footer};
     window.set_child(Some(&chrome.root));
     state.borrow_mut().chrome=Some(chrome.clone());
     chrome
@@ -1122,7 +1199,10 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
     let chrome=ensure_chrome(window,state);
     chrome.root.remove_css_class("grub-light");
     chrome.root.remove_css_class("grub-dark");
-    chrome.root.add_css_class(if s.appearance=="light" { "grub-light" } else { "grub-dark" });
+    let use_dark=match s.appearance.as_str() {
+        "light"=>false,"dark"=>true,_=>system_prefers_dark(),
+    };
+    chrome.root.add_css_class(if use_dark { "grub-dark" } else { "grub-light" });
 
     clear_box(&chrome.header);
     let header=&chrome.header;
@@ -1141,7 +1221,7 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
     let branding=gtk::Box::new(gtk::Orientation::Vertical,1);
     branding.set_hexpand(true);
     add_text(&branding,"GRUB Studio","brand",false);
-    add_text(&branding,"UNIVERSAL  ·  2.3.1","brand-subtitle",false);
+    add_text(&branding,"UNIVERSAL  ·  2.3.2","brand-subtitle",false);
     header.append(&branding);
     let status=if s.demo {"DEMO".into()}
         else if s.busy {tr(state,"status.scanning")}
@@ -1173,12 +1253,18 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
     // Appearance and language are preferences, not global editing actions.
     // Put them in one compact menu so the header fits 620px / HiDPI windows.
     let settings_content=popup_contents();
-    let appearance=button(&format!("{}: {}",tr(state,"theme.label"),
-        if s.appearance=="light" {tr(state,"theme.light")}else{tr(state,"theme.dark")}),false);
+    add_text(&settings_content,&tr(state,"theme.label"),"section-heading",false);
+    let modes=[tr(state,"theme.system"),tr(state,"theme.light"),tr(state,"theme.dark")];
+    let mode_refs=modes.iter().map(String::as_str).collect::<Vec<_>>();
+    let appearance=gtk::DropDown::from_strings(&mode_refs);
+    appearance.add_css_class("lang-select");
+    appearance.set_selected(match s.appearance.as_str(){"light"=>1,"dark"=>2,_=>0});
     let w=window.clone();let state2=state.clone();
-    appearance.connect_clicked(move |_| {
+    appearance.connect_selected_notify(move |combo| {
+        let mode=match combo.selected(){1=>"light",2=>"dark",_=>"system"};
         let mut s=state2.borrow_mut();
-        s.appearance=if s.appearance=="light" {"dark"}else{"light"}.into();
+        if s.appearance==mode {return;}
+        s.appearance=mode.into();
         save_prefs(&s);drop(s);rebuild(&w,&state2);
     });
     settings_content.append(&appearance);
@@ -1274,6 +1360,8 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
     apply_sidebar_density(nav,window_width<860);
     // The outer window and its fixed-width navigation are persistent.
     // Only the active page is replaced, so tabs cannot resize the menu.
+    clear_box(&chrome.theme_actions);
+    chrome.theme_actions.set_visible(false);
     let page=match s.active.as_str() {
         "menu"=>page_menu(window,state),
         "themes"=>page_themes(window,state),
@@ -1292,9 +1380,39 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
     footer.append(&gtk::Label::new(Some(if s.demo {"DEMO"}else{"GTK4  ·  Wayland/X11"})));
 }
 
+#[cfg(test)]
+mod ui_tests {
+    use super::*;
+
+    #[test]
+    fn kde_cursor_is_read_from_mouse_section_only() {
+        let config="[General]\ncursorTheme=wrong\n[Mouse]\ncursorTheme=Breeze_Snow\ncursorSize=32\n[Other]\ncursorTheme=other\n";
+        assert_eq!(cursor_choice(config,None,None),(Some("Breeze_Snow".into()),Some(32)));
+    }
+    #[test]
+    fn env_cursor_settings_override_kde_settings() {
+        let config="[Mouse]\ncursorTheme=Breeze\ncursorSize=24\n";
+        assert_eq!(cursor_choice(config,Some("Bibata-Modern-Ice"),Some("48")),
+            (Some("Bibata-Modern-Ice".into()),Some(48)));
+    }
+    #[test]
+    fn unsafe_cursor_themes_and_sizes_are_ignored() {
+        let config="[Mouse]\ncursorTheme=../../elsewhere\ncursorSize=100000\n";
+        assert_eq!(cursor_choice(config,None,None),(None,None));
+    }
+    #[test]
+    fn appearance_modes_and_ui_hints_are_translated() {
+        for (locale,_) in LANGUAGES {
+            for key in ["theme.system","hint.demo","hint.busy","hint.unlock","hint.readonly","hint.select"] {
+                assert_ne!(translate(locale,key),key,"Missing {locale}: {key}");
+            }
+        }
+    }
+}
+
 fn main() {
     let args:Vec<String>=std::env::args().skip(1).collect();
-    if args.iter().any(|a| a=="--version") { println!("GRUB Studio Universal 2.3.1 Rust Edition");return; }
+    if args.iter().any(|a| a=="--version") { println!("GRUB Studio Universal 2.3.2 Rust Edition");return; }
     if args.iter().any(|a| a=="--self-test") {
         let locales=serde_json::from_str::<serde_json::Value>(include_str!("../assets/translations.json")).expect("valid locale catalog");
         for (code,_) in LANGUAGES {assert!(locales[*code]["tools.title"].is_string(),"missing tools translation: {code}");}
@@ -1318,13 +1436,20 @@ fn main() {
         .filter(|value|["home","menu","themes","settings","tools","about"].contains(value))
         .map(str::to_owned);
     let preview_appearance=args.iter().find_map(|a|a.strip_prefix("--appearance="))
-        .filter(|v| matches!(*v,"light"|"dark")).map(str::to_owned);
+        .filter(|v| matches!(*v,"light"|"dark"|"system")).map(str::to_owned);
     let preview_language=args.iter().find_map(|a|a.strip_prefix("--language="))
         .filter(|v| LANGUAGES.iter().any(|(id,_)| id==v)).map(str::to_owned);
     let demo=ui_smoke || ui_resize_report || demo_themes || demo_page.is_some() || args.iter().any(|a| a=="--demo");
     let app=gtk::Application::builder().application_id(APP_ID).build();
-    app.connect_startup(|_| load_css());
+    app.connect_startup(|_| {load_css();apply_desktop_cursor();});
     app.connect_activate(move |app| {
+        if ui_smoke {
+            if let Some(settings)=gtk::Settings::default() {
+                println!("GTK4 cursor settings: {} / {}",
+                    settings.property::<String>("gtk-cursor-theme-name"),
+                    settings.property::<i32>("gtk-cursor-theme-size"));
+            }
+        }
         let state=Rc::new(RefCell::new(initial_state(demo)));
         if demo_themes {state.borrow_mut().active="themes".into();}
         if let Some(ref page)=demo_page {state.borrow_mut().active=page.clone();}
@@ -1359,6 +1484,10 @@ fn main() {
                 }
                 st.borrow_mut().active=routes[next].into();
                 rebuild(&w,&st);
+                if let Some(chrome)=st.borrow().chrome.as_ref() {
+                    assert_eq!(chrome.theme_actions.is_visible(),routes[next]=="themes",
+                        "theme actions must only appear on the Themes page");
+                }
                 next+=1;
                 glib::ControlFlow::Continue
             });

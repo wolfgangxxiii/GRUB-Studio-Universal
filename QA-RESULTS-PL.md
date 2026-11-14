@@ -1,4 +1,4 @@
-# GRUB Studio Universal 2.3.1 RC1 — raport jakości / QA
+# GRUB Studio Universal 2.3.2 RC1 — raport jakości / QA
 
 Data: 14 listopada 2026
 
@@ -7,26 +7,26 @@ Data: 14 listopada 2026
 - **Sześć stron**: Przegląd, Menu rozruchowe, Motywy, Ustawienia GRUB, Narzędzia, O programie i bezpieczeństwo.
 - Wykrywanie systemów jest rozwijaną sekcją w **Menu rozruchowym**; kopie zapasowe i dziennik działań są połączone w **Narzędziach**.
 - Boczne menu ma stabilną szerokość **196 px** w szerokim oknie i **62 px** w wąskim, z podpowiedziami po ukryciu podpisów. Rozmiar nie zmienia się przy przełączaniu stron.
-- Karta Motywy wykrywa katalogi `theme.txt`, pokazuje zainstalowane motywy i stan aktywności. Pełna ścieżka zaznaczonego pliku jest od razu widoczna w sekcji szczegółów.
+- Karta Motywy wykrywa katalogi `theme.txt`, pokazuje zainstalowane motywy i stan aktywności. Ścieżki widać bezpośrednio na liście, a operacje pozostają w nieruchomym dolnym pasku.
 - Lista motywów mieści kilka wierszy i ma przewijanie dla większych kolekcji.
 - Edytor EFI ma układ lista/formularz w dwóch kolumnach, które układają się pionowo na wąskim ekranie. Operacje kontekstowe są schowane w menu.
-- Ustawienia wyglądu i języka są połączone w jednym menu. Nieuprawniony stan pokazuje jeden przycisk odblokowania, bez powtórzonego znacznika.
+- Ustawienia wyglądu (systemowy/jasny/ciemny) i języka są połączone w jednym menu. Kursor GTK4 używa ustawień sesji lub KDE Plasma i nie dostaje własnego motywu z AppImage.
 - Usunięto pozorny podgląd menu GRUB i odczytywanie tła `desktop-image`; wcześniej pokazywał symulację niezależną od faktycznego `theme.txt`.
 
 ## Kontrole automatyczne
 
 | Kontrola | Oczekiwany wynik / sposób sprawdzenia |
 | --- | --- |
-| `cargo test --all-targets` | Testy biblioteki + kontrola tłumaczeń kluczowych elementów w siedmiu językach |
+| `cargo test --all-targets` | Testy biblioteki + konfiguracji kursora KDE, pierwszeństwa zmiennych środowiskowych i tłumaczeń w siedmiu językach |
 | `cargo build --release --bins` | Kompilacja aplikacji GTK4 i modułu uprzywilejowanego |
-| `--ui-smoke` w `xvfb-run` | 6 stron, nawigacja **62 px** w oknie 720 × 540 px |
+| `--ui-smoke` w `xvfb-run` | 6 stron, nawigacja **62 px** i dolny pasek działań wyłącznie na karcie Motywy; test motywu/rozmiaru kursora |
 | `--ui-smoke-wide` w `xvfb-run` | 6 stron, nawigacja **196 px** w oknie 1100 × 540 px |
 | `--ui-resize-report` + `xdotool` | Zwinięcie panelu z **196 px do 62 px**, gdy już otwarte okno zmniejszy się do 720 px |
 | Zrzuty GTK4 | Motywy (ciemny, jasny i kompaktowy polski), Menu (ciemny i kompaktowy polski), Narzędzia (jasny) |
 | `build-appimage.sh` | Wytworzenie przenośnego AppImage x86_64 |
 | `AppImage --version` i `AppImage --self-test` | Sprawdzenie pliku wynikowego |
 
-Wynik 2.3.1 po usunięciu podglądu jest widoczny w [GitHub Actions](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions). Testy nie zapisują zmian do bootloadera.
+Raport dla wersji 2.3.2 opiera się na [GitHub Actions](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions). Testy nie zapisują zmian do bootloadera. Test wyświetlania rzeczywistego kursora KDE/Wayland wymaga komputera użytkownika.
 
 ## Zrzuty z rzeczywistej aplikacji
 
@@ -47,7 +47,7 @@ Wirtualny ekran X11 umożliwia porównanie geometrii kart i podstawowych interak
 2. Odczyt zasobów `/boot` przy uprawnieniach i etykietach SELinux Bazzite.
 3. Kopia zapasowa, odtworzenie oraz modyfikacja `/etc/default/grub` na rzeczywistej instalacji.
 4. Aktualizacja konfiguracji GRUB i ponowny rozruch na systemach UEFI z Windows.
-5. Skalowanie HiDPI 125–200%, obsługa dotyku i różne kompozytory Wayland.
+5. Skalowanie HiDPI 125–200%, obsługa dotyku, różne kompozytory Wayland oraz fizyczny wygląd wskaźnika KDE/Wayland.
 6. Uruchomienie AppImage na dystrybucjach innych niż obraz systemu kompilującego.
 
 Przed zmianami bootloadera użytkownik powinien mieć dostęp do nośnika ratunkowego oraz kopii zapasowej. **Automatyczny PASS nie oznacza przetestowania zapisu GRUB na sprzęcie.**

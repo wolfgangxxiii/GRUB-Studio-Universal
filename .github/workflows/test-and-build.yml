@@ -24,10 +24,13 @@ jobs:
           GDK_BACKEND: x11
           GSK_RENDERER: cairo
           GTK_A11Y: none
+          XCURSOR_THEME: Breeze_Snow
+          XCURSOR_SIZE: '32'
         run: |
           set -euo pipefail
           timeout 20s xvfb-run -a target/release/grub-studio-universal --ui-smoke | tee gtk-smoke.log
           grep -q 'GTK4 navigation smoke:' gtk-smoke.log
+          grep -q 'GTK4 cursor settings: Breeze_Snow / 32' gtk-smoke.log
           timeout 20s xvfb-run -a target/release/grub-studio-universal --ui-smoke-wide | tee gtk-smoke-wide.log
           grep -q 'sidebar 196 px: OK' gtk-smoke-wide.log
       - name: Test live resize from expanded to compact navigation
@@ -97,24 +100,24 @@ jobs:
         env:
           APPIMAGE_EXTRACT_AND_RUN: "1"
         run: |
-          test -s GRUB-Studio-Universal-v2.3.1-x86_64.AppImage
-          file GRUB-Studio-Universal-v2.3.1-x86_64.AppImage
-          ./GRUB-Studio-Universal-v2.3.1-x86_64.AppImage --version
-          ./GRUB-Studio-Universal-v2.3.1-x86_64.AppImage --self-test
-          sha256sum GRUB-Studio-Universal-v2.3.1-x86_64.AppImage > GRUB-Studio-Universal-v2.3.1-SHA256.txt
+          test -s GRUB-Studio-Universal-v2.3.2-x86_64.AppImage
+          file GRUB-Studio-Universal-v2.3.2-x86_64.AppImage
+          ./GRUB-Studio-Universal-v2.3.2-x86_64.AppImage --version
+          ./GRUB-Studio-Universal-v2.3.2-x86_64.AppImage --self-test
+          sha256sum GRUB-Studio-Universal-v2.3.2-x86_64.AppImage > GRUB-Studio-Universal-v2.3.2-SHA256.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: grub-studio-universal-v2.3.1-release-candidate
+          name: grub-studio-universal-v2.3.2-release-candidate
           path: |
-            GRUB-Studio-Universal-v2.3.1-x86_64.AppImage
-            GRUB-Studio-Universal-v2.3.1-SHA256.txt
+            GRUB-Studio-Universal-v2.3.2-x86_64.AppImage
+            GRUB-Studio-Universal-v2.3.2-SHA256.txt
       - name: Publish downloadable preview release
         if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if gh release view v2.3.1-rc.1 >/dev/null 2>&1; then
-            gh release upload v2.3.1-rc.1 GRUB-Studio-Universal-v2.3.1-x86_64.AppImage GRUB-Studio-Universal-v2.3.1-SHA256.txt --clobber
+          if gh release view v2.3.2-rc.1 >/dev/null 2>&1; then
+            gh release upload v2.3.2-rc.1 GRUB-Studio-Universal-v2.3.2-x86_64.AppImage GRUB-Studio-Universal-v2.3.2-SHA256.txt --clobber
           else
-            gh release create v2.3.1-rc.1 GRUB-Studio-Universal-v2.3.1-x86_64.AppImage GRUB-Studio-Universal-v2.3.1-SHA256.txt --title 'GRUB Studio Universal 2.3.1 — simplified theme manager' --notes 'Removes the inaccurate GRUB theme preview and unused wallpaper decoding. Theme selection now shows only installed theme.txt paths, active state and actionable controls; additional GTK4 smoke and resize tests included. Run as normal user; Polkit authorizes supported system changes. Validate writes on your own GRUB installation.' --prerelease --target "$GITHUB_SHA"
+            gh release create v2.3.2-rc.1 GRUB-Studio-Universal-v2.3.2-x86_64.AppImage GRUB-Studio-Universal-v2.3.2-SHA256.txt --title 'GRUB Studio Universal 2.3.2 — cursor and GUI refinements' --notes 'Respects KDE Plasma cursor theme and size via session settings, enables Follow System appearance, and keeps theme Apply/Disable actions visible at compact sizes. Adds cursor precedence tests, translated disabled-button hints and GTK4 smoke coverage. Run as a normal user; Polkit prompts for supported GRUB changes. Please verify cursor behavior on real KDE/Wayland desktops.' --prerelease --target "$GITHUB_SHA"
           fi
