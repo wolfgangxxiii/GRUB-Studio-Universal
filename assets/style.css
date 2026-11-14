@@ -1,4 +1,4 @@
-/* GRUB Studio Universal 2.3.7 — stable window chrome and consistent vector iconography.
+/* GRUB Studio Universal 2.3.8 — stable window chrome and consistent vector iconography.
  * 196px / 62px responsive navigation, typography hierarchy, restrained colors, one
  * primary action per context. Both palettes meet comfortable text contrast.
  */
@@ -24,9 +24,16 @@
 }
 .icon-button { min-width: 32px; min-height: 32px; border-radius: 8px; padding: 6px; }
 .lang-select { min-width: 200px; }
-.prefs-panel { min-width: 226px; padding: 14px; border-radius: 11px; }
+.prefs-panel { min-width: 292px; padding: 14px; border-radius: 11px; }
 .prefs-heading { font-size: 13px; font-weight: 750; }
 .prefs-label { margin-top: 4px; font-size: 12px; font-weight: 650; }
+.prefs-choice { min-height: 32px; padding: 4px 9px; border-radius: 7px; font-size: 12px; font-weight: 600; }
+.prefs-panel.prefs-dark .prefs-choice { background: #293648; color: #e3ebf7; border: 1px solid #41556b; }
+.prefs-panel.prefs-dark .prefs-choice:hover { background: #34485e; }
+.prefs-panel.prefs-dark .prefs-choice.prefs-selected { background: #4b92e7; color: #071522; border-color: #4b92e7; }
+.prefs-panel.prefs-light .prefs-choice { background: #f8fbff; color: #37506d; border: 1px solid #d0dce9; }
+.prefs-panel.prefs-light .prefs-choice:hover { background: #e9f1fb; }
+.prefs-panel.prefs-light .prefs-choice.prefs-selected { background: #347bc9; color: #ffffff; border-color: #347bc9; }
 popover.studio-prefs-popover > contents { padding: 0; border-radius: 12px; }
 .prefs-panel.prefs-dark { background: #1c2532; color: #eaf0f8; border: 1px solid #3b5068; }
 .prefs-panel.prefs-light { background: #ffffff; color: #26384b; border: 1px solid #d0dce9; }

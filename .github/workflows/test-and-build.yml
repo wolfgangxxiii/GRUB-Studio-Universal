@@ -33,6 +33,15 @@ jobs:
           grep -q 'GTK4 cursor settings: Breeze_Snow / 32' gtk-smoke.log
           timeout 20s xvfb-run -a target/release/grub-studio-universal --ui-smoke-wide | tee gtk-smoke-wide.log
           grep -q 'sidebar 196 px: OK' gtk-smoke-wide.log
+      - name: Exercise appearance and language preferences without freezing GTK
+        env:
+          GDK_BACKEND: x11
+          GSK_RENDERER: cairo
+          GTK_A11Y: none
+        run: |
+          set -euo pipefail
+          timeout 20s xvfb-run -a target/release/grub-studio-universal --ui-prefs-smoke | tee gtk-prefs-smoke.log
+          grep -q 'GTK4 preferences smoke: 6 appearance/language changes: OK' gtk-prefs-smoke.log
       - name: Test live resize from expanded to compact navigation
         env:
           GDK_BACKEND: x11
@@ -100,24 +109,24 @@ jobs:
         env:
           APPIMAGE_EXTRACT_AND_RUN: "1"
         run: |
-          test -s GRUB-Studio-Universal-v2.3.7-x86_64.AppImage
-          file GRUB-Studio-Universal-v2.3.7-x86_64.AppImage
-          ./GRUB-Studio-Universal-v2.3.7-x86_64.AppImage --version
-          ./GRUB-Studio-Universal-v2.3.7-x86_64.AppImage --self-test
-          sha256sum GRUB-Studio-Universal-v2.3.7-x86_64.AppImage > GRUB-Studio-Universal-v2.3.7-SHA256.txt
+          test -s GRUB-Studio-Universal-v2.3.8-x86_64.AppImage
+          file GRUB-Studio-Universal-v2.3.8-x86_64.AppImage
+          ./GRUB-Studio-Universal-v2.3.8-x86_64.AppImage --version
+          ./GRUB-Studio-Universal-v2.3.8-x86_64.AppImage --self-test
+          sha256sum GRUB-Studio-Universal-v2.3.8-x86_64.AppImage > GRUB-Studio-Universal-v2.3.8-SHA256.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: grub-studio-universal-v2.3.7-release-candidate
+          name: grub-studio-universal-v2.3.8-release-candidate
           path: |
-            GRUB-Studio-Universal-v2.3.7-x86_64.AppImage
-            GRUB-Studio-Universal-v2.3.7-SHA256.txt
+            GRUB-Studio-Universal-v2.3.8-x86_64.AppImage
+            GRUB-Studio-Universal-v2.3.8-SHA256.txt
       - name: Publish downloadable preview release
         if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if gh release view v2.3.7-rc.1 >/dev/null 2>&1; then
-            gh release upload v2.3.7-rc.1 GRUB-Studio-Universal-v2.3.7-x86_64.AppImage GRUB-Studio-Universal-v2.3.7-SHA256.txt --clobber
+          if gh release view v2.3.8-rc.1 >/dev/null 2>&1; then
+            gh release upload v2.3.8-rc.1 GRUB-Studio-Universal-v2.3.8-x86_64.AppImage GRUB-Studio-Universal-v2.3.8-SHA256.txt --clobber
           else
-            gh release create v2.3.7-rc.1 GRUB-Studio-Universal-v2.3.7-x86_64.AppImage GRUB-Studio-Universal-v2.3.7-SHA256.txt --title 'GRUB Studio Universal 2.3.7 — stable system window decorations' --notes 'Stabilization release: removes the custom GTK HeaderBar integration and returns controls to a simple in-app toolbar, leaving window decorations to the system. Preserves permanent responsive navigation, combined EFI/GRUB discovery, staged and syntax-checked GRUB output, draft preservation and validation improvements from 2.3.6. Historical GUI screenshots remain out of the source tree. Real-hardware KDE/Wayland, Polkit, SELinux and boot writes still require testing.' --prerelease --target "$GITHUB_SHA"
+            gh release create v2.3.8-rc.1 GRUB-Studio-Universal-v2.3.8-x86_64.AppImage GRUB-Studio-Universal-v2.3.8-SHA256.txt --title 'GRUB Studio Universal 2.3.8 — preferences freeze fix' --notes 'Fixes appearance/language menu freezes on GTK4 and KDE Wayland. Eliminates nested dropdown popovers, closes preferences before rebuilding from idle and adds an interactive regression smoke test. Keeps the system-managed title bar and all prior GRUB write safeguards. Real KDE/Wayland hardware and administrative writes still need validation.' --prerelease --target "$GITHUB_SHA"
           fi

@@ -22,7 +22,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.7-rc.1/GRUB-Studio-Universal-v2.3.7-x86_64.AppImage"><strong>⬇️ Download AppImage · v2.3.7 RC1</strong></a>
+  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.8-rc.1/GRUB-Studio-Universal-v2.3.8-x86_64.AppImage"><strong>⬇️ Download AppImage · v2.3.8 RC1</strong></a>
   &nbsp;·&nbsp;
   <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases">All releases</a>
 </p>
@@ -52,18 +52,18 @@
 
 ### ⬇️ Pobieranie i uruchamianie
 
-**[Pobierz GRUB Studio Universal 2.3.7 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.7-rc.1/GRUB-Studio-Universal-v2.3.7-x86_64.AppImage)**
+**[Pobierz GRUB Studio Universal 2.3.8 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.8-rc.1/GRUB-Studio-Universal-v2.3.8-x86_64.AppImage)**
 
 AppImage nie wymaga instalacji pakietu ani ingerencji w obraz systemu Bazzite. Po pobraniu nadaj mu uprawnienia wykonywania:
 
 ```bash
-chmod +x GRUB-Studio-Universal-v2.3.7-x86_64.AppImage
-./GRUB-Studio-Universal-v2.3.7-x86_64.AppImage
+chmod +x GRUB-Studio-Universal-v2.3.8-x86_64.AppImage
+./GRUB-Studio-Universal-v2.3.8-x86_64.AppImage
 ```
 
-**[Pobierz sumę SHA-256](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.7-rc.1/GRUB-Studio-Universal-v2.3.7-SHA256.txt)** · [Zobacz wydanie i zmiany](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.3.7-rc.1)
+**[Pobierz sumę SHA-256](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.8-rc.1/GRUB-Studio-Universal-v2.3.8-SHA256.txt)** · [Zobacz wydanie i zmiany](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.3.8-rc.1)
 
-> **Wersja 2.3.7 RC:** Przywrócono prosty układ okna bez własnego `GtkHeaderBar`: system odpowiada za dekoracje okna, a przyciski aplikacji pozostają w jej obszarze. Zachowano stałą nawigację, poprawki bezpieczeństwa zapisu `grub.cfg`, ochronę niezapisanych wpisów EFI oraz wygodniejsze ustawienia z 2.3.6. Zapis na komputerze nadal wymaga testu i Polkit/`pkexec`.
+> **Wersja 2.3.8 RC:** Naprawiono zawieszanie panelu „Wygląd i język”: zrezygnowano z zagnieżdżonych list GTK, a odświeżenie ekranu następuje dopiero po zamknięciu menu. Dodano automatyczny test sześciu przełączeń wyglądu i języka. Pozostawiono stabilne systemowe dekoracje okna z 2.3.7, stałą nawigację i zabezpieczenia GRUB. Działanie na KDE/Wayland wymaga jeszcze testu na komputerze użytkownika.
 
 Szczegóły projektu wyglądu i przypisania funkcji do kart: **[docs/DESIGN.md](docs/DESIGN.md)**.
 
@@ -124,18 +124,18 @@ Masz pomysł lub znalazłeś błąd? Otwórz [Issues](https://github.com/wolfgan
 
 ### ⬇️ Download & run
 
-**[Download GRUB Studio Universal 2.3.7 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.7-rc.1/GRUB-Studio-Universal-v2.3.7-x86_64.AppImage)**
+**[Download GRUB Studio Universal 2.3.8 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.8-rc.1/GRUB-Studio-Universal-v2.3.8-x86_64.AppImage)**
 
 The portable AppImage does not require installing an application package or modifying the Bazzite base image:
 
 ```bash
-chmod +x GRUB-Studio-Universal-v2.3.7-x86_64.AppImage
-./GRUB-Studio-Universal-v2.3.7-x86_64.AppImage
+chmod +x GRUB-Studio-Universal-v2.3.8-x86_64.AppImage
+./GRUB-Studio-Universal-v2.3.8-x86_64.AppImage
 ```
 
-**[Download SHA-256 checksum](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.7-rc.1/GRUB-Studio-Universal-v2.3.7-SHA256.txt)** · [Release notes](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.3.7-rc.1)
+**[Download SHA-256 checksum](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.8-rc.1/GRUB-Studio-Universal-v2.3.8-SHA256.txt)** · [Release notes](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.3.8-rc.1)
 
-> **Version 2.3.7 RC:** Returns to simpler system-managed window decorations and a separate in-app toolbar to reduce KDE/Wayland titlebar regressions. Keeps the permanent sidebar, combined GRUB/EFI discovery, checked temporary GRUB generation, draft preservation, stricter EFI paths and settings improvements. Real-hardware testing is still required; administration depends on Polkit/`pkexec`.
+> **Version 2.3.8 RC:** Fixes the appearance/language menu freeze by replacing nested GTK dropdown popovers with direct choices and deferring interface rebuilding until the menu has closed. Adds a six-change preferences regression test. Retains the system-managed window decorations, permanent sidebar, safe GRUB generation, and preserved form drafts. Real KDE/Wayland hardware testing is still needed; administrative writes depend on Polkit/`pkexec`.
 
 More about the layout, one-place-per-action design and testing: **[docs/DESIGN.md](docs/DESIGN.md)**.
 
