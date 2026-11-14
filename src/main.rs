@@ -784,7 +784,6 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     list.append(&list_header);
     if themes.is_empty() {
         add_text(&list,&tr(state,"themes.placeholder"),"muted",true);
-        add_text(&list,&tr(state,"status.readonly"),"warning",true);
     }
     let selector=gtk::ListBox::new();
     selector.add_css_class("studio-list");
@@ -819,6 +818,7 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     scroll.set_max_content_height(270);
     scroll.set_propagate_natural_height(true);
     scroll.set_vexpand(false);
+    scroll.set_visible(!themes.is_empty());
     scroll.set_child(Some(&selector));
     list.append(&scroll);
     let install=button(&tr(state,"themes.import"),false);
@@ -874,7 +874,7 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     details_card.append(&selected_info);
     let controls=action_row();
     let activate=button(&tr(state,"themes.use"),true);
-    let can_apply_theme=writable && !selected.is_empty() && selected!=active;
+    let can_apply_theme=writable && themes.iter().any(|t|t.path==selected) && selected!=active;
     activate.set_sensitive(can_apply_theme);
     if !can_apply_theme {
         activate.remove_css_class("suggested-action");
@@ -1389,7 +1389,7 @@ mod interface_tests {
 
     #[test]
     fn important_actions_and_errors_are_localized_in_all_seven_languages() {
-        let keys=["prefs.title","themes.use","themes.details","menu.entry.actions",
+        let keys=["prefs.title","themes.use","themes.details","themes.placeholder","menu.entry.actions",
             "menu.more","dialog.invalidsettings","dialog.invalidkernel",
             "dialog.invalidentry","dialog.invalidthemefolder"];
         for (locale,_) in LANGUAGES {
