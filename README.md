@@ -6,7 +6,7 @@
 
 <p align="center">
   <strong>A modern, portable GRUB configuration studio for Linux.</strong><br>
-  Rust · GTK4 · Wayland · Light & Dark
+  Rust · GTK4 · libadwaita · Wayland · Light & Dark
 </p>
 
 <p align="center">
@@ -17,12 +17,13 @@
   <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions/workflows/test-and-build.yml"><img src="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions/workflows/test-and-build.yml/badge.svg" alt="Build status"></a>
   <img src="https://img.shields.io/badge/Rust-2021-CE422B?logo=rust&logoColor=white" alt="Rust">
   <img src="https://img.shields.io/badge/GTK-4-4A86CF?logo=gtk&logoColor=white" alt="GTK4">
+  <img src="https://img.shields.io/badge/libadwaita-native-3584E4?logo=gnome&logoColor=white" alt="libadwaita">
   <img src="https://img.shields.io/badge/Linux-x86__64-1793D1?logo=linux&logoColor=white" alt="Linux x86_64">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-GPL--3.0--or--later-38A169" alt="GPL-3.0-or-later"></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.8-rc.1/GRUB-Studio-Universal-v2.3.8-x86_64.AppImage"><strong>⬇️ Download AppImage · v2.3.8 RC1</strong></a>
+  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.0-rc.1/GRUB-Studio-Universal-v3.0.0-x86_64.AppImage"><strong>⬇️ Download AppImage · v3.0.0 RC1</strong></a>
   &nbsp;·&nbsp;
   <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases">All releases</a>
 </p>
@@ -35,13 +36,13 @@
 
 ## 🇵🇱 Polski
 
-**GRUB Studio Universal** to graficzne narzędzie do zarządzania konfiguracją programu rozruchowego GRUB. Powstało w **Rust** i korzysta z natywnego interfejsu **GTK4**, przystosowanego do Waylanda oraz ekranów o różnej wielkości.
+**GRUB Studio Universal** to graficzne narzędzie do zarządzania konfiguracją programu rozruchowego GRUB. Powstało w **Rust**, korzysta z **GTK4 oraz libadwaita** i działa natywnie pod Waylandem oraz X11.
 
 ### ✨ Najważniejsze funkcje
 
 | Obszar | Możliwości |
 | --- | --- |
-| 🎨 **Interfejs** | **Stabilne dekoracje okna obsługiwane przez system**, oddzielny pasek narzędzi w aplikacji, spójne ikony wektorowe, zawsze widoczna nawigacja 196/62 px, jasny/ciemny wygląd, siedem języków i kursor systemowy. |
+| 🎨 **Interfejs** | **Natywna stylistyka libadwaita** — tryb systemowy/jasny/ciemny, akcent systemowy (gdy obsługiwany), karty i kontrolki Adwaita; stabilne dekoracje okna, zawsze widoczna nawigacja 196/62 px, siedem języków i kursor systemowy. |
 | 🐧 **Dystrybucje** | Rozpoznawanie Bazzite, Fedora, Ubuntu/Debian, Arch/CachyOS i openSUSE. |
 | 🖥️ **Systemy** | Wspólny widok informacji GRUB/EFI bez duplikowania systemów o tej samej nazwie; opcjonalny skan `os-prober`. |
 | 🖼️ **Motywy GRUB** | Wykrywanie `theme.txt`, lista z lokalizacją plików, stan aktywności, import oraz przyciski zastosowania/wyłączenia dostępne nawet przy przewijaniu. Bez symulowanego podglądu. |
@@ -52,18 +53,18 @@
 
 ### ⬇️ Pobieranie i uruchamianie
 
-**[Pobierz GRUB Studio Universal 2.3.8 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.8-rc.1/GRUB-Studio-Universal-v2.3.8-x86_64.AppImage)**
+**[Pobierz GRUB Studio Universal 3.0.0 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.0-rc.1/GRUB-Studio-Universal-v3.0.0-x86_64.AppImage)**
 
 AppImage nie wymaga instalacji pakietu ani ingerencji w obraz systemu Bazzite. Po pobraniu nadaj mu uprawnienia wykonywania:
 
 ```bash
-chmod +x GRUB-Studio-Universal-v2.3.8-x86_64.AppImage
-./GRUB-Studio-Universal-v2.3.8-x86_64.AppImage
+chmod +x GRUB-Studio-Universal-v3.0.0-x86_64.AppImage
+./GRUB-Studio-Universal-v3.0.0-x86_64.AppImage
 ```
 
-**[Pobierz sumę SHA-256](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.8-rc.1/GRUB-Studio-Universal-v2.3.8-SHA256.txt)** · [Zobacz wydanie i zmiany](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.3.8-rc.1)
+**[Pobierz sumę SHA-256](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.0-rc.1/GRUB-Studio-Universal-v3.0.0-SHA256.txt)** · [Zobacz wydanie i zmiany](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v3.0.0-rc.1)
 
-> **Wersja 2.3.8 RC:** Naprawiono zawieszanie panelu „Wygląd i język”: zrezygnowano z zagnieżdżonych list GTK, a odświeżenie ekranu następuje dopiero po zamknięciu menu. Dodano automatyczny test sześciu przełączeń wyglądu i języka. Pozostawiono stabilne systemowe dekoracje okna z 2.3.7, stałą nawigację i zabezpieczenia GRUB. Działanie na KDE/Wayland wymaga jeszcze testu na komputerze użytkownika.
+> **Wersja 3.0.0 RC:** Nowa warstwa wizualna oparta na **libadwaita** zastępuje ręcznie zakodowane granatowo-niebieskie palety kolorów. Jasny/ciemny/systemowy wygląd jest obsługiwany przez `AdwStyleManager`, a akcenty i kontrolki pochodzą z motywu Adwaita. Układ okna, menu preferencji bez zawieszania (2.3.8) i zabezpieczenia GRUB pozostają bez zmian. Wymagany jest jeszcze test na rzeczywistym KDE/Wayland.
 
 Szczegóły projektu wyglądu i przypisania funkcji do kart: **[docs/DESIGN.md](docs/DESIGN.md)**.
 
@@ -82,7 +83,7 @@ Szczegóły projektu wyglądu i przypisania funkcji do kart: **[docs/DESIGN.md](
 <details>
 <summary>Rozwiń instrukcję dla Rust + GTK4</summary>
 
-W środowisku budowania (np. Fedora Toolbox) wymagane są Rust/Cargo, GTK4 development, GCC i `pkg-config`. Nie trzeba instalować tych narzędzi w podstawowym obrazie Bazzite.
+W środowisku budowania (np. Fedora Toolbox) wymagane są Rust/Cargo, pakiety deweloperskie GTK4 i libadwaita, GCC oraz `pkg-config`. Nie trzeba instalować tych narzędzi w podstawowym obrazie Bazzite.
 
 ```bash
 sudo dnf install -y gcc pkgconf-pkg-config gtk4-devel
@@ -107,13 +108,13 @@ Masz pomysł lub znalazłeś błąd? Otwórz [Issues](https://github.com/wolfgan
 
 ## 🇬🇧 English
 
-**GRUB Studio Universal** is a graphical tool for managing the GRUB bootloader configuration. Built with **Rust** and **GTK4**, it features a compact, responsive interface designed for Wayland and different screen sizes.
+**GRUB Studio Universal** is a graphical tool for managing the GRUB bootloader configuration. Built with **Rust**, **GTK4** and **libadwaita**, it features a responsive native interface for Wayland and X11.
 
 ### ✨ Highlights
 
 | Area | Features |
 | --- | --- |
-| 🎨 **Interface** | **System-managed window decorations**, separate in-app toolbar, built-in monochrome vector icons, an always-visible 196/62 px sidebar, system cursor, light/dark modes and seven languages. |
+| 🎨 **Interface** | **Native libadwaita** surfaces, widgets, desktop accent and system/light/dark color scheme; system-managed window decorations, a fixed 196/62 px sidebar, system cursor and seven languages. |
 | 🐧 **Distributions** | Detection of Bazzite, Fedora, Ubuntu/Debian, Arch/CachyOS, and openSUSE. |
 | 🖥️ **Operating systems** | One combined GRUB/EFI discovery view, merging records with the same system name; optional `os-prober` scan. |
 | 🖼️ **GRUB themes** | Installed `theme.txt` discovery, selection, active-theme status, import, and pinned Apply/Disable buttons even in compact windows. The inaccurate simulated preview is gone. |
@@ -124,18 +125,18 @@ Masz pomysł lub znalazłeś błąd? Otwórz [Issues](https://github.com/wolfgan
 
 ### ⬇️ Download & run
 
-**[Download GRUB Studio Universal 2.3.8 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.8-rc.1/GRUB-Studio-Universal-v2.3.8-x86_64.AppImage)**
+**[Download GRUB Studio Universal 3.0.0 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.0-rc.1/GRUB-Studio-Universal-v3.0.0-x86_64.AppImage)**
 
 The portable AppImage does not require installing an application package or modifying the Bazzite base image:
 
 ```bash
-chmod +x GRUB-Studio-Universal-v2.3.8-x86_64.AppImage
-./GRUB-Studio-Universal-v2.3.8-x86_64.AppImage
+chmod +x GRUB-Studio-Universal-v3.0.0-x86_64.AppImage
+./GRUB-Studio-Universal-v3.0.0-x86_64.AppImage
 ```
 
-**[Download SHA-256 checksum](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.8-rc.1/GRUB-Studio-Universal-v2.3.8-SHA256.txt)** · [Release notes](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.3.8-rc.1)
+**[Download SHA-256 checksum](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.0-rc.1/GRUB-Studio-Universal-v3.0.0-SHA256.txt)** · [Release notes](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v3.0.0-rc.1)
 
-> **Version 2.3.8 RC:** Fixes the appearance/language menu freeze by replacing nested GTK dropdown popovers with direct choices and deferring interface rebuilding until the menu has closed. Adds a six-change preferences regression test. Retains the system-managed window decorations, permanent sidebar, safe GRUB generation, and preserved form drafts. Real KDE/Wayland hardware testing is still needed; administrative writes depend on Polkit/`pkexec`.
+> **Version 3.0.0 RC:** Switches the interface to the official **libadwaita** stylesheet, using its system-aware light/dark palettes and accent colors instead of custom hardcoded blue/navy colors. Preserves the stable GTK system window decorations, the non-blocking language/appearance preferences menu from v2.3.8 and GRUB write safeguards. Real KDE/Wayland hardware testing is still needed; administration depends on Polkit/`pkexec`.
 
 More about the layout, one-place-per-action design and testing: **[docs/DESIGN.md](docs/DESIGN.md)**.
 
@@ -154,7 +155,7 @@ More about the layout, one-place-per-action design and testing: **[docs/DESIGN.m
 <details>
 <summary>Show Rust + GTK4 build instructions</summary>
 
-The build environment needs Rust/Cargo, GTK4 development files, GCC, and `pkg-config`. A Fedora Toolbox can provide these without installing them into Bazzite's immutable base image.
+The build environment needs Rust/Cargo, GTK4 and libadwaita development files, GCC, and `pkg-config`. A Fedora Toolbox can provide these without installing them into Bazzite's immutable base image.
 
 ```bash
 sudo dnf install -y gcc pkgconf-pkg-config gtk4-devel

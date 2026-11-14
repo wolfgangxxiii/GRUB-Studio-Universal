@@ -6,6 +6,7 @@ cd "$project_dir"
 
 command -v cargo >/dev/null || { echo "Rust/Cargo toolchain not installed; install rustup in a Toolbox/Distrobox." >&2; exit 1; }
 pkg-config --exists gtk4 || { echo "GTK4 development files not found (gtk4-devel / libgtk-4-dev)." >&2; exit 1; }
+pkg-config --exists libadwaita-1 || { echo "libadwaita development files not found (libadwaita-devel / libadwaita-1-dev)." >&2; exit 1; }
 command -v linuxdeploy >/dev/null || { echo "linuxdeploy not found. AppImage generation requires linuxdeploy." >&2; exit 1; }
 command -v rsvg-convert >/dev/null || { echo "librsvg (rsvg-convert) is required to generate the AppImage icon." >&2; exit 1; }
 
@@ -28,7 +29,7 @@ ln -sfn grub-studio-universal.png "$appdir/.DirIcon"
 # linuxdeploy copies linked libraries and assembles the AppImage runtime.
 # GTK4 + GLib runtime resources must be checked on a second distribution.
 export ARCH=x86_64
-export OUTPUT="GRUB-Studio-Universal-v2.3.8-x86_64.AppImage"
+export OUTPUT="GRUB-Studio-Universal-v3.0.0-x86_64.AppImage"
 linuxdeploy \
   --appdir "$appdir" \
   --executable "$appdir/usr/bin/grub-studio-universal" \

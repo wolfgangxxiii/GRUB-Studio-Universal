@@ -1,4 +1,5 @@
-//! Native GTK4 UI. GTK4 selects Wayland directly when WAYLAND_DISPLAY is set.
+//! Native GTK4 UI with libadwaita styling. GTK4 selects Wayland directly
+//! when WAYLAND_DISPLAY is set; the system window decorations remain intact.
 use grub_studio::{core, inspect};
 use grub_studio::core::MenuEntry;
 use grub_studio::inspect::{OsRecord, Snapshot, Theme};
@@ -387,6 +388,26 @@ fn system_prefers_dark() -> bool {
         }}
     }
     false
+}
+fn apply_appearance(appearance: &str) -> bool {
+    let manager=adw::StyleManager::default();
+    match appearance {
+        "light"=>manager.set_color_scheme(adw::ColorScheme::ForceLight),
+        "dark"=>manager.set_color_scheme(adw::ColorScheme::ForceDark),
+        _=>{
+            // Some KDE sessions do not advertise the color scheme to the
+            // portal. Retain the KDE fallback from pre-Adwaita releases.
+            let scheme=if manager.system_supports_color_schemes() {
+                adw::ColorScheme::Default
+            } else if system_prefers_dark() {
+                adw::ColorScheme::ForceDark
+            } else {
+                adw::ColorScheme::ForceLight
+            };
+            manager.set_color_scheme(scheme);
+        }
+    }
+    manager.is_dark()
 }
 fn show_message(window: &gtk::ApplicationWindow, title: &str, body: &str, error: bool) {
     let dialog = gtk::MessageDialog::builder()
@@ -1291,14 +1312,14 @@ fn page_tools(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     page
 }
 fn page_about(_window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
-    let page=page_root(&tr(state,"about.title"),"Rust Edition · GTK4 · Wayland · 2.3.7");
+    let page=page_root(&tr(state,"about.title"),"Rust Edition · GTK4 · libadwaita · 3.0.0");
     for number in 1..=9 {
         let title=tr(state,&format!("about.{number:02}.title"));
         let text=tr(state,&format!("about.{number:02}.text"));
         let section=section(&page,&title);
         add_text(&section,&text,"muted",true);
     }
-    add_text(&page,"GPL-3.0-or-later · Independent application · GTK4 runtime required", "muted",true);
+    add_text(&page,"GPL-3.0-or-later · Independent application · GTK4 and libadwaita runtime", "muted",true);
     page
 }
 
@@ -1479,9 +1500,7 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
     let chrome=ensure_chrome(window,state);
     chrome.root.remove_css_class("grub-light");
     chrome.root.remove_css_class("grub-dark");
-    let use_dark=match s.appearance.as_str() {
-        "light"=>false,"dark"=>true,_=>system_prefers_dark(),
-    };
+    let use_dark=apply_appearance(&s.appearance);
     chrome.root.add_css_class(if use_dark { "grub-dark" } else { "grub-light" });
 
     clear_box(&chrome.header);
@@ -1495,7 +1514,7 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
     let brand=gtk::Box::new(gtk::Orientation::Vertical,1);
     brand.set_hexpand(true);
     add_text(&brand,"GRUB Studio","brand",false);
-    add_text(&brand,"UNIVERSAL  ·  2.3.8","brand-subtitle",false);
+    add_text(&brand,"UNIVERSAL  ·  3.0.0","brand-subtitle",false);
     header.append(&brand);
     // Custom controls never become part of the window manager's title bar.
     let status=if s.demo {"DEMO".into()}
@@ -1677,7 +1696,7 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
     label.set_hexpand(true);label.set_xalign(0.0);
     label.set_ellipsize(gtk::pango::EllipsizeMode::End);
     footer.append(&label);
-    footer.append(&gtk::Label::new(Some("GTK4  ·  Wayland/X11")));
+    footer.append(&gtk::Label::new(Some("GTK4 + Adwaita  ·  Wayland/X11")));
 }
 
 #[cfg(test)]
@@ -1741,7 +1760,7 @@ mod ui_tests {
 
 fn main() {
     let args:Vec<String>=std::env::args().skip(1).collect();
-    if args.iter().any(|a| a=="--version") { println!("GRUB Studio Universal 2.3.8 Rust Edition");return; }
+    if args.iter().any(|a| a=="--version") { println!("GRUB Studio Universal 3.0.0 Rust / Adwaita Edition");return; }
     if args.iter().any(|a| a=="--self-test") {
         let locales=serde_json::from_str::<serde_json::Value>(include_str!("../assets/translations.json")).expect("valid locale catalog");
         for (code,_) in LANGUAGES {assert!(locales[*code]["tools.title"].is_string(),"missing tools translation: {code}");}
@@ -1770,7 +1789,11 @@ fn main() {
     let preview_language=args.iter().find_map(|a|a.strip_prefix("--language="))
         .filter(|v| LANGUAGES.iter().any(|(id,_)| id==v)).map(str::to_owned);
     let demo=ui_smoke || prefs_smoke || ui_resize_report || demo_themes || demo_page.is_some() || args.iter().any(|a| a=="--demo");
-    let app=gtk::Application::builder().application_id(APP_ID).build();
+    // AdwApplication installs the official Adwaita stylesheet and connects
+    // the style manager to desktop appearance preferences. The application
+    // window is still GtkApplicationWindow so that KDE/Wayland controls its
+    // system decorations (no custom HeaderBar regression).
+    let app=adw::Application::builder().application_id(APP_ID).build();
     app.connect_startup(|_| {load_css();apply_desktop_cursor();});
     app.connect_activate(move |app| {
         if ui_smoke {
@@ -1847,6 +1870,15 @@ fn main() {
             ];
             let mut step=0;
             glib::timeout_add_local(Duration::from_millis(300),move || {
+                if step>0 {
+                    // Verify that the official libadwaita palette actually
+                    // switches, in addition to storing the chosen preference.
+                    match steps[step-1].2 {
+                        "dark"=>assert!(adw::StyleManager::default().is_dark(),"Adwaita did not switch to dark"),
+                        "light"=>assert!(!adw::StyleManager::default().is_dark(),"Adwaita did not switch to light"),
+                        _=>(),
+                    }
+                }
                 if step==steps.len() {
                     assert_eq!(st.borrow().appearance,"system");
                     assert_eq!(st.borrow().language,"pl");
