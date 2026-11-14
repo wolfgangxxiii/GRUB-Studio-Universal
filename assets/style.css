@@ -1,4 +1,4 @@
-/* GRUB Studio Universal 2.3.4 — permanent navigation, task-focused GTK4 layout.
+/* GRUB Studio Universal 2.3.5 — native titlebar and consistent vector iconography.
  * 196px / 62px responsive navigation, typography hierarchy, restrained colors, one
  * primary action per context. Both palettes meet comfortable text contrast.
  */
@@ -7,31 +7,37 @@
 }
 
 /* Layout: chrome is persistent; only page-scroller's child changes. */
-.studio-header { min-height: 48px; padding: 6px 11px; }
+.studio-titlebar { min-height: 48px; padding: 2px 9px; box-shadow: none; }
+.studio-header { padding: 2px 1px; }
 .studio-sidebar { min-width: 196px; padding: 12px 8px 10px; }
 .page-scroller { min-width: 0; }
-.studio-footer { min-height: 24px; padding: 5px 16px; font-size: 10px; }
+.studio-footer { min-height: 24px; padding: 5px 16px; font-size: 11px; }
 .theme-action-bar { min-height: 58px; padding: 6px 16px; }
 .theme-toolbar-name { font-size: 13px; font-weight: 750; }
 .theme-toolbar-actions { margin: 0; }
 .theme-toolbar-actions .action-button { min-height: 34px; }
-.brand { font-weight: 800; font-size: 15px; letter-spacing: .2px; }
+.brand { font-weight: 800; font-size: 14px; letter-spacing: .2px; }
 .brand-subtitle { font-weight: 650; font-size: 10px; letter-spacing: 1.4px; }
-.brand-app-icon { min-width: 36px; min-height: 36px; }
+.brand-app-icon { min-width: 32px; min-height: 32px; }
 .status-badge {
   padding: 6px 10px; border-radius: 14px;
   font-size: 10px; font-weight: 700;
 }
 .icon-button { min-width: 32px; min-height: 32px; border-radius: 8px; padding: 6px; }
-.lang-select { min-width: 110px; }
-.prefs-panel { min-width: 214px; padding: 13px; }
+.lang-select { min-width: 200px; }
+.prefs-panel { min-width: 226px; padding: 14px; border-radius: 11px; }
+.prefs-heading { font-size: 13px; font-weight: 750; }
+.prefs-label { margin-top: 4px; font-size: 12px; font-weight: 650; }
+popover.studio-prefs-popover > contents { padding: 0; border-radius: 12px; }
+.prefs-panel.prefs-dark { background: #1c2532; color: #eaf0f8; border: 1px solid #3b5068; }
+.prefs-panel.prefs-light { background: #ffffff; color: #26384b; border: 1px solid #d0dce9; }
 .popup-contents { min-width: 172px; padding: 7px; }
 .popup-contents .action-button { min-height: 35px; }
 .prefs-panel .action-button { min-height: 36px; }
 .popup-action > button, .prefs-trigger > button { min-height: 32px; border-radius: 8px; padding: 6px 10px; }
 .lang-select > button {
-  min-height: 32px; border-radius: 8px;
-  padding: 5px 10px; font-size: 12px; font-weight: 650;
+  min-height: 32px; border-radius: 7px;
+  padding: 5px 9px; font-size: 13px; font-weight: 600;
 }
 .nav-heading {
   margin: 5px 12px 10px; font-size: 10px;
@@ -42,22 +48,24 @@
   min-height: 36px; padding: 6px 10px;
   border: 0; border-left: 3px solid transparent;
   border-radius: 8px; box-shadow: none;
-  font-size: 12px; font-weight: 550;
+  font-size: 13px; font-weight: 550;
 }
 .nav-active { font-weight: 750; }
 .nav-compact { min-width: 62px; padding-left: 5px; padding-right: 5px; }
 .nav-compact .nav-button { padding: 7px 9px; }
 .nav-compact .nav-icon { margin-left: 5px; }
+.nav-icon { min-width: 19px; min-height: 19px; }
 .nav-footer { margin: 9px 12px; font-size: 11px; }
 .page-title { font-size: 23px; font-weight: 800; letter-spacing: -.3px; }
 .studio-card { border-radius: 12px; padding: 13px; }
 .hero { padding: 19px 18px; }
 .hero-title { font-size: 20px; font-weight: 750; }
-.section-heading { font-size: 11px; font-weight: 750; letter-spacing: .5px; }
+.section-heading { font-size: 12px; font-weight: 750; letter-spacing: .4px; }
 .row-title { font-size: 13px; font-weight: 650; }
-.muted { font-size: 12px; }
-.warning { font-size: 11px; }
-.item-label { font-size: 12px; }
+.muted { font-size: 13px; }
+.warning { font-size: 12px; }
+.item-label { font-size: 13px; }
+.empty-state { padding: 13px 10px; font-size: 13px; font-style: italic; }
 .actions { margin-top: 7px; margin-bottom: 5px; }
 .action-flow { margin-top: 9px; margin-bottom: 6px; }
 .action-flow flowboxchild { padding: 0; margin: 0; }
@@ -95,7 +103,8 @@
 
 /* Dark mode — ink/navy with a single blue accent. */
 .grub-dark { background: #111620; color: #ebf0f7; }
-.grub-dark .studio-header { background: #171e29; border-bottom: 1px solid #303b4a; }
+.grub-dark .studio-titlebar { background: #171e29; color: #ebf0f7; border-bottom: 1px solid #303b4a; }
+.grub-dark .studio-header { background: transparent; }
 .grub-dark .studio-sidebar { background: #121a26; border-right: 1px solid #293545; }
 .grub-dark .page-scroller { background: #111620; }
 .grub-dark .studio-footer { background: #141c28; color: #91a2b9; border-top: 1px solid #283747; }
@@ -109,6 +118,7 @@
 .grub-dark .metric-label { color: #98aac0; }
 .grub-dark .section-heading { color: #cad7e7; }
 .grub-dark .warning { color: #e5bd82; }
+.grub-dark .empty-state { background: #17212e; color: #afc0d5; border-radius: 8px; }
 .grub-dark .status-badge { color: #a9dbbd; background: #204235; }
 .grub-dark .status-locked { color: #e3bf9d; background: #443324; }
 .grub-dark .status-readonly { color: #e0c58c; background: #413e2c; }
@@ -127,7 +137,7 @@
 .grub-dark .studio-list row:selected .row-title { color: #ffffff; }
 .grub-dark .theme-current .row-title { color: #97c5ff; }
 .grub-dark .lang-select > button {
-  background: #293648; color: #e8eff9; border: 1px solid #3e5065;
+  background: #253245; color: #e8eff9; border: 1px solid #42536a;
 }
 .grub-dark .lang-select > button:hover { background: #34485e; }
 .grub-dark entry, .grub-dark dropdown, .grub-dark textview {
@@ -143,7 +153,8 @@
 
 /* Light mode — clean graphite typography, restrained slate outlines. */
 .grub-light { background: #f3f6fa; color: #243247; }
-.grub-light .studio-header { background: #ffffff; border-bottom: 1px solid #dbe4ef; }
+.grub-light .studio-titlebar { background: #ffffff; color: #243247; border-bottom: 1px solid #dbe4ef; }
+.grub-light .studio-header { background: transparent; }
 .grub-light .studio-sidebar { background: #f9fbfe; border-right: 1px solid #dce5ef; }
 .grub-light .page-scroller { background: #f3f6fa; }
 .grub-light .studio-footer { background: #fbfcfe; color: #63778f; border-top: 1px solid #dfe6ef; }
@@ -157,6 +168,7 @@
 .grub-light .metric-label { color: #61768e; }
 .grub-light .section-heading { color: #3f5570; }
 .grub-light .warning { color: #98642c; }
+.grub-light .empty-state { background: #f1f5fa; color: #6a7e94; border-radius: 8px; }
 .grub-light .status-badge { color: #236b48; background: #dff4e7; }
 .grub-light .status-locked { color: #895a2b; background: #fff0db; }
 .grub-light .status-readonly { color: #7e6123; background: #fff2cf; }
