@@ -1818,30 +1818,6 @@ fn main() {
     let app=adw::Application::builder().application_id(APP_ID).build();
     app.connect_startup(|_| {load_css();apply_desktop_cursor();});
     app.connect_activate(move |app| {
-        if home_layout_smoke {
-            let window=window.clone();let application=app.clone();
-            glib::timeout_add_local_once(Duration::from_millis(750),move || {
-                let root=window.clone().upcast::<gtk::Widget>();
-                let grid=descendant_with_class(&root,"stats-grid")
-                    .expect("dashboard metric grid missing")
-                    .downcast::<gtk::Grid>().expect("dashboard must be a GtkGrid");
-                assert!(grid.column_homogeneous() && grid.row_homogeneous(),
-                    "dashboard columns and rows must be homogeneous");
-                let first=grid.child_at(0,0).expect("top-left metric missing");
-                let second=grid.child_at(1,0).expect("top-right metric missing");
-                let third=grid.child_at(0,1).expect("bottom-left metric missing");
-                let fourth=grid.child_at(1,1).expect("bottom-right metric missing");
-                assert!(grid.width()>500,"dashboard grid must occupy the full content width");
-                assert_eq!(first.width(),second.width(),"metric columns differ");
-                assert_eq!(third.width(),fourth.width(),"second metric row columns differ");
-                assert_eq!(first.height(),third.height(),"metric rows differ in height");
-                assert!((grid.width() - first.width() - second.width()
-                    - grid.column_spacing() as i32).abs()<=4,
-                    "dashboard tiles do not fill the allocated grid width");
-                println!("GTK4 home layout smoke: 4 equally sized cards filling {} px: OK",grid.width());
-                application.quit();
-            });
-        }
         if ui_smoke {
             if let Some(settings)=gtk::Settings::default() {
                 println!("GTK4 cursor settings: {} / {}",
@@ -1865,6 +1841,30 @@ fn main() {
             .default_height(if ui_smoke {540}else{650}).build();
         rebuild(&window,&state);
         window.present();
+        if home_layout_smoke {
+            let window=window.clone();let application=app.clone();
+            glib::timeout_add_local_once(Duration::from_millis(750),move || {
+                let root=window.clone().upcast::<gtk::Widget>();
+                let grid=descendant_with_class(&root,"stats-grid")
+                    .expect("dashboard metric grid missing")
+                    .downcast::<gtk::Grid>().expect("dashboard must be a GtkGrid");
+                assert!(grid.is_column_homogeneous() && grid.is_row_homogeneous(),
+                    "dashboard columns and rows must be homogeneous");
+                let first=grid.child_at(0,0).expect("top-left metric missing");
+                let second=grid.child_at(1,0).expect("top-right metric missing");
+                let third=grid.child_at(0,1).expect("bottom-left metric missing");
+                let fourth=grid.child_at(1,1).expect("bottom-right metric missing");
+                assert!(grid.width()>500,"dashboard grid must occupy the full content width");
+                assert_eq!(first.width(),second.width(),"metric columns differ");
+                assert_eq!(third.width(),fourth.width(),"second metric row columns differ");
+                assert_eq!(first.height(),third.height(),"metric rows differ in height");
+                assert!((grid.width() - first.width() - second.width()
+                    - grid.column_spacing() as i32).abs()<=4,
+                    "dashboard tiles do not fill the allocated grid width");
+                println!("GTK4 home layout smoke: 4 equally sized cards filling {} px: OK",grid.width());
+                application.quit();
+            });
+        }
         if ui_smoke {
             // Exercise all destinations at a deliberately compact width.
             // Verify that navigating never changes the allocated sidebar
