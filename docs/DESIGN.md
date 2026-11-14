@@ -1,8 +1,8 @@
-# GRUB Studio Universal — projekt interfejsu 2.3.8
+# GRUB Studio Universal — projekt interfejsu 3.0.0
 
 ## Cel
 
-Zwięzły, czytelny menedżer GRUB działający natywnie w GTK4 na Waylandzie i X11.
+Zwięzły, czytelny menedżer GRUB działający natywnie w GTK4 i libadwaita na Waylandzie i X11.
 Interfejs jest inspirowany podziałem na kolekcję i szczegóły w Lutris, ale
 pozostaje własnym projektem. Stosuje również zasadę hierarchii i ujawniania
 szczegółów na żądanie z [GNOME HIG](https://developer.gnome.org/hig/).
@@ -29,9 +29,13 @@ szczegółów na żądanie z [GNOME HIG](https://developer.gnome.org/hig/).
 - **Wykryte wpisy:** dane GRUB, UEFI/EFI i opcjonalnego `os-prober` są pokazane
   w jednym panelu, identyczne nazwy łączą źródła, a dokładny skan jest
   drugorzędną akcją. Tryb bez edycji nie nazywa już strony edytorem.
-- **Kolory i kursor systemowy:** tryby systemowy/jasny/ciemny; motyw i wielkość
-  kursora z sesji (`XCURSOR_*`) lub KDE Plasma (`kcminputrc`). Nie dołączamy
-  do AppImage własnego pakietu kursorów.
+- **Adwaita 3.0:** aplikacja używa `AdwApplication` oraz `AdwStyleManager`.
+  Tryby systemowy/jasny/ciemny uruchamiają natywne palety Adwaita, a
+  poszczególne komponenty odwołują się do jej tokenów (`@window_bg_color`,
+  `@card_bg_color`, `@accent_bg_color`) zamiast sztywnych kodów RGB.
+  Zachowano systemowe przyciski i dekoracje okna; `GtkHeaderBar` nie wraca.
+- **Kursor systemowy:** motyw i wielkość kursora z sesji (`XCURSOR_*`) lub
+  KDE Plasma (`kcminputrc`). Nie dołączamy własnego pakietu kursorów.
 - **Menu preferencji bez zagnieżdżonych okien:** tryb wyglądu i język wybiera się
   przyciskami w jednym panelu GTK. Po kliknięciu panel znika, a przebudowę
   widoku wykonuje zadanie odłożone do pętli zdarzeń, aby nie zwalniać widżetów
@@ -89,7 +93,7 @@ GitHub Actions uruchamia oba testy przed budową AppImage.
 Osobny test `--ui-resize-report` wymusza rozmiar 720 px poleceniem `xdotool`
 **po otwarciu okna** i sprawdza przejście z 196 do 62 px; dzięki temu test
 obejmuje też menedżery okien niewysyłające powiadomień o zmianie szerokości.
-Wersja 2.3.8 dodatkowo testuje otwarcie menu preferencji i sześć kolejnych
+Wersja 3.0.0 testuje zmianę koloru `AdwStyleManager` oraz sześć kolejnych
 zmian języka/wyglądu bez blokowania pętli GTK. Sprawdza obecność osadzonego PNG aplikacji, komplet komunikatów
 uprawnień w siedmiu językach oraz zachowuje testy kursora i stałego paska akcji Motywów.
 

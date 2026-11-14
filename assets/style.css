@@ -1,59 +1,45 @@
-/* GRUB Studio Universal 2.3.8 — stable window chrome and consistent vector iconography.
- * 196px / 62px responsive navigation, typography hierarchy, restrained colors, one
- * primary action per context. Both palettes meet comfortable text contrast.
+/* GRUB Studio Universal 3.0.0 — native Adwaita palettes.
+ * Use libadwaita's named color tokens (supported on Ubuntu 24.04 / Adwaita 1.5)
+ * rather than hard-coded navy/blue themes. The StyleManager owns light/dark
+ * selection, including KDE portal preferences and the app's explicit override.
+ * Keep the existing system-managed window decorations and stable navigation.
  */
-.app-root {
-  /* The host GTK font and mouse cursor are always the source of truth. */
-}
 
-/* Layout: chrome is persistent; only page-scroller's child changes. */
-.studio-header { min-height: 48px; padding: 6px 11px; }
-.studio-sidebar { min-width: 196px; padding: 12px 8px 10px; }
+/* The host provides fonts, icons, native window controls and cursor. */
+.app-root { font-family: inherit; }
+
+/* Persistent chrome: only the content scroller changes between pages. */
+.studio-header { min-height: 48px; padding: 8px 14px; }
+.studio-sidebar { min-width: 196px; padding: 14px 9px 11px; }
 .page-scroller { min-width: 0; }
-.studio-footer { min-height: 24px; padding: 5px 16px; font-size: 11px; }
-.theme-action-bar { min-height: 58px; padding: 6px 16px; }
+.studio-footer { min-height: 24px; padding: 6px 16px; font-size: 11px; }
+.theme-action-bar { min-height: 58px; padding: 7px 16px; }
 .theme-toolbar-name { font-size: 13px; font-weight: 750; }
 .theme-toolbar-actions { margin: 0; }
 .theme-toolbar-actions .action-button { min-height: 34px; }
-.brand { font-weight: 800; font-size: 14px; letter-spacing: .2px; }
-.brand-subtitle { font-weight: 650; font-size: 10px; letter-spacing: 1.4px; }
+.brand { font-weight: 800; font-size: 14px; letter-spacing: .1px; }
+.brand-subtitle { font-weight: 650; font-size: 10px; letter-spacing: 1.1px; }
 .brand-app-icon { min-width: 36px; min-height: 36px; }
-.status-badge {
-  padding: 6px 10px; border-radius: 14px;
-  font-size: 10px; font-weight: 700;
-}
-.icon-button { min-width: 32px; min-height: 32px; border-radius: 8px; padding: 6px; }
-.lang-select { min-width: 200px; }
-.prefs-panel { min-width: 292px; padding: 14px; border-radius: 11px; }
+.status-badge { padding: 6px 11px; border-radius: 14px; font-size: 10px; font-weight: 700; }
+.icon-button { min-width: 32px; min-height: 32px; border-radius: 9px; padding: 6px; }
+
+/* One menu surface, without nested drop-down popovers (v2.3.8 fix). */
+.prefs-panel { min-width: 292px; padding: 14px; border-radius: 12px; }
 .prefs-heading { font-size: 13px; font-weight: 750; }
 .prefs-label { margin-top: 4px; font-size: 12px; font-weight: 650; }
-.prefs-choice { min-height: 32px; padding: 4px 9px; border-radius: 7px; font-size: 12px; font-weight: 600; }
-.prefs-panel.prefs-dark .prefs-choice { background: #293648; color: #e3ebf7; border: 1px solid #41556b; }
-.prefs-panel.prefs-dark .prefs-choice:hover { background: #34485e; }
-.prefs-panel.prefs-dark .prefs-choice.prefs-selected { background: #4b92e7; color: #071522; border-color: #4b92e7; }
-.prefs-panel.prefs-light .prefs-choice { background: #f8fbff; color: #37506d; border: 1px solid #d0dce9; }
-.prefs-panel.prefs-light .prefs-choice:hover { background: #e9f1fb; }
-.prefs-panel.prefs-light .prefs-choice.prefs-selected { background: #347bc9; color: #ffffff; border-color: #347bc9; }
-popover.studio-prefs-popover > contents { padding: 0; border-radius: 12px; }
-.prefs-panel.prefs-dark { background: #1c2532; color: #eaf0f8; border: 1px solid #3b5068; }
-.prefs-panel.prefs-light { background: #ffffff; color: #26384b; border: 1px solid #d0dce9; }
+.prefs-choice { min-height: 33px; padding: 4px 9px; border-radius: 8px; font-size: 12px; font-weight: 600; }
+popover.studio-prefs-popover > contents { padding: 0; border-radius: 13px; }
 .popup-contents { min-width: 172px; padding: 7px; }
 .popup-contents .action-button { min-height: 35px; }
 .prefs-panel .action-button { min-height: 36px; }
-.popup-action > button, .prefs-trigger > button { min-height: 32px; border-radius: 8px; padding: 6px 10px; }
-.lang-select > button {
-  min-height: 32px; border-radius: 7px;
-  padding: 5px 9px; font-size: 13px; font-weight: 600;
-}
-.nav-heading {
-  margin: 5px 12px 10px; font-size: 10px;
-  font-weight: 750; letter-spacing: 1px;
-}
+.popup-action > button, .prefs-trigger > button { min-height: 32px; border-radius: 9px; padding: 6px 10px; }
+
+.nav-heading { margin: 5px 12px 10px; font-size: 10px; font-weight: 750; letter-spacing: 1px; }
 .nav-group-secondary { margin-top: 22px; }
 .nav-button {
-  min-height: 36px; padding: 6px 10px;
+  min-height: 39px; padding: 7px 10px;
   border: 0; border-left: 3px solid transparent;
-  border-radius: 8px; box-shadow: none;
+  border-radius: 9px; box-shadow: none;
   font-size: 13px; font-weight: 550;
 }
 .nav-active { font-weight: 750; }
@@ -62,8 +48,9 @@ popover.studio-prefs-popover > contents { padding: 0; border-radius: 12px; }
 .nav-compact .nav-icon { margin-left: 5px; }
 .nav-icon { min-width: 19px; min-height: 19px; }
 .nav-footer { margin: 9px 12px; font-size: 11px; }
+
 .page-title { font-size: 23px; font-weight: 800; letter-spacing: -.3px; }
-.studio-card { border-radius: 12px; padding: 13px; }
+.studio-card { border-radius: 12px; padding: 14px; }
 .hero { padding: 19px 18px; }
 .hero-title { font-size: 20px; font-weight: 750; }
 .section-heading { font-size: 12px; font-weight: 750; letter-spacing: .4px; }
@@ -71,136 +58,121 @@ popover.studio-prefs-popover > contents { padding: 0; border-radius: 12px; }
 .muted { font-size: 13px; }
 .warning { font-size: 12px; }
 .item-label { font-size: 13px; }
-.empty-state { padding: 13px 10px; font-size: 13px; font-style: italic; }
+.empty-state { padding: 13px 10px; font-size: 13px; font-style: italic; border-radius: 9px; }
 .actions { margin-top: 7px; margin-bottom: 5px; }
 .action-flow { margin-top: 9px; margin-bottom: 6px; }
-.action-flow flowboxchild { padding: 0; margin: 0; }
+.action-flow flowboxchild, .menu-editor-flow flowboxchild { padding: 0; margin: 0; }
 .menu-editor-flow { margin-top: 6px; }
-.menu-editor-flow flowboxchild { padding: 0; margin: 0; }
 .menu-entry-list, .menu-entry-fields { padding: 2px; }
-.action-button {
-  min-height: 31px; padding: 6px 13px;
-  border-radius: 7px; font-size: 12px; font-weight: 650;
-}
-/* Disabled writes must not resemble an available primary action. */
+.action-button { min-height: 32px; padding: 6px 13px; border-radius: 8px; font-size: 12px; font-weight: 650; }
 .action-button:disabled, .icon-button:disabled,
-.popup-action:disabled, .prefs-trigger:disabled { opacity: .48; }
+.popup-action:disabled, .prefs-trigger:disabled { opacity: .5; }
 .grub-dark .action-button.suggested-action:disabled,
-.grub-light .action-button.suggested-action:disabled { background: #7d8b9a; color: #ecf0f4; }
+.grub-light .action-button.suggested-action:disabled { opacity: .55; }
 .grub-dark entry:disabled, .grub-dark dropdown:disabled,
-.grub-light entry:disabled, .grub-light dropdown:disabled { opacity: .78; }
+.grub-light entry:disabled, .grub-light dropdown:disabled { opacity: .75; }
+
 .stats-grid { margin-top: 2px; }
 .metric-card { min-height: 60px; padding: 12px 15px; }
 .metric-label { font-size: 10px; font-weight: 750; letter-spacing: .7px; }
 .metric-value { font-size: 17px; font-weight: 750; }
-.studio-list { border-radius: 9px; }
+.studio-list { border-radius: 10px; }
 .studio-list row { min-height: 43px; }
 .studio-list row:last-child { border-bottom: 0; }
 .theme-browser, .theme-details { margin: 0 2px; }
 .theme-details { margin-top: 10px; }
 .theme-option { padding: 2px; }
-.theme-icon-fallback { opacity: .72; }
-.grub-dark .theme-icon-fallback { color: #bbd0e8; }
-.grub-light .theme-icon-fallback { color: #496c91; }
+.theme-icon-fallback { opacity: .7; }
 .theme-selected-name { font-size: 16px; font-weight: 750; }
 .theme-selected-status { padding: 4px 8px; border-radius: 11px; font-size: 10px; font-weight: 750; }
 .theme-file-location { margin-top: 4px; margin-bottom: 9px; }
 .generated-expander { padding: 6px; border-radius: 9px; }
 
-/* Dark mode — ink/navy with a single blue accent. */
-.grub-dark { background: #111620; color: #ebf0f7; }
-.grub-dark .studio-header { background: #171e29; color: #ebf0f7; border-bottom: 1px solid #303b4a; }
-.grub-dark .studio-sidebar { background: #121a26; border-right: 1px solid #293545; }
-.grub-dark .page-scroller { background: #111620; }
-.grub-dark .studio-footer { background: #141c28; color: #91a2b9; border-top: 1px solid #283747; }
-.grub-dark .theme-action-bar { background: #171e29; color: #e8f0f9; border-top: 1px solid #303b4a; }
-.grub-dark .studio-card { background: #1c2532; border: 1px solid #303e50; }
-.grub-dark .hero { background: #202e40; border-color: #354d68; }
-.grub-dark .metric-card { background: #192432; }
-.grub-dark .warning-card { background: #282722; border-color: #575040; }
-.grub-dark .brand-subtitle, .grub-dark .muted,
-.grub-dark .nav-heading, .grub-dark .nav-footer,
-.grub-dark .metric-label { color: #98aac0; }
-.grub-dark .section-heading { color: #cad7e7; }
-.grub-dark .warning { color: #e5bd82; }
-.grub-dark .empty-state { background: #17212e; color: #afc0d5; border-radius: 8px; }
-.grub-dark .status-badge { color: #a9dbbd; background: #204235; }
-.grub-dark .status-locked { color: #e3bf9d; background: #443324; }
-.grub-dark .status-readonly { color: #e0c58c; background: #413e2c; }
-.grub-dark .theme-state-active { color: #9ed4b2; background: #214035; }
-.grub-dark .theme-state-idle { color: #b4c8df; background: #304052; }
-.grub-dark .nav-button { color: #b7c6d9; background: transparent; }
-.grub-dark .nav-button:hover { background: #243247; }
-.grub-dark .nav-active { color: #ffffff; background: #24466d; border-left-color: #70aaf6; }
-.grub-dark .nav-active .nav-icon { color: #91bbfa; }
-.grub-dark .studio-list { background: #131c28; border: 1px solid #35465c; }
-.grub-dark .studio-list row { border-bottom: 1px solid #2d3b4b; }
-.grub-dark .studio-list row:hover { background: #213047; }
-.grub-dark .studio-list row:selected { color: #ffffff; background: #294b73; }
-.grub-dark .studio-list row .row-title { color: #e7effa; }
-.grub-dark .studio-list row .muted { color: #9cafc7; }
-.grub-dark .studio-list row:selected .row-title { color: #ffffff; }
-.grub-dark .theme-current .row-title { color: #97c5ff; }
-.grub-dark .lang-select > button {
-  background: #253245; color: #e8eff9; border: 1px solid #42536a;
+/* Actual Adwaita palette: libadwaita changes these tokens for light, dark,
+ * high contrast and (where supported) the desktop accent color. */
+.grub-light, .grub-dark { background: @window_bg_color; color: @window_fg_color; }
+.grub-light .studio-header, .grub-dark .studio-header,
+.grub-light .theme-action-bar, .grub-dark .theme-action-bar {
+  background: @headerbar_bg_color; color: @headerbar_fg_color;
+  border-bottom: 1px solid alpha(@window_fg_color, .1);
 }
-.grub-dark .lang-select > button:hover { background: #34485e; }
-.grub-dark entry, .grub-dark dropdown, .grub-dark textview {
-  background: #131e2c; color: #f0f4fa; border: 1px solid #42556b;
+.grub-light .studio-sidebar, .grub-dark .studio-sidebar {
+  background: @sidebar_bg_color; color: @sidebar_fg_color;
+  border-right: 1px solid alpha(@window_fg_color, .1);
 }
-.grub-dark .action-button.flat, .grub-dark .icon-button {
-  background: #293648; color: #e3ebf7; border: 1px solid #3e5065;
+.grub-light .page-scroller, .grub-dark .page-scroller { background: @window_bg_color; }
+.grub-light .studio-footer, .grub-dark .studio-footer {
+  background: @headerbar_bg_color; color: alpha(@window_fg_color, .68);
+  border-top: 1px solid alpha(@window_fg_color, .1);
 }
-.grub-dark .popup-action > button, .grub-dark .prefs-trigger > button { background: #293648; color: #e3ebf7; border: 1px solid #3e5065; }
-.grub-dark .action-button.flat:hover, .grub-dark .icon-button:hover { background: #34485e; }
-.grub-dark .action-button.suggested-action { background: #4b92e7; color: #071522; }
-.grub-dark .generated-expander { background: #192331; border: 1px solid #354355; }
+.grub-light .theme-action-bar, .grub-dark .theme-action-bar {
+  border-top: 1px solid alpha(@window_fg_color, .1); border-bottom: none;
+}
+.grub-light .studio-card, .grub-dark .studio-card,
+.grub-light .metric-card, .grub-dark .metric-card {
+  background: @card_bg_color;
+  border: 1px solid alpha(@window_fg_color, .1);
+}
+.grub-light .hero, .grub-dark .hero { background: @card_bg_color; border-color: alpha(@accent_bg_color, .2); }
+.grub-light .warning-card, .grub-dark .warning-card { background: alpha(@warning_color, .1); }
+.grub-light .brand-subtitle, .grub-dark .brand-subtitle,
+.grub-light .muted, .grub-dark .muted,
+.grub-light .nav-heading, .grub-dark .nav-heading,
+.grub-light .nav-footer, .grub-dark .nav-footer,
+.grub-light .metric-label, .grub-dark .metric-label { color: alpha(@window_fg_color, .68); }
+.grub-light .section-heading, .grub-dark .section-heading { color: @window_fg_color; }
+.grub-light .warning, .grub-dark .warning { color: @warning_color; }
+.grub-light .empty-state, .grub-dark .empty-state { background: alpha(@window_fg_color, .05); }
+.grub-light .status-badge, .grub-dark .status-badge,
+.grub-light .theme-state-active, .grub-dark .theme-state-active {
+  color: @success_color; background: alpha(@success_color, .13);
+}
+.grub-light .status-locked, .grub-dark .status-locked,
+.grub-light .status-readonly, .grub-dark .status-readonly {
+  color: @warning_color; background: alpha(@warning_color, .13);
+}
+.grub-light .theme-state-idle, .grub-dark .theme-state-idle {
+  color: @window_fg_color; background: alpha(@window_fg_color, .08);
+}
+.grub-light .nav-button, .grub-dark .nav-button { color: @sidebar_fg_color; background: transparent; }
+.grub-light .nav-button:hover, .grub-dark .nav-button:hover { background: alpha(@window_fg_color, .07); }
+.grub-light .nav-active, .grub-dark .nav-active {
+  color: @accent_color; background: alpha(@accent_bg_color, .14);
+  border-left-color: @accent_bg_color;
+}
+.grub-light .nav-active .nav-icon, .grub-dark .nav-active .nav-icon { color: @accent_color; }
+.grub-light .studio-list, .grub-dark .studio-list {
+  background: @card_bg_color; border: 1px solid alpha(@window_fg_color, .12);
+}
+.grub-light .studio-list row, .grub-dark .studio-list row { border-bottom: 1px solid alpha(@window_fg_color, .08); }
+.grub-light .studio-list row:hover, .grub-dark .studio-list row:hover { background: alpha(@window_fg_color, .06); }
+.grub-light .studio-list row:selected, .grub-dark .studio-list row:selected {
+  color: @accent_color; background: alpha(@accent_bg_color, .15);
+}
+.grub-light .studio-list row .row-title, .grub-dark .studio-list row .row-title { color: @window_fg_color; }
+.grub-light .studio-list row .muted, .grub-dark .studio-list row .muted { color: alpha(@window_fg_color, .68); }
+.grub-light .theme-current .row-title, .grub-dark .theme-current .row-title { color: @accent_color; }
+.grub-light .theme-icon-fallback, .grub-dark .theme-icon-fallback { color: @accent_color; }
+.grub-light .action-button.flat, .grub-dark .action-button.flat,
+.grub-light .icon-button, .grub-dark .icon-button {
+  background: alpha(@window_fg_color, .04); color: @window_fg_color;
+  border: 1px solid alpha(@window_fg_color, .15);
+}
+.grub-light .action-button.flat:hover, .grub-dark .action-button.flat:hover,
+.grub-light .icon-button:hover, .grub-dark .icon-button:hover { background: alpha(@window_fg_color, .09); }
+.grub-light .action-button.suggested-action, .grub-dark .action-button.suggested-action {
+  background: @accent_bg_color; color: @accent_fg_color;
+}
+.grub-light .generated-expander, .grub-dark .generated-expander {
+  background: @card_bg_color; border: 1px solid alpha(@window_fg_color, .1);
+}
 
-/* Light mode — clean graphite typography, restrained slate outlines. */
-.grub-light { background: #f3f6fa; color: #243247; }
-.grub-light .studio-header { background: #ffffff; color: #243247; border-bottom: 1px solid #dbe4ef; }
-.grub-light .studio-sidebar { background: #f9fbfe; border-right: 1px solid #dce5ef; }
-.grub-light .page-scroller { background: #f3f6fa; }
-.grub-light .studio-footer { background: #fbfcfe; color: #63778f; border-top: 1px solid #dfe6ef; }
-.grub-light .theme-action-bar { background: #ffffff; color: #25394e; border-top: 1px solid #dbe4ee; }
-.grub-light .studio-card { background: #ffffff; border: 1px solid #dbe4ee; }
-.grub-light .hero { background: #ffffff; border-color: #cddcf0; }
-.grub-light .metric-card { background: #ffffff; }
-.grub-light .warning-card { background: #fff8ed; border-color: #ebd7b8; }
-.grub-light .brand-subtitle, .grub-light .muted,
-.grub-light .nav-heading, .grub-light .nav-footer,
-.grub-light .metric-label { color: #61768e; }
-.grub-light .section-heading { color: #3f5570; }
-.grub-light .warning { color: #98642c; }
-.grub-light .empty-state { background: #f1f5fa; color: #6a7e94; border-radius: 8px; }
-.grub-light .status-badge { color: #236b48; background: #dff4e7; }
-.grub-light .status-locked { color: #895a2b; background: #fff0db; }
-.grub-light .status-readonly { color: #7e6123; background: #fff2cf; }
-.grub-light .theme-state-active { color: #23734c; background: #e2f4e9; }
-.grub-light .theme-state-idle { color: #49617c; background: #e8eef5; }
-.grub-light .nav-button { color: #455a73; background: transparent; }
-.grub-light .nav-button:hover { background: #edf2f8; }
-.grub-light .nav-active { color: #1758a0; background: #e3f0ff; border-left-color: #3779c8; }
-.grub-light .nav-active .nav-icon { color: #2c72c5; }
-.grub-light .studio-list { background: #f9fbfd; border: 1px solid #dce4ee; }
-.grub-light .studio-list row { border-bottom: 1px solid #e3e9f1; }
-.grub-light .studio-list row:hover { background: #edf4fc; }
-.grub-light .studio-list row:selected { color: #174f93; background: #e3f0fe; }
-.grub-light .studio-list row .row-title { color: #283b53; }
-.grub-light .studio-list row .muted { color: #647b93; }
-.grub-light .studio-list row:selected .row-title { color: #165d9c; }
-.grub-light .theme-current .row-title { color: #226ab8; }
-.grub-light .lang-select > button {
-  background: #ffffff; color: #37506d; border: 1px solid #d0dce9;
+/* A popover can use a different GDK surface: style it explicitly with the
+ * same Adwaita tokens rather than depending on root class inheritance. */
+.prefs-panel.prefs-dark, .prefs-panel.prefs-light {
+  background: @window_bg_color; color: @window_fg_color;
+  border: 1px solid alpha(@window_fg_color, .13);
 }
-.grub-light .lang-select > button:hover { background: #e9f1fb; }
-.grub-light entry, .grub-light dropdown, .grub-light textview {
-  background: #ffffff; color: #233347; border: 1px solid #c8d6e5;
-}
-.grub-light .action-button.flat, .grub-light .icon-button {
-  background: #ffffff; color: #37506d; border: 1px solid #d0dce9;
-}
-.grub-light .popup-action > button, .grub-light .prefs-trigger > button { background: #ffffff; color: #37506d; border: 1px solid #d0dce9; }
-.grub-light .action-button.flat:hover, .grub-light .icon-button:hover { background: #e9f1fb; }
-.grub-light .action-button.suggested-action { background: #347bc9; color: #ffffff; }
-.grub-light .generated-expander { background: #ffffff; border: 1px solid #dce5ef; }
+.prefs-panel .prefs-choice { color: @window_fg_color; background: alpha(@window_fg_color, .05); border: 1px solid alpha(@window_fg_color, .14); }
+.prefs-panel .prefs-choice:hover { background: alpha(@window_fg_color, .1); }
+.prefs-panel .prefs-choice.prefs-selected { color: @accent_fg_color; background: @accent_bg_color; border-color: @accent_bg_color; }
