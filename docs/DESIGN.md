@@ -1,4 +1,4 @@
-# GRUB Studio Universal — projekt interfejsu 2.3.3
+# GRUB Studio Universal — projekt interfejsu 2.3.4
 
 ## Cel
 
@@ -11,9 +11,10 @@ szczegółów na żądanie z [GNOME HIG](https://developer.gnome.org/hig/).
 
 - **Stała powłoka:** pasek górny, nawigacja i pasek stanu są tworzone raz.
   Zmiana karty zastępuje wyłącznie zawartość obszaru roboczego.
-- **Nawigacja:** sześć sekcji w dwóch grupach (GRUB, Narzędzia). Panel ma
+- **Nawigacja:** sześć sekcji, zawsze widocznych w panelu bocznym. Nie ma
+  przycisku do chowania ani ponownego wyświetlania nawigacji. Panel ma
   szerokość 196 px w dużym oknie i 62 px z samymi ikonami poniżej 860 px.
-  Długie nazwy nie zmieniają szerokości panelu; zwinięte ikony mają podpowiedzi.
+  Długie nazwy nie zmieniają szerokości panelu; ikony mają podpowiedzi.
 - **Pasek górny:** identyfikacja aplikacji, stan uprawnień, odblokowanie przez
   Polkit, globalne odświeżenie i jedno menu preferencji (kolorystyka oraz język).
   Odblokowanie zastępuje powtarzający jego znaczenie znacznik blokady. Grafika
@@ -24,8 +25,11 @@ szczegółów na żądanie z [GNOME HIG](https://developer.gnome.org/hig/).
   kursora z sesji (`XCURSOR_*`) lub KDE Plasma (`kcminputrc`). Nie dołączamy
   do AppImage własnego pakietu kursorów.
 - **Stany operacji:** brak autoryzacji jest odrębny od trybu tylko do odczytu.
-  Zablokowane przyciski są wyszarzone, a niedostępne pola konfiguracji nie
-  sugerują możliwości zapisania zmian.
+  W trybach demonstracyjnym i tylko do odczytu formularze edycji ustępują
+  podsumowaniu odczytanych danych, bez pozornie aktywnych pól zapisu.
+- **Trwałość pracy w interfejsie:** niezapisane ustawienia GRUB i dane
+  edytowanego wpisu EFI przechowuje stan aplikacji, a nie pojedyncza karta.
+  Po zmianie karty, języka lub motywu wyglądu edycja jest nadal dostępna.
 
 ## Jedno miejsce dla każdej czynności
 
@@ -45,7 +49,7 @@ bez uprawnień. Funkcje zapisu GRUB zachowują walidację i kopię bezpieczeńst
 ## Zachowanie na mniejszym ekranie
 
 - Minimalny obszar okna 620 × 440 px; pionowy przewijany widok karty.
-- Poniżej 860 px panel boczny jest ikonowy, ale zachowuje wskazówki po najechaniu.
+- Poniżej 860 px panel boczny jest ikonowy, ale cały czas widoczny i zachowuje wskazówki po najechaniu.
 - Edytor wpisów zawija przyciski do kolejnego wiersza.
 - Na szerokim ekranie edytor ma dwie kolumny (lista wpisów i formularz);
   przy mniejszej szerokości kolumny ustawiają się jedna pod drugą.
@@ -72,7 +76,7 @@ GitHub Actions uruchamia oba testy przed budową AppImage.
 Osobny test `--ui-resize-report` wymusza rozmiar 720 px poleceniem `xdotool`
 **po otwarciu okna** i sprawdza przejście z 196 do 62 px; dzięki temu test
 obejmuje też menedżery okien niewysyłające powiadomień o zmianie szerokości.
-Wersja 2.3.3 sprawdza obecność osadzonego PNG aplikacji, komplet komunikatów
+Wersja 2.3.4 sprawdza obecność osadzonego PNG aplikacji, komplet komunikatów
 uprawnień w siedmiu językach oraz zachowuje testy kursora i stałego paska akcji Motywów.
 
 **Decyzja projektowa:** usunięto pozorny podgląd motywu. Sam odczyt
