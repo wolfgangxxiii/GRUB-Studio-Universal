@@ -631,9 +631,16 @@ fn page_home(_window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     }
     page.append(&banner);
 
+    // The dashboard is a true, full-width 2x2 grid. Without homogeneous
+    // columns GTK measures each cell only by its label and leaves the rest of
+    // the content area empty (especially noticeable on widescreen displays).
     let stats=gtk::Grid::new();
     stats.add_css_class("stats-grid");
-    stats.set_row_spacing(8);stats.set_column_spacing(8);
+    stats.set_hexpand(true);
+    stats.set_halign(gtk::Align::Fill);
+    stats.set_column_homogeneous(true);
+    stats.set_row_homogeneous(true);
+    stats.set_row_spacing(10);stats.set_column_spacing(10);
     let current_theme=snapshot.config.get("GRUB_THEME").and_then(|s|s.split('/').rev().nth(1))
         .unwrap_or("—");
     for (position,title,value) in [
@@ -643,6 +650,9 @@ fn page_home(_window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
         (3,tr(state,"home.bootloader"),snapshot.profile.bootloader.clone()),
     ] {
         let tile=card();tile.add_css_class("metric-card");
+        tile.set_hexpand(true);
+        tile.set_halign(gtk::Align::Fill);
+        tile.set_vexpand(true);
         add_text(&tile,title,"metric-label",true);
         add_text(&tile,value,"metric-value",true);
         stats.attach(&tile,position%2,position/2,1,1);
@@ -1312,7 +1322,7 @@ fn page_tools(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     page
 }
 fn page_about(_window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
-    let page=page_root(&tr(state,"about.title"),"Rust Edition · GTK4 · libadwaita · 3.0.0");
+    let page=page_root(&tr(state,"about.title"),"Rust Edition · GTK4 · libadwaita · 3.0.1");
     for number in 1..=9 {
         let title=tr(state,&format!("about.{number:02}.title"));
         let text=tr(state,&format!("about.{number:02}.text"));
@@ -1333,6 +1343,17 @@ fn load_css() {
 }
 fn clear_box(container: &gtk::Box) {
     while let Some(child)=container.first_child() { container.remove(&child); }
+}
+// Used by the headless GTK layout check. Inspect the rendered widget tree,
+// rather than relying only on the Grid construction flags.
+fn descendant_with_class(widget: &gtk::Widget, css_class: &str) -> Option<gtk::Widget> {
+    if widget.has_css_class(css_class) {return Some(widget.clone());}
+    let mut child=widget.first_child();
+    while let Some(node)=child {
+        if let Some(found)=descendant_with_class(&node,css_class) {return Some(found);}
+        child=node.next_sibling();
+    }
+    None
 }
 fn icon_button(icon: &str, tooltip: &str) -> gtk::Button {
     let b=gtk::Button::from_icon_name(icon);
@@ -1514,7 +1535,7 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
     let brand=gtk::Box::new(gtk::Orientation::Vertical,1);
     brand.set_hexpand(true);
     add_text(&brand,"GRUB Studio","brand",false);
-    add_text(&brand,"UNIVERSAL  ·  3.0.0","brand-subtitle",false);
+    add_text(&brand,"UNIVERSAL  ·  3.0.1","brand-subtitle",false);
     header.append(&brand);
     // Custom controls never become part of the window manager's title bar.
     let status=if s.demo {"DEMO".into()}
@@ -1760,7 +1781,7 @@ mod ui_tests {
 
 fn main() {
     let args:Vec<String>=std::env::args().skip(1).collect();
-    if args.iter().any(|a| a=="--version") { println!("GRUB Studio Universal 3.0.0 Rust / Adwaita Edition");return; }
+    if args.iter().any(|a| a=="--version") { println!("GRUB Studio Universal 3.0.1 Rust / Adwaita Edition");return; }
     if args.iter().any(|a| a=="--self-test") {
         let locales=serde_json::from_str::<serde_json::Value>(include_str!("../assets/translations.json")).expect("valid locale catalog");
         for (code,_) in LANGUAGES {assert!(locales[*code]["tools.title"].is_string(),"missing tools translation: {code}");}
@@ -1778,6 +1799,7 @@ fn main() {
     }
     let ui_smoke=args.iter().any(|a| a=="--ui-smoke" || a=="--ui-smoke-wide");
     let prefs_smoke=args.iter().any(|a| a=="--ui-prefs-smoke");
+    let home_layout_smoke=args.iter().any(|a| a=="--ui-home-layout-smoke");
     let ui_resize_report=args.iter().any(|a| a=="--ui-resize-report");
     let ui_wide=args.iter().any(|a| a=="--ui-smoke-wide");
     let demo_themes=args.iter().any(|a| a=="--demo-themes");
@@ -1788,7 +1810,7 @@ fn main() {
         .filter(|v| matches!(*v,"light"|"dark"|"system")).map(str::to_owned);
     let preview_language=args.iter().find_map(|a|a.strip_prefix("--language="))
         .filter(|v| LANGUAGES.iter().any(|(id,_)| id==v)).map(str::to_owned);
-    let demo=ui_smoke || prefs_smoke || ui_resize_report || demo_themes || demo_page.is_some() || args.iter().any(|a| a=="--demo");
+    let demo=ui_smoke || prefs_smoke || home_layout_smoke || ui_resize_report || demo_themes || demo_page.is_some() || args.iter().any(|a| a=="--demo");
     // AdwApplication installs the official Adwaita stylesheet and connects
     // the style manager to desktop appearance preferences. The application
     // window is still GtkApplicationWindow so that KDE/Wayland controls its
@@ -1796,6 +1818,30 @@ fn main() {
     let app=adw::Application::builder().application_id(APP_ID).build();
     app.connect_startup(|_| {load_css();apply_desktop_cursor();});
     app.connect_activate(move |app| {
+        if home_layout_smoke {
+            let window=window.clone();let application=app.clone();
+            glib::timeout_add_local_once(Duration::from_millis(750),move || {
+                let root=window.clone().upcast::<gtk::Widget>();
+                let grid=descendant_with_class(&root,"stats-grid")
+                    .expect("dashboard metric grid missing")
+                    .downcast::<gtk::Grid>().expect("dashboard must be a GtkGrid");
+                assert!(grid.column_homogeneous() && grid.row_homogeneous(),
+                    "dashboard columns and rows must be homogeneous");
+                let first=grid.child_at(0,0).expect("top-left metric missing");
+                let second=grid.child_at(1,0).expect("top-right metric missing");
+                let third=grid.child_at(0,1).expect("bottom-left metric missing");
+                let fourth=grid.child_at(1,1).expect("bottom-right metric missing");
+                assert!(grid.width()>500,"dashboard grid must occupy the full content width");
+                assert_eq!(first.width(),second.width(),"metric columns differ");
+                assert_eq!(third.width(),fourth.width(),"second metric row columns differ");
+                assert_eq!(first.height(),third.height(),"metric rows differ in height");
+                assert!((grid.width() - first.width() - second.width()
+                    - grid.column_spacing() as i32).abs()<=4,
+                    "dashboard tiles do not fill the allocated grid width");
+                println!("GTK4 home layout smoke: 4 equally sized cards filling {} px: OK",grid.width());
+                application.quit();
+            });
+        }
         if ui_smoke {
             if let Some(settings)=gtk::Settings::default() {
                 println!("GTK4 cursor settings: {} / {}",

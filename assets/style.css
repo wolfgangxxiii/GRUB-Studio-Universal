@@ -1,4 +1,4 @@
-/* GRUB Studio Universal 3.0.0 — native Adwaita palettes.
+/* GRUB Studio Universal 3.0.1 — native Adwaita palettes.
  * Use libadwaita's named color tokens (supported on Ubuntu 24.04 / Adwaita 1.5)
  * rather than hard-coded navy/blue themes. The StyleManager owns light/dark
  * selection, including KDE portal preferences and the app's explicit override.
@@ -64,7 +64,7 @@ popover.studio-prefs-popover > contents { padding: 0; border-radius: 13px; }
 .action-flow flowboxchild, .menu-editor-flow flowboxchild { padding: 0; margin: 0; }
 .menu-editor-flow { margin-top: 6px; }
 .menu-entry-list, .menu-entry-fields { padding: 2px; }
-.action-button { min-height: 32px; padding: 6px 13px; border-radius: 8px; font-size: 12px; font-weight: 650; }
+.action-button { min-height: 34px; padding: 6px 13px; border-radius: 8px; font-size: 12px; font-weight: 650; }
 .action-button:disabled, .icon-button:disabled,
 .popup-action:disabled, .prefs-trigger:disabled { opacity: .5; }
 .grub-dark .action-button.suggested-action:disabled,
@@ -72,10 +72,10 @@ popover.studio-prefs-popover > contents { padding: 0; border-radius: 13px; }
 .grub-dark entry:disabled, .grub-dark dropdown:disabled,
 .grub-light entry:disabled, .grub-light dropdown:disabled { opacity: .75; }
 
-.stats-grid { margin-top: 2px; }
-.metric-card { min-height: 60px; padding: 12px 15px; }
+.stats-grid { margin-top: 3px; }
+.metric-card { min-height: 80px; padding: 15px 18px; }
 .metric-label { font-size: 10px; font-weight: 750; letter-spacing: .7px; }
-.metric-value { font-size: 17px; font-weight: 750; }
+.metric-value { font-size: 20px; font-weight: 800; }
 .studio-list { border-radius: 10px; }
 .studio-list row { min-height: 43px; }
 .studio-list row:last-child { border-bottom: 0; }
@@ -86,7 +86,12 @@ popover.studio-prefs-popover > contents { padding: 0; border-radius: 13px; }
 .theme-selected-name { font-size: 16px; font-weight: 750; }
 .theme-selected-status { padding: 4px 8px; border-radius: 11px; font-size: 10px; font-weight: 750; }
 .theme-file-location { margin-top: 4px; margin-bottom: 9px; }
-.generated-expander { padding: 6px; border-radius: 9px; }
+.generated-expander { padding: 6px; border-radius: 11px; }
+.generated-expander > box > title {
+  min-height: 35px; padding: 6px 11px; border-radius: 8px;
+  font-weight: 700; transition: background 120ms ease;
+}
+.generated-expander > box > title > expander { min-width: 17px; min-height: 17px; }
 
 /* Actual Adwaita palette: libadwaita changes these tokens for light, dark,
  * high contrast and (where supported) the desktop accent color. */
@@ -113,6 +118,10 @@ popover.studio-prefs-popover > contents { padding: 0; border-radius: 13px; }
   background: @card_bg_color;
   border: 1px solid alpha(@window_fg_color, .1);
 }
+.grub-light .metric-card, .grub-dark .metric-card {
+  border-left: 3px solid alpha(@accent_bg_color, .6);
+}
+.grub-light .metric-value, .grub-dark .metric-value { color: @accent_color; }
 .grub-light .hero, .grub-dark .hero { background: @card_bg_color; border-color: alpha(@accent_bg_color, .2); }
 .grub-light .warning-card, .grub-dark .warning-card { background: alpha(@warning_color, .1); }
 .grub-light .brand-subtitle, .grub-dark .brand-subtitle,
@@ -135,9 +144,9 @@ popover.studio-prefs-popover > contents { padding: 0; border-radius: 13px; }
   color: @window_fg_color; background: alpha(@window_fg_color, .08);
 }
 .grub-light .nav-button, .grub-dark .nav-button { color: @sidebar_fg_color; background: transparent; }
-.grub-light .nav-button:hover, .grub-dark .nav-button:hover { background: alpha(@window_fg_color, .07); }
+.grub-light .nav-button:hover, .grub-dark .nav-button:hover { background: alpha(@accent_bg_color, .11); }
 .grub-light .nav-active, .grub-dark .nav-active {
-  color: @accent_color; background: alpha(@accent_bg_color, .14);
+  color: @accent_color; background: alpha(@accent_bg_color, .2);
   border-left-color: @accent_bg_color;
 }
 .grub-light .nav-active .nav-icon, .grub-dark .nav-active .nav-icon { color: @accent_color; }
@@ -155,16 +164,52 @@ popover.studio-prefs-popover > contents { padding: 0; border-radius: 13px; }
 .grub-light .theme-icon-fallback, .grub-dark .theme-icon-fallback { color: @accent_color; }
 .grub-light .action-button.flat, .grub-dark .action-button.flat,
 .grub-light .icon-button, .grub-dark .icon-button {
-  background: alpha(@window_fg_color, .04); color: @window_fg_color;
-  border: 1px solid alpha(@window_fg_color, .15);
+  background: alpha(@window_fg_color, .075); color: @window_fg_color;
+  border: 1px solid alpha(@window_fg_color, .24);
 }
 .grub-light .action-button.flat:hover, .grub-dark .action-button.flat:hover,
-.grub-light .icon-button:hover, .grub-dark .icon-button:hover { background: alpha(@window_fg_color, .09); }
+.grub-light .icon-button:hover, .grub-dark .icon-button:hover {
+  background: alpha(@accent_bg_color, .16);
+  border-color: alpha(@accent_bg_color, .48);
+}
+.grub-light .popup-action > button, .grub-dark .popup-action > button,
+.grub-light .prefs-trigger > button, .grub-dark .prefs-trigger > button {
+  background: alpha(@window_fg_color, .075);
+  color: @window_fg_color;
+  border: 1px solid alpha(@window_fg_color, .24);
+}
+.grub-light .popup-action > button:hover, .grub-dark .popup-action > button:hover,
+.grub-light .prefs-trigger > button:hover, .grub-dark .prefs-trigger > button:hover {
+  background: alpha(@accent_bg_color, .16);
+  border-color: alpha(@accent_bg_color, .48);
+}
 .grub-light .action-button.suggested-action, .grub-dark .action-button.suggested-action {
   background: @accent_bg_color; color: @accent_fg_color;
 }
 .grub-light .generated-expander, .grub-dark .generated-expander {
-  background: @card_bg_color; border: 1px solid alpha(@window_fg_color, .1);
+  background: @card_bg_color; border: 1px solid alpha(@window_fg_color, .21);
+}
+.grub-light .generated-expander > box > title,
+.grub-dark .generated-expander > box > title {
+  background: alpha(@accent_bg_color, .085);
+  color: @window_fg_color;
+  border: 1px solid alpha(@accent_bg_color, .26);
+}
+.grub-light .generated-expander > box > title:hover,
+.grub-dark .generated-expander > box > title:hover {
+  background: alpha(@accent_bg_color, .18);
+  border-color: alpha(@accent_bg_color, .5);
+}
+.grub-light .generated-expander > box > title:focus-visible,
+.grub-dark .generated-expander > box > title:focus-visible,
+.grub-light .generated-expander:focus-visible > box > title,
+.grub-dark .generated-expander:focus-visible > box > title {
+  outline: 2px solid @accent_bg_color;
+  outline-offset: 2px;
+}
+.grub-light .generated-expander > box > title > expander,
+.grub-dark .generated-expander > box > title > expander {
+  color: @accent_color;
 }
 
 /* A popover can use a different GDK surface: style it explicitly with the
@@ -173,6 +218,6 @@ popover.studio-prefs-popover > contents { padding: 0; border-radius: 13px; }
   background: @window_bg_color; color: @window_fg_color;
   border: 1px solid alpha(@window_fg_color, .13);
 }
-.prefs-panel .prefs-choice { color: @window_fg_color; background: alpha(@window_fg_color, .05); border: 1px solid alpha(@window_fg_color, .14); }
-.prefs-panel .prefs-choice:hover { background: alpha(@window_fg_color, .1); }
+.prefs-panel .prefs-choice { color: @window_fg_color; background: alpha(@window_fg_color, .075); border: 1px solid alpha(@window_fg_color, .22); }
+.prefs-panel .prefs-choice:hover { background: alpha(@accent_bg_color, .14); border-color: alpha(@accent_bg_color, .42); }
 .prefs-panel .prefs-choice.prefs-selected { color: @accent_fg_color; background: @accent_bg_color; border-color: @accent_bg_color; }
