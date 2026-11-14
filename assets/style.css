@@ -70,9 +70,9 @@
 }
 /* Disabled writes must not resemble an available primary action. */
 .action-button:disabled, .icon-button:disabled,
-.popup-action:disabled, .prefs-trigger:disabled { opacity: .48; }
+.popup-action:disabled, .prefs-trigger:disabled { opacity: .82; }
 .grub-dark entry:disabled, .grub-dark dropdown:disabled,
-.grub-light entry:disabled, .grub-light dropdown:disabled { opacity: .62; }
+.grub-light entry:disabled, .grub-light dropdown:disabled { opacity: .78; }
 .stats-grid { margin-top: 2px; }
 .metric-card { min-height: 60px; padding: 12px 15px; }
 .metric-label { font-size: 10px; font-weight: 750; letter-spacing: .7px; }
