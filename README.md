@@ -28,8 +28,8 @@
 </p>
 
 <p align="center">
-  <img src="preview/GRUB-Studio-2.3.2-Themes-Dark.png" alt="Actual GRUB Studio 2.3.2 GTK4 dark-mode screenshot" width="49%">
-  <img src="preview/GRUB-Studio-2.3.2-Themes-Light.png" alt="Actual GRUB Studio 2.3.2 GTK4 light-mode screenshot" width="49%">
+  <img src="preview/GRUB-Studio-2.3.3-Themes-Dark.png" alt="Actual GRUB Studio 2.3.3 GTK4 dark-mode screenshot with application logo" width="49%">
+  <img src="preview/GRUB-Studio-2.3.3-Themes-Light.png" alt="Actual GRUB Studio 2.3.3 GTK4 light-mode screenshot with application logo" width="49%">
 </p>
 <p align="center"><sub>Rzeczywiste zrzuty GTK4 / Actual GTK4 screenshots · tryb demonstracyjny / demo mode</sub></p>
 

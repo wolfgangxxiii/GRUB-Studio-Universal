@@ -34,12 +34,12 @@ Raport dla wersji 2.3.3 opiera się na [GitHub Actions](https://github.com/wolfg
 
 Zrzuty pochodzą z procesu GTK4 w wirtualnym środowisku X11; nie są renderami marketingowymi:
 
-- [Motywy — ciemny](preview/GRUB-Studio-2.3.2-Themes-Dark.png)
-- [Motywy — jasny](preview/GRUB-Studio-2.3.2-Themes-Light.png)
-- [Motywy — kompaktowy układ po polsku](preview/GRUB-Studio-2.3.2-Themes-Compact-PL.png)
-- [Menu — ciemny](preview/GRUB-Studio-2.3.2-Menu-Dark.png)
-- [Narzędzia — jasny](preview/GRUB-Studio-2.3.2-Tools-Light.png)
-- [Menu — kompaktowy układ po polsku](preview/GRUB-Studio-2.3.2-Menu-Compact-PL.png)
+- [Motywy — ciemny](preview/GRUB-Studio-2.3.3-Themes-Dark.png)
+- [Motywy — jasny](preview/GRUB-Studio-2.3.3-Themes-Light.png)
+- [Motywy — kompaktowy układ po polsku](preview/GRUB-Studio-2.3.3-Themes-Compact-PL.png)
+- [Menu — ciemny](preview/GRUB-Studio-2.3.3-Menu-Dark.png)
+- [Narzędzia — jasny](preview/GRUB-Studio-2.3.3-Tools-Light.png)
+- [Menu — kompaktowy układ po polsku](preview/GRUB-Studio-2.3.3-Menu-Compact-PL.png)
 
 ## Ograniczenia weryfikacji
 
