@@ -502,6 +502,29 @@ fn button(label: &str, primary: bool) -> gtk::Button {
     b.add_css_class("action-button");
     b
 }
+fn preference_choice(label: &str, group: &str, id: &str, selected: bool) -> gtk::Button {
+    let choice=gtk::Button::with_label(label);
+    choice.add_css_class("prefs-choice");
+    choice.add_css_class(group);
+    choice.set_widget_name(id);
+    choice.set_hexpand(true);
+    if selected {choice.add_css_class("prefs-selected");}
+    choice
+}
+
+// Find a button in the preferences popover without relying on the visual
+// language or the order of GTK's internal widget children.
+fn find_preference_choice(widget: &gtk::Widget, group: &str, id: &str) -> Option<gtk::Button> {
+    if widget.has_css_class(group) && widget.widget_name()==id {
+        return widget.clone().downcast::<gtk::Button>().ok();
+    }
+    let mut child=widget.first_child();
+    while let Some(widget)=child {
+        if let Some(found)=find_preference_choice(&widget,group,id) {return Some(found);}
+        child=widget.next_sibling();
+    }
+    None
+}
 fn popup_button(label: &str, contents: &gtk::Box) -> gtk::MenuButton {
     let toggle = gtk::MenuButton::new();
     toggle.set_label(label);
@@ -1472,7 +1495,7 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
     let brand=gtk::Box::new(gtk::Orientation::Vertical,1);
     brand.set_hexpand(true);
     add_text(&brand,"GRUB Studio","brand",false);
-    add_text(&brand,"UNIVERSAL  ·  2.3.7","brand-subtitle",false);
+    add_text(&brand,"UNIVERSAL  ·  2.3.8","brand-subtitle",false);
     header.append(&brand);
     // Custom controls never become part of the window manager's title bar.
     let status=if s.demo {"DEMO".into()}
@@ -1509,46 +1532,68 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
     settings_content.add_css_class(if use_dark {"prefs-dark"}else{"prefs-light"});
     add_text(&settings_content,&tr(state,"prefs.title"),"prefs-heading",false);
     settings_content.append(&gtk::Separator::new(gtk::Orientation::Horizontal));
+    // A GTK DropDown opens a *second* popover. Nested grabs can stall on
+    // Wayland, and rebuilding synchronously from selected-notify destroys
+    // the active menu during GTK's own selection event. Flat buttons avoid
+    // both failure modes while retaining keyboard-accessible choices.
+    let preferences_popover=gtk::Popover::new();
+    preferences_popover.add_css_class("studio-prefs-popover");
+    preferences_popover.set_position(gtk::PositionType::Bottom);
     add_text(&settings_content,&tr(state,"theme.label"),"prefs-label",false);
-    let modes=[tr(state,"theme.system"),tr(state,"theme.light"),tr(state,"theme.dark")];
-    let mode_refs=modes.iter().map(String::as_str).collect::<Vec<_>>();
-    let appearance=gtk::DropDown::from_strings(&mode_refs);
-    appearance.add_css_class("lang-select");
-    appearance.set_hexpand(true);
-    appearance.set_selected(match s.appearance.as_str(){"light"=>1,"dark"=>2,_=>0});
-    let w=window.clone();let state2=state.clone();
-    appearance.connect_selected_notify(move |combo| {
-        let mode=match combo.selected(){1=>"light",2=>"dark",_=>"system"};
-        let mut s=state2.borrow_mut();
-        if s.appearance==mode {return;}
-        s.appearance=mode.into();
-        save_prefs(&s);drop(s);rebuild(&w,&state2);
-    });
-    settings_content.append(&appearance);
+    let appearance_buttons=gtk::Box::new(gtk::Orientation::Horizontal,5);
+    for (mode,key) in [("system","theme.system"),("light","theme.light"),("dark","theme.dark")] {
+        let choice=preference_choice(&tr(state,key),"prefs-appearance",mode,s.appearance==mode);
+        let w=window.downgrade();let st=state.clone();let popover=preferences_popover.downgrade();
+        choice.connect_clicked(move |_| {
+            let mut current=st.borrow_mut();
+            if current.appearance==mode {
+                if let Some(popover)=popover.upgrade() {popover.popdown();}
+                return;
+            }
+            current.appearance=mode.into();
+            if !current.demo {save_prefs(&current);}
+            drop(current);
+            // Closing the menu before scheduling an idle refresh prevents
+            // GTK from handling events on a widget that's being destroyed.
+            if let Some(popover)=popover.upgrade() {popover.popdown();}
+            if let Some(w)=w.upgrade() {
+                let st=st.clone();
+                glib::idle_add_local_once(move || rebuild(&w,&st));
+            }
+        });
+        appearance_buttons.append(&choice);
+    }
+    settings_content.append(&appearance_buttons);
     add_text(&settings_content,&tr(state,"language.label"),"prefs-label",false);
-    let names:Vec<&str>=LANGUAGES.iter().map(|(_,name)|*name).collect();
-    let language=gtk::DropDown::from_strings(&names);
-    language.add_css_class("lang-select");
-    language.set_hexpand(true);
-    language.set_selected(LANGUAGES.iter().position(|(id,_)| *id==s.language).unwrap_or(0) as u32);
-    let w=window.clone();let state2=state.clone();
-    language.connect_selected_notify(move |combo| {
-        if let Some((locale,_))=LANGUAGES.get(combo.selected() as usize) {
-            let mut st=state2.borrow_mut();
-            if st.language==*locale {return;}
-            st.language=(*locale).into();save_prefs(&st);
-            drop(st);rebuild(&w,&state2);
-        }
-    });
-    settings_content.append(&language);
+    let language_buttons=gtk::Grid::new();
+    language_buttons.set_column_spacing(5);
+    language_buttons.set_row_spacing(5);
+    for (index,&(locale,name)) in LANGUAGES.iter().enumerate() {
+        let choice=preference_choice(name,"prefs-language",locale,s.language==locale);
+        let w=window.downgrade();let st=state.clone();let popover=preferences_popover.downgrade();
+        choice.connect_clicked(move |_| {
+            let mut current=st.borrow_mut();
+            if current.language==locale {
+                if let Some(popover)=popover.upgrade() {popover.popdown();}
+                return;
+            }
+            current.language=locale.into();
+            if !current.demo {save_prefs(&current);}
+            drop(current);
+            if let Some(popover)=popover.upgrade() {popover.popdown();}
+            if let Some(w)=w.upgrade() {
+                let st=st.clone();
+                glib::idle_add_local_once(move || rebuild(&w,&st));
+            }
+        });
+        language_buttons.attach(&choice,(index%2) as i32,(index/2) as i32,1,1);
+    }
+    settings_content.append(&language_buttons);
     let preferences=gtk::MenuButton::new();
     preferences.set_child(Some(&nav_icon("settings")));
     preferences.set_tooltip_text(Some(&tr(state,"prefs.title")));
     preferences.add_css_class("icon-button");
     preferences.add_css_class("prefs-trigger");
-    let preferences_popover=gtk::Popover::new();
-    preferences_popover.add_css_class("studio-prefs-popover");
-    preferences_popover.set_position(gtk::PositionType::Bottom);
     preferences_popover.set_child(Some(&settings_content));
     preferences.set_popover(Some(&preferences_popover));
     header.append(&preferences);
@@ -1696,7 +1741,7 @@ mod ui_tests {
 
 fn main() {
     let args:Vec<String>=std::env::args().skip(1).collect();
-    if args.iter().any(|a| a=="--version") { println!("GRUB Studio Universal 2.3.7 Rust Edition");return; }
+    if args.iter().any(|a| a=="--version") { println!("GRUB Studio Universal 2.3.8 Rust Edition");return; }
     if args.iter().any(|a| a=="--self-test") {
         let locales=serde_json::from_str::<serde_json::Value>(include_str!("../assets/translations.json")).expect("valid locale catalog");
         for (code,_) in LANGUAGES {assert!(locales[*code]["tools.title"].is_string(),"missing tools translation: {code}");}
@@ -1713,6 +1758,7 @@ fn main() {
         std::process::exit(2);
     }
     let ui_smoke=args.iter().any(|a| a=="--ui-smoke" || a=="--ui-smoke-wide");
+    let prefs_smoke=args.iter().any(|a| a=="--ui-prefs-smoke");
     let ui_resize_report=args.iter().any(|a| a=="--ui-resize-report");
     let ui_wide=args.iter().any(|a| a=="--ui-smoke-wide");
     let demo_themes=args.iter().any(|a| a=="--demo-themes");
@@ -1723,7 +1769,7 @@ fn main() {
         .filter(|v| matches!(*v,"light"|"dark"|"system")).map(str::to_owned);
     let preview_language=args.iter().find_map(|a|a.strip_prefix("--language="))
         .filter(|v| LANGUAGES.iter().any(|(id,_)| id==v)).map(str::to_owned);
-    let demo=ui_smoke || ui_resize_report || demo_themes || demo_page.is_some() || args.iter().any(|a| a=="--demo");
+    let demo=ui_smoke || prefs_smoke || ui_resize_report || demo_themes || demo_page.is_some() || args.iter().any(|a| a=="--demo");
     let app=gtk::Application::builder().application_id(APP_ID).build();
     app.connect_startup(|_| {load_css();apply_desktop_cursor();});
     app.connect_activate(move |app| {
@@ -1735,6 +1781,11 @@ fn main() {
             }
         }
         let state=Rc::new(RefCell::new(initial_state(demo)));
+        if prefs_smoke {
+            let mut current=state.borrow_mut();
+            current.appearance="system".into();
+            current.language="pl".into();
+        }
         if demo_themes {state.borrow_mut().active="themes".into();}
         if let Some(ref page)=demo_page {state.borrow_mut().active=page.clone();}
         if let Some(ref mode)=preview_appearance {state.borrow_mut().appearance=mode.clone();}
@@ -1778,6 +1829,45 @@ fn main() {
                         "theme actions must only appear on the Themes page");
                 }
                 next+=1;
+                glib::ControlFlow::Continue
+            });
+        }
+        if prefs_smoke {
+            // Reproduce the actual freeze path: open the popover, click its
+            // theme/language controls, let the main loop drain its idle
+            // rebuild, and repeat on the newly rendered popover.
+            let w=window.clone();let st=state.clone();let application=app.clone();
+            let steps=[
+                ("prefs-appearance","dark","dark","pl"),
+                ("prefs-language","en","dark","en"),
+                ("prefs-appearance","light","light","en"),
+                ("prefs-language","de","light","de"),
+                ("prefs-appearance","system","system","de"),
+                ("prefs-language","pl","system","pl"),
+            ];
+            let mut step=0;
+            glib::timeout_add_local(Duration::from_millis(300),move || {
+                if step==steps.len() {
+                    assert_eq!(st.borrow().appearance,"system");
+                    assert_eq!(st.borrow().language,"pl");
+                    println!("GTK4 preferences smoke: {} appearance/language changes: OK",step);
+                    application.quit();
+                    return glib::ControlFlow::Break;
+                }
+                let (group,id,appearance,language)=steps[step];
+                let chrome=st.borrow().chrome.clone().expect("persistent window chrome");
+                let menu=chrome.header.last_child().expect("preferences menu button")
+                    .downcast::<gtk::MenuButton>().expect("GTK MenuButton");
+                let popover=menu.popover().expect("preferences popover");
+                popover.popup();
+                let content=popover.child().expect("preferences content");
+                let choice=find_preference_choice(&content,group,id)
+                    .unwrap_or_else(||panic!("missing preferences option {group}/{id}"));
+                choice.emit_clicked();
+                assert_eq!(st.borrow().appearance,appearance);
+                assert_eq!(st.borrow().language,language);
+                assert!(w.titlebar().is_none(),"window decorations must stay system-managed");
+                step+=1;
                 glib::ControlFlow::Continue
             });
         }

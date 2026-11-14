@@ -1,4 +1,4 @@
-# GRUB Studio Universal — projekt interfejsu 2.3.7
+# GRUB Studio Universal — projekt interfejsu 2.3.8
 
 ## Cel
 
@@ -32,6 +32,10 @@ szczegółów na żądanie z [GNOME HIG](https://developer.gnome.org/hig/).
 - **Kolory i kursor systemowy:** tryby systemowy/jasny/ciemny; motyw i wielkość
   kursora z sesji (`XCURSOR_*`) lub KDE Plasma (`kcminputrc`). Nie dołączamy
   do AppImage własnego pakietu kursorów.
+- **Menu preferencji bez zagnieżdżonych okien:** tryb wyglądu i język wybiera się
+  przyciskami w jednym panelu GTK. Po kliknięciu panel znika, a przebudowę
+  widoku wykonuje zadanie odłożone do pętli zdarzeń, aby nie zwalniać widżetów
+  podczas obsługi zdarzenia. Wybrana opcja jest wizualnie oznaczona.
 - **Stany operacji:** brak autoryzacji jest odrębny od trybu tylko do odczytu.
   W trybach demonstracyjnym i tylko do odczytu formularze edycji ustępują
   podsumowaniu odczytanych danych, bez pozornie aktywnych pól zapisu.
@@ -75,6 +79,7 @@ cargo test --all-targets
 cargo build --release --bins
 GDK_BACKEND=x11 GSK_RENDERER=cairo xvfb-run -a target/release/grub-studio-universal --ui-smoke
 GDK_BACKEND=x11 GSK_RENDERER=cairo xvfb-run -a target/release/grub-studio-universal --ui-smoke-wide
+GDK_BACKEND=x11 GSK_RENDERER=cairo xvfb-run -a target/release/grub-studio-universal --ui-prefs-smoke
 ```
 
 Tryb `--ui-smoke` (bez operacji na GRUB) automatycznie otwiera wszystkie sześć
@@ -84,7 +89,8 @@ GitHub Actions uruchamia oba testy przed budową AppImage.
 Osobny test `--ui-resize-report` wymusza rozmiar 720 px poleceniem `xdotool`
 **po otwarciu okna** i sprawdza przejście z 196 do 62 px; dzięki temu test
 obejmuje też menedżery okien niewysyłające powiadomień o zmianie szerokości.
-Wersja 2.3.7 sprawdza obecność osadzonego PNG aplikacji, komplet komunikatów
+Wersja 2.3.8 dodatkowo testuje otwarcie menu preferencji i sześć kolejnych
+zmian języka/wyglądu bez blokowania pętli GTK. Sprawdza obecność osadzonego PNG aplikacji, komplet komunikatów
 uprawnień w siedmiu językach oraz zachowuje testy kursora i stałego paska akcji Motywów.
 
 **Decyzja projektowa:** usunięto pozorny podgląd motywu. Sam odczyt
