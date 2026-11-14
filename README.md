@@ -1,34 +1,57 @@
 <p align="center">
-  <img src="assets/grub-studio.svg" alt="GRUB Studio Universal logo" width="100">
+  <img src="assets/grub-studio.svg" width="88" alt="GRUB Studio Universal" />
 </p>
 
 <h1 align="center">GRUB Studio Universal</h1>
 
 <p align="center">
-  <strong>A modern, portable GRUB configuration studio for Linux.</strong><br>
-  Rust · GTK4 · libadwaita · Wayland · Light & Dark
+  <strong>Twoje centrum zarządzania GRUB — bez terminala.</strong><br />
+  A clean, native GRUB configuration studio for Linux.
 </p>
 
 <p align="center">
-  <a href="#polski">🇵🇱 Polski</a> &nbsp;·&nbsp; <a href="#english">🇬🇧 English</a>
+  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v3.0.2-rc.1"><img src="https://img.shields.io/badge/version-3.0.2_RC1-3584E4?style=flat-square" alt="Version 3.0.2 RC1" /></a>
+  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions/workflows/test-and-build.yml"><img src="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions/workflows/test-and-build.yml/badge.svg" alt="Build and test status" /></a>
+  <img src="https://img.shields.io/badge/Rust-2021-CE422B?style=flat-square&logo=rust&logoColor=white" alt="Rust" />
+  <img src="https://img.shields.io/badge/GTK4-%2B_libadwaita-4A86CF?style=flat-square&logo=gnome&logoColor=white" alt="GTK4 and libadwaita" />
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0--or--later-39A275?style=flat-square" alt="GPL-3.0-or-later" /></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions/workflows/test-and-build.yml"><img src="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions/workflows/test-and-build.yml/badge.svg" alt="Build status"></a>
-  <img src="https://img.shields.io/badge/Rust-2021-CE422B?logo=rust&logoColor=white" alt="Rust">
-  <img src="https://img.shields.io/badge/GTK-4-4A86CF?logo=gtk&logoColor=white" alt="GTK4">
-  <img src="https://img.shields.io/badge/libadwaita-native-3584E4?logo=gnome&logoColor=white" alt="libadwaita">
-  <img src="https://img.shields.io/badge/Linux-x86__64-1793D1?logo=linux&logoColor=white" alt="Linux x86_64">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-GPL--3.0--or--later-38A169" alt="GPL-3.0-or-later"></a>
-</p>
-
-<p align="center">
-  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.2-rc.1/GRUB-Studio-Universal-v3.0.2-x86_64.AppImage"><strong>⬇️ Download AppImage · v3.0.2 RC1</strong></a>
+  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.2-rc.1/GRUB-Studio-Universal-v3.0.2-x86_64.AppImage"><strong>⬇️ Pobierz AppImage / Download · v3.0.2</strong></a>
   &nbsp;·&nbsp;
-  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases">All releases</a>
+  <a href="#polski">🇵🇱 Polski</a>
+  &nbsp;·&nbsp;
+  <a href="#english">🇬🇧 English</a>
 </p>
 
-<p align="center"><sub>Actual GTK4 interface screenshots are generated as CI artifacts, without storing historical images in the source repository.</sub></p>
+---
+
+## 🖥️ Poznaj aplikację / Take a look
+
+<p align="center">
+  <a href="docs/screenshots/dashboard-dark.png">
+    <img src="docs/screenshots/dashboard-dark.png" width="980" alt="GRUB Studio Universal 3.0.2 — centrum rozruchu w trybie ciemnym" />
+  </a>
+</p>
+
+<p align="center"><sub>🌙 Tryb ciemny · Dark appearance · Kliknij, aby powiększyć / Click to enlarge</sub></p>
+
+<details>
+  <summary><strong>☀️ Zobacz tryb jasny / View light appearance</strong></summary>
+  <br />
+  <p align="center">
+    <a href="docs/screenshots/dashboard-light.png">
+      <img src="docs/screenshots/dashboard-light.png" width="980" alt="GRUB Studio Universal 3.0.2 — centrum rozruchu w trybie jasnym" />
+    </a>
+  </p>
+</details>
+
+<p align="center"><sub>Rzeczywiste zrzuty okna wersji 3.0.2, przycięte do obszaru aplikacji. / Real, cropped screenshots of version 3.0.2.</sub></p>
+
+| 🎨 Personalizacja | 🛡️ Bezpieczna obsługa | ⚡ Natywny interfejs |
+| :--- | :--- | :--- |
+| Import motywów z **ZIP, TAR.GZ, TAR.XZ** lub folderu; jasny i ciemny wygląd. | Oddzielny proces Polkit, kontrola ścieżek, kopie zapasowe i weryfikacja konfiguracji. | **Rust + GTK4 + libadwaita**, Wayland/X11 i siedem języków. |
 
 ---
 
@@ -36,79 +59,55 @@
 
 ## 🇵🇱 Polski
 
-**GRUB Studio Universal** to graficzne narzędzie do zarządzania konfiguracją programu rozruchowego GRUB. Powstało w **Rust**, korzysta z **GTK4 oraz libadwaita** i działa natywnie pod Waylandem oraz X11.
+### Co umożliwia GRUB Studio?
 
-### ✨ Najważniejsze funkcje
+GRUB Studio Universal pomaga przeglądać stan rozruchu, instalować motywy GRUB i bezpiecznie zmieniać obsługiwane ustawienia. Aplikacja nie zastępuje bootloadera ani nie zmienia kolejności rozruchu UEFI.
 
-| Obszar | Możliwości |
-| --- | --- |
-| 🎨 **Interfejs** | **Natywna stylistyka libadwaita** — tryb systemowy/jasny/ciemny, akcent systemowy (gdy obsługiwany), cztery równe kafelki na pulpicie, czytelne przyciski i rozwijane sekcje; stabilne dekoracje okna, zawsze widoczna nawigacja 196/62 px, siedem języków i kursor systemowy. |
-| 🐧 **Dystrybucje** | Rozpoznawanie Bazzite, Fedora, Ubuntu/Debian, Arch/CachyOS i openSUSE. |
-| 🖥️ **Systemy** | Wspólny widok informacji GRUB/EFI bez duplikowania systemów o tej samej nazwie; opcjonalny skan `os-prober`. |
-| 🖼️ **Motywy GRUB** | Wykrywanie `theme.txt`, lista z lokalizacją plików, stan aktywności, import folderów i archiwów ZIP/TAR.GZ/TAR.XZ oraz przyciski zastosowania/wyłączenia dostępne nawet przy przewijaniu. Bez symulowanego podglądu. |
-| ⚙️ **Ustawienia** | Czas wyświetlania menu, przetłumaczone style menu, lista rozdzielczości i parametry rozruchu. Niezapisane wartości formularza pozostają przy zmianie kart; bez prawa zapisu wyświetla się podsumowanie tylko do odczytu. |
-| 📋 **Wpisy rozruchowe** | Prostsza karta „Menu rozruchowe” z czytelnym stanem blokady i jednym panelem wykrywania; edycja własnych EFI tylko na obsługiwanych konfiguracjach. Niezapisane dane pozostają także po ręcznym odświeżeniu. |
-| 🧰 **Narzędzia** | Kopie zapasowe i dziennik działań dostępne razem bez duplikowania pozycji menu. |
-| 🛡️ **Ochrona zmian** | Polkit, osobny status blokady i trybu tylko do odczytu, walidacja ścieżek EFI i kopie bezpieczeństwa. Generator tworzy plik GRUB osobno, sprawdza składnię i dopiero wtedy zastępuje konfigurację rozruchową. |
+| Funkcja | Co możesz zrobić |
+| :--- | :--- |
+| **Pulpit** | Sprawdzić wykrytą dystrybucję, aktywny motyw, liczbę motywów, inne systemy i bootloader. |
+| **Menu rozruchowe** | Przeglądać wykryte wpisy GRUB/EFI; zarządzać własnymi wpisami EFI tam, gdzie pozwala konfiguracja. |
+| **Motywy** | Wykrywać motywy, importować katalogi i archiwa, aktywować lub wyłączać wybrany motyw. |
+| **Ustawienia GRUB** | Zmieniać obsługiwane parametry czasu menu, trybu wyświetlania, rozdzielczości i jądra. |
+| **Narzędzia** | Tworzyć i przywracać kopie konfiguracji oraz przeglądać dziennik operacji. |
+| **Wygląd i język** | Wybierać motyw systemowy/jasny/ciemny; korzystać z siedmiu języków interfejsu. |
 
-### 🎨 Skąd pobrać motywy GRUB?
+### 📦 Instalowanie AppImage
 
-- **[Gorgeous-GRUB](https://github.com/jacksaur/Gorgeous-GRUB)** — galeria motywów społecznościowych z odnośnikami do stron poszczególnych projektów.
-- **[Distro GRUB Themes — podgląd i pobieranie](https://k1ng.dev/distro-grub-themes/preview)** — motywy dopasowane do wielu dystrybucji Linuksa.
+**[Pobierz GRUB Studio Universal 3.0.2 — AppImage x86_64](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.2-rc.1/GRUB-Studio-Universal-v3.0.2-x86_64.AppImage)**
 
-**Importowanie w 3.0.2:** pobierz motyw i wybierz **Motywy → Importuj archiwum** dla `.zip`, `.tar.gz` lub `.tar.xz`. Program sam wyszuka pojedynczy `theme.txt`, także w podfolderze, **rozpakuje wyłącznie pliki motywu bez uprawnień administratora**, sprawdzi ich typy, rozmiary i ścieżki, a następnie pokaże nazwę i liczbę plików przed potwierdzeniem. Dopiero po potwierdzeniu i autoryzacji Polkit kopiuje motyw do katalogu GRUB. Istnieje też opcja **Importuj folder** dla już rozpakowanych motywów. Archiwa zawierające *wiele* motywów (`theme.txt`) należy rozpakować samodzielnie i wybrać konkretny folder. Archiwa z niedozwolonymi ścieżkami, dowiązaniami lub nadmiernym rozmiarem są odrzucane. Pliki instalatorów/skryptów są pomijane i **nigdy nie są wykonywane**. Import **nie włącza motywu automatycznie** — wybierz go i naciśnij „Zastosuj motyw”.
-
-### ⬇️ Pobieranie i uruchamianie
-
-**[Pobierz GRUB Studio Universal 3.0.2 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.2-rc.1/GRUB-Studio-Universal-v3.0.2-x86_64.AppImage)**
-
-AppImage nie wymaga instalacji pakietu ani ingerencji w obraz systemu Bazzite. Po pobraniu nadaj mu uprawnienia wykonywania:
+AppImage nie wymaga instalowania pakietu w systemie. Po pobraniu:
 
 ```bash
 chmod +x GRUB-Studio-Universal-v3.0.2-x86_64.AppImage
 ./GRUB-Studio-Universal-v3.0.2-x86_64.AppImage
 ```
 
-**[Pobierz sumę SHA-256](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.2-rc.1/GRUB-Studio-Universal-v3.0.2-SHA256.txt)** · [Zobacz wydanie i zmiany](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v3.0.2-rc.1)
+[Suma kontrolna SHA-256](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.2-rc.1/GRUB-Studio-Universal-v3.0.2-SHA256.txt) · [Historia wydań](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases)
 
-> **Wersja 3.0.2 RC:** Bezpośredni import ZIP, TAR.GZ i TAR.XZ z wykrywaniem `theme.txt` i kontrolą bezpieczeństwa. Zachowano ulepszony pulpit, kontrast przycisków, **libadwaita**, stabilne menu języków/wyglądu oraz dotychczasowe ograniczenia uprawnień. Wymagany jest jeszcze test z zapisem motywu na rzeczywistym KDE/Wayland.
+### 🎨 Skąd pobierać motywy GRUB?
 
-Szczegóły projektu wyglądu i przypisania funkcji do kart: **[docs/DESIGN.md](docs/DESIGN.md)**.
+| Galeria | Zawartość |
+| :--- | :--- |
+| **[Gorgeous-GRUB](https://github.com/jacksaur/Gorgeous-GRUB)** | Kolekcja motywów tworzonych przez społeczność, z odnośnikami do autorów. |
+| **[Distro GRUB Themes](https://k1ng.dev/distro-grub-themes/preview)** | Podglądy i pliki motywów przeznaczonych dla różnych dystrybucji. |
 
-### 🔐 Bezpieczeństwo i kompatybilność
+**Import bez rozpakowywania ręcznego:**
 
-- Aplikację uruchamia się jako **zwykły użytkownik**. O hasło administratora prosi systemowy **Polkit**; po odmowie pozostaje tryb tylko do odczytu.
-- Program **nie edytuje ręcznie** `grub.cfg`: generuje go do pliku tymczasowego, sprawdza składnię i atomowo instaluje zatwierdzony wynik. Nie uruchamia `grub-install` ani nie zmienia kolejności UEFI.
-- Plik `/etc/default/grub`, jeśli go nie ma, może zostać utworzony **dopiero po zatwierdzeniu zapisu** w obsługiwanej konfiguracji.
-- Wykrywanie Windows w EFI potwierdza obecność wpisu lub pliku, **nie gwarantuje** poprawnego uruchomienia systemu.
-- Na Bazzite/OSTree obowiązują dodatkowe ograniczenia; zmiany wyglądu GRUB nie są oficjalnie wspierane przez Bazzite.
-- Przy aktywnym Limine, systemd-boot lub rEFInd aplikacja ogranicza operacje zapisu.
-- **Przed zmianą konfiguracji rozruchu wykonaj kopię zapasową i przygotuj nośnik ratunkowy.**
+1. Pobierz archiwum **`.zip`**, **`.tar.gz`** lub **`.tar.xz`** z wybranym motywem.
+2. Otwórz **Motywy → Importuj archiwum**. Program znajdzie `theme.txt`, także wewnątrz folderów.
+3. Sprawdź wykrytą nazwę, liczbę plików i rozmiar. Zatwierdź instalację, a następnie autoryzację Polkit.
+4. Wybierz zainstalowany motyw i kliknij **Zastosuj motyw** — import nie aktywuje go automatycznie.
 
-### 🧰 Budowanie ze źródeł
+Wciąż możesz użyć przycisku **Importuj folder**. Jeśli archiwum zawiera *kilka* niezależnych plików `theme.txt`, rozpakuj je i wybierz katalog konkretnego motywu. Program nie wykonuje skryptów z archiwów; kontroluje niebezpieczne ścieżki, dowiązania, typy plików i limit rozmiaru.
 
-<details>
-<summary>Rozwiń instrukcję dla Rust + GTK4</summary>
+### 🔐 Bezpieczeństwo i zgodność
 
-W środowisku budowania (np. Fedora Toolbox) wymagane są Rust/Cargo, pakiety deweloperskie GTK4 i libadwaita, GCC oraz `pkg-config`. Nie trzeba instalować tych narzędzi w podstawowym obrazie Bazzite.
-
-```bash
-sudo dnf install -y gcc pkgconf-pkg-config gtk4-devel
-cargo test --all-targets
-cargo build --release --bins
-cargo run --bin grub-studio-universal -- --demo
-GDK_BACKEND=x11 GSK_RENDERER=cairo xvfb-run -a target/release/grub-studio-universal --ui-smoke
-GDK_BACKEND=x11 GSK_RENDERER=cairo xvfb-run -a target/release/grub-studio-universal --ui-smoke-wide
-GDK_BACKEND=x11 GSK_RENDERER=cairo xvfb-run -a target/release/grub-studio-universal --ui-home-layout-smoke
-```
-
-Skrypt `build-appimage.sh` wymaga dodatkowo `linuxdeploy`. Automatyczny workflow budujący i testujący AppImage znajduje się w [GitHub Actions](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions).
-
-</details>
-
-### 🤝 Projekt
-
-Masz pomysł lub znalazłeś błąd? Otwórz [Issues](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/issues). Kod jest udostępniany na licencji **GPL-3.0-or-later**. To niezależny projekt, niezwiązany oficjalnie z Bazzite ani twórcami GRUB.
+- Uruchamiaj aplikację **jako zwykły użytkownik**. Zmiany wymagają osobnej autoryzacji **Polkit**; bez niej dostępny jest tryb tylko do odczytu.
+- Konfiguracja jest generowana do pliku tymczasowego i sprawdzana przed zastąpieniem `grub.cfg`. Program nie uruchamia `grub-install`.
+- Obsługiwane profile obejmują **Bazzite, Fedora, Ubuntu/Debian, Arch/CachyOS i openSUSE**; dostępne operacje zależą od wykrytej konfiguracji.
+- W środowiskach z aktywnym **Limine, systemd-boot lub rEFInd** zapis jest ograniczony. Zmiany wyglądu GRUB na Bazzite/OSTree nie są oficjalnie wspierane przez Bazzite.
+- **Przed modyfikacją rozruchu wykonaj kopię konfiguracji i przygotuj nośnik ratunkowy.** Testy automatyczne nie zastępują testu zapisu na rzeczywistym urządzeniu.
 
 ---
 
@@ -116,83 +115,74 @@ Masz pomysł lub znalazłeś błąd? Otwórz [Issues](https://github.com/wolfgan
 
 ## 🇬🇧 English
 
-**GRUB Studio Universal** is a graphical tool for managing the GRUB bootloader configuration. Built with **Rust**, **GTK4** and **libadwaita**, it features a responsive native interface for Wayland and X11.
+### What can it do?
 
-### ✨ Highlights
+**GRUB Studio Universal** is a native Rust/GTK4 desktop app for inspecting the boot setup, managing GRUB themes and safely editing supported settings. It does **not** replace your bootloader or modify UEFI boot order.
 
-| Area | Features |
-| --- | --- |
-| 🎨 **Interface** | **Native libadwaita** surfaces, full-width equal dashboard tiles, stronger action/expander contrast, desktop accent and system/light/dark color scheme; system-managed window decorations, a fixed 196/62 px sidebar, system cursor and seven languages. |
-| 🐧 **Distributions** | Detection of Bazzite, Fedora, Ubuntu/Debian, Arch/CachyOS, and openSUSE. |
-| 🖥️ **Operating systems** | One combined GRUB/EFI discovery view, merging records with the same system name; optional `os-prober` scan. |
-| 🖼️ **GRUB themes** | Installed `theme.txt` discovery, selection, active-theme status, folder/ZIP/TAR.GZ/TAR.XZ import and pinned Apply/Disable buttons even in compact windows. The inaccurate simulated preview is gone. |
-| ⚙️ **Settings** | Menu timeout, localized menu styles, resolution presets, and supported boot options. Unsaved edits survive navigation, while unauthorized sessions show a read-only summary. |
-| 📋 **Boot entries** | Clear boot-menu view, consolidated system discovery, drafts retained across refresh, and editing restricted to supported GRUB profiles. |
-| 🧰 **Tools** | Backups and activity log consolidated into one destination. |
-| 🛡️ **Safety** | Polkit authentication, distinct locked/read-only statuses, EFI path validation, backups, and checked temporary GRUB generation before atomic installation. |
+| Feature | Details |
+| :--- | :--- |
+| **Dashboard** | View detected distribution, active theme, installed themes, other systems and bootloader. |
+| **Boot entries** | Inspect GRUB/EFI records and manage custom EFI entries on supported configurations. |
+| **Themes** | Detect, import, apply and disable GRUB themes; import folders or ZIP/TAR.GZ/TAR.XZ archives. |
+| **GRUB settings** | Configure supported timeout, menu style, resolution and kernel options. |
+| **Tools** | Create and restore configuration backups; review the operation log. |
+| **Appearance** | System/light/dark modes, native libadwaita styling and seven interface languages. |
 
-### 🎨 Where to find GRUB themes
+### 📦 Download & run
 
-- **[Gorgeous-GRUB](https://github.com/jacksaur/Gorgeous-GRUB)** — a curated gallery of community themes with links to their original projects.
-- **[Distro GRUB Themes — previews and downloads](https://k1ng.dev/distro-grub-themes/preview)** — themes for a variety of Linux distributions.
-
-**Importing in 3.0.2:** download a theme and choose **Themes → Import archive** for ZIP, TAR.GZ or TAR.XZ. The app finds one `theme.txt` automatically, including nested folders, extracts the theme **as an unprivileged user** into private temporary storage, validates paths/file types/sizes, then shows its name and file count for confirmation. Polkit authorization is requested only after validation. **Import folder** remains available for extracted themes. If an archive contains *multiple* `theme.txt` files, extract it yourself and select the intended folder. Archives with unsafe paths, links, or excessive sizes are rejected; installers and scripts are skipped and **never executed**. Imported themes are **not activated** automatically — select the theme and click Apply theme.
-
-### ⬇️ Download & run
-
-**[Download GRUB Studio Universal 3.0.2 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.2-rc.1/GRUB-Studio-Universal-v3.0.2-x86_64.AppImage)**
-
-The portable AppImage does not require installing an application package or modifying the Bazzite base image:
+**[Download GRUB Studio Universal 3.0.2 AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.2-rc.1/GRUB-Studio-Universal-v3.0.2-x86_64.AppImage)**
 
 ```bash
 chmod +x GRUB-Studio-Universal-v3.0.2-x86_64.AppImage
 ./GRUB-Studio-Universal-v3.0.2-x86_64.AppImage
 ```
 
-**[Download SHA-256 checksum](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.2-rc.1/GRUB-Studio-Universal-v3.0.2-SHA256.txt)** · [Release notes](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v3.0.2-rc.1)
+[SHA-256 checksum](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.2-rc.1/GRUB-Studio-Universal-v3.0.2-SHA256.txt) · [All releases](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases)
 
-> **Version 3.0.2 RC:** Direct ZIP, TAR.GZ and TAR.XZ theme import with automatic `theme.txt` discovery and safety validation. The improved dashboard, native **libadwaita** appearance and responsive language/color preferences remain unchanged. Real KDE/Wayland theme installation still requires on-device validation.
+### 🎨 Find and import themes
 
-More about the layout, one-place-per-action design and testing: **[docs/DESIGN.md](docs/DESIGN.md)**.
+- [Gorgeous-GRUB](https://github.com/jacksaur/Gorgeous-GRUB) — curated community theme collection.
+- [Distro GRUB Themes](https://k1ng.dev/distro-grub-themes/preview) — distribution-themed designs with previews and downloads.
+
+Download a **ZIP**, **TAR.GZ** or **TAR.XZ** file and select **Themes → Import archive**. The application finds one `theme.txt`, including nested directories, extracts supported theme assets in a private, **unprivileged** temporary directory, validates them, and asks for confirmation **before** Polkit authorization. Installation never activates the theme automatically. Use **Import folder** for already extracted themes; extract archives containing multiple themes manually and select the intended directory. Installer scripts are skipped and never executed.
 
 ### 🔐 Safety & compatibility
 
-- Run the GUI as a **regular user**. Administrative authorization is requested through **Polkit**, with a read-only mode when access is denied.
-- The application generates `grub.cfg` into a temporary file, checks its syntax, then atomically replaces the generated configuration; it does not run `grub-install` or change UEFI boot order.
-- If `/etc/default/grub` is missing, it may be created **only after an explicitly approved write** on a supported setup.
-- A Windows EFI entry or file is **not proof** that Windows will successfully boot.
-- Bazzite/OSTree systems receive additional safety restrictions; GRUB theme modifications are not officially supported by Bazzite.
-- Write operations are restricted when Limine, systemd-boot, or rEFInd is the active bootloader.
-- **Back up your boot configuration and keep a recovery USB drive ready before making changes.**
+- Run the GUI as a **regular user**. Administrative operations use a separate **Polkit** helper, and unsupported installations remain read-only.
+- Generated GRUB configuration is validated before atomically replacing the existing output. No `grub-install` or UEFI boot-order changes are performed.
+- Supported detection includes **Bazzite, Fedora, Ubuntu/Debian, Arch/CachyOS and openSUSE**, with write permissions dependent on the actual boot profile.
+- Write actions are restricted when **Limine, systemd-boot or rEFInd** is active. Bazzite does not officially support custom GRUB appearance changes.
+- **Back up your boot configuration and keep a recovery USB drive available.** Real hardware/Polkit testing is still recommended.
 
-### 🧰 Build from source
+---
+
+## 🧰 Building from source / Kompilacja
 
 <details>
-<summary>Show Rust + GTK4 build instructions</summary>
+  <summary><strong>Show build instructions / Pokaż instrukcje</strong></summary>
 
-The build environment needs Rust/Cargo, GTK4 and libadwaita development files, GCC, and `pkg-config`. A Fedora Toolbox can provide these without installing them into Bazzite's immutable base image.
+Install the Rust toolchain, GTK4/libadwaita development headers, GCC and `pkg-config` (e.g. inside Fedora Toolbox), then run:
 
 ```bash
-sudo dnf install -y gcc pkgconf-pkg-config gtk4-devel
 cargo test --all-targets
 cargo build --release --bins
 cargo run --bin grub-studio-universal -- --demo
-GDK_BACKEND=x11 GSK_RENDERER=cairo xvfb-run -a target/release/grub-studio-universal --ui-smoke
-GDK_BACKEND=x11 GSK_RENDERER=cairo xvfb-run -a target/release/grub-studio-universal --ui-smoke-wide
-GDK_BACKEND=x11 GSK_RENDERER=cairo xvfb-run -a target/release/grub-studio-universal --ui-home-layout-smoke
 ```
 
-The `build-appimage.sh` script additionally requires `linuxdeploy`. Automated builds and AppImage runtime tests are available in [GitHub Actions](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions).
+The AppImage packaging script also requires `linuxdeploy` and `rsvg-convert`:
+
+```bash
+bash build-appimage.sh
+```
+
+Automated Rust tests, GTK4 UI smoke tests, preference switching, live resize, screenshots and AppImage checks run in [GitHub Actions](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions). See [docs/DESIGN.md](docs/DESIGN.md) for the application layout and design notes.
 
 </details>
-
-### 🤝 Contributing
-
-Found a bug or have an idea? Open an [issue](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/issues). The source is licensed under **GPL-3.0-or-later**. This is an independent project and is not officially affiliated with Bazzite or the GRUB maintainers.
 
 ---
 
 <p align="center">
-  <a href="#polski">↑ Polski</a> &nbsp;·&nbsp; <a href="#english">↑ English</a> &nbsp;·&nbsp;
-  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases">Releases</a>
+  Found a bug? <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/issues">Open an issue</a> ·
+  <a href="LICENSE">GPL-3.0-or-later</a> ·
+  Independent community project, not affiliated with GNU GRUB or Bazzite.
 </p>
