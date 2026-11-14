@@ -504,4 +504,29 @@ mod tests {
         assert!(!core::valid_theme_path("/tmp/test/theme.txt"));
         assert_eq!(inspect::valid_backup_id("20261113-142202-100"), true);
     }
+    #[test]
+    fn copies_extracted_theme_assets_but_rejects_archive_files() {
+        let nonce=SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
+        let root=std::env::temp_dir().join(format!("grub-studio-import-test-{}-{nonce}",std::process::id()));
+        let source=root.join("downloaded-theme");
+        let target=root.join("installed-theme");
+        fs::create_dir_all(&source).unwrap();
+        fs::create_dir(&target).unwrap();
+        fs::write(source.join("theme.txt"), "# GRUB theme").unwrap();
+        fs::write(source.join("background.png"), b"example image").unwrap();
+
+        let mut count=0;
+        let mut bytes=0;
+        safe_theme_copy(&source,&target,&mut count,&mut bytes,0).unwrap();
+        assert_eq!(count,2);
+        assert!(target.join("theme.txt").is_file());
+        assert!(target.join("background.png").is_file());
+
+        // Archives are deliberately not unpacked in the privileged helper.
+        fs::write(source.join("download.zip"), b"dummy archive").unwrap();
+        let err=safe_theme_copy(&source,&target,&mut count,&mut bytes,0).unwrap_err();
+        assert!(err.contains("Unexpected file type"),"{err}");
+        assert!(!target.join("download.zip").exists());
+        fs::remove_dir_all(&root).unwrap();
+    }
 }

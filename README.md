@@ -51,6 +51,13 @@
 | 🧰 **Narzędzia** | Kopie zapasowe i dziennik działań dostępne razem bez duplikowania pozycji menu. |
 | 🛡️ **Ochrona zmian** | Polkit, osobny status blokady i trybu tylko do odczytu, walidacja ścieżek EFI i kopie bezpieczeństwa. Generator tworzy plik GRUB osobno, sprawdza składnię i dopiero wtedy zastępuje konfigurację rozruchową. |
 
+### 🎨 Skąd pobrać motywy GRUB?
+
+- **[Gorgeous-GRUB](https://github.com/jacksaur/Gorgeous-GRUB)** — galeria motywów społecznościowych z odnośnikami do stron poszczególnych projektów.
+- **[Distro GRUB Themes — podgląd i pobieranie](https://k1ng.dev/distro-grub-themes/preview)** — motywy dopasowane do wielu dystrybucji Linuksa.
+
+**Importowanie:** obecnie program przyjmuje **rozpakowany katalog motywu**, a nie plik `.zip`, `.tar.gz` czy `.tar.xz`. Pobierz wybrany motyw, rozpakuj archiwum, otwórz **Motywy → Importuj folder** i wskaż katalog zawierający bezpośrednio `theme.txt` oraz pliki graficzne/czcionki. Jeśli archiwum ma dodatkowy katalog nadrzędny, wybierz katalog wewnętrzny z `theme.txt`. Import wymaga uprawnień administratora i **nie aktywuje motywu automatycznie** — zaznacz go na liście i wybierz „Zastosuj motyw”. Nie uruchamiaj skryptów instalacyjnych pobranych z nieznanych źródeł.
+
 ### ⬇️ Pobieranie i uruchamianie
 
 **[Pobierz GRUB Studio Universal 3.0.1 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.1-rc.1/GRUB-Studio-Universal-v3.0.1-x86_64.AppImage)**
@@ -123,6 +130,13 @@ Masz pomysł lub znalazłeś błąd? Otwórz [Issues](https://github.com/wolfgan
 | 📋 **Boot entries** | Clear boot-menu view, consolidated system discovery, drafts retained across refresh, and editing restricted to supported GRUB profiles. |
 | 🧰 **Tools** | Backups and activity log consolidated into one destination. |
 | 🛡️ **Safety** | Polkit authentication, distinct locked/read-only statuses, EFI path validation, backups, and checked temporary GRUB generation before atomic installation. |
+
+### 🎨 Where to find GRUB themes
+
+- **[Gorgeous-GRUB](https://github.com/jacksaur/Gorgeous-GRUB)** — a curated gallery of community themes with links to their original projects.
+- **[Distro GRUB Themes — previews and downloads](https://k1ng.dev/distro-grub-themes/preview)** — themes for a variety of Linux distributions.
+
+**Importing:** the current app accepts an **extracted theme directory**, not `.zip`, `.tar.gz`, or `.tar.xz` files directly. Download and extract the theme, then select **Themes → Import folder** and choose the folder containing `theme.txt` directly alongside the theme resources. If the archive has an extra top-level folder, choose the inner `theme.txt` directory. Administrator authorization is required. Importing **does not activate** the theme: select it in the list and click Apply theme. Avoid executing installation scripts from untrusted sources.
 
 ### ⬇️ Download & run
 
