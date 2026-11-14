@@ -23,7 +23,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.0-rc.1/GRUB-Studio-Universal-v3.0.0-x86_64.AppImage"><strong>⬇️ Download AppImage · v3.0.0 RC1</strong></a>
+  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.1-rc.1/GRUB-Studio-Universal-v3.0.1-x86_64.AppImage"><strong>⬇️ Download AppImage · v3.0.1 RC1</strong></a>
   &nbsp;·&nbsp;
   <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases">All releases</a>
 </p>
@@ -42,7 +42,7 @@
 
 | Obszar | Możliwości |
 | --- | --- |
-| 🎨 **Interfejs** | **Natywna stylistyka libadwaita** — tryb systemowy/jasny/ciemny, akcent systemowy (gdy obsługiwany), karty i kontrolki Adwaita; stabilne dekoracje okna, zawsze widoczna nawigacja 196/62 px, siedem języków i kursor systemowy. |
+| 🎨 **Interfejs** | **Natywna stylistyka libadwaita** — tryb systemowy/jasny/ciemny, akcent systemowy (gdy obsługiwany), cztery równe kafelki na pulpicie, czytelne przyciski i rozwijane sekcje; stabilne dekoracje okna, zawsze widoczna nawigacja 196/62 px, siedem języków i kursor systemowy. |
 | 🐧 **Dystrybucje** | Rozpoznawanie Bazzite, Fedora, Ubuntu/Debian, Arch/CachyOS i openSUSE. |
 | 🖥️ **Systemy** | Wspólny widok informacji GRUB/EFI bez duplikowania systemów o tej samej nazwie; opcjonalny skan `os-prober`. |
 | 🖼️ **Motywy GRUB** | Wykrywanie `theme.txt`, lista z lokalizacją plików, stan aktywności, import oraz przyciski zastosowania/wyłączenia dostępne nawet przy przewijaniu. Bez symulowanego podglądu. |
@@ -53,18 +53,18 @@
 
 ### ⬇️ Pobieranie i uruchamianie
 
-**[Pobierz GRUB Studio Universal 3.0.0 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.0-rc.1/GRUB-Studio-Universal-v3.0.0-x86_64.AppImage)**
+**[Pobierz GRUB Studio Universal 3.0.1 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.1-rc.1/GRUB-Studio-Universal-v3.0.1-x86_64.AppImage)**
 
 AppImage nie wymaga instalacji pakietu ani ingerencji w obraz systemu Bazzite. Po pobraniu nadaj mu uprawnienia wykonywania:
 
 ```bash
-chmod +x GRUB-Studio-Universal-v3.0.0-x86_64.AppImage
-./GRUB-Studio-Universal-v3.0.0-x86_64.AppImage
+chmod +x GRUB-Studio-Universal-v3.0.1-x86_64.AppImage
+./GRUB-Studio-Universal-v3.0.1-x86_64.AppImage
 ```
 
-**[Pobierz sumę SHA-256](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.0-rc.1/GRUB-Studio-Universal-v3.0.0-SHA256.txt)** · [Zobacz wydanie i zmiany](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v3.0.0-rc.1)
+**[Pobierz sumę SHA-256](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.1-rc.1/GRUB-Studio-Universal-v3.0.1-SHA256.txt)** · [Zobacz wydanie i zmiany](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v3.0.1-rc.1)
 
-> **Wersja 3.0.0 RC:** Nowa warstwa wizualna oparta na **libadwaita** zastępuje ręcznie zakodowane granatowo-niebieskie palety kolorów. Jasny/ciemny/systemowy wygląd jest obsługiwany przez `AdwStyleManager`, a akcenty i kontrolki pochodzą z motywu Adwaita. Układ okna, menu preferencji bez zawieszania (2.3.8) i zabezpieczenia GRUB pozostają bez zmian. Wymagany jest jeszcze test na rzeczywistym KDE/Wayland.
+> **Wersja 3.0.1 RC:** Pulpit ma teraz cztery kafelki o równych wymiarach, wypełniające całą szerokość obszaru treści. Przyciski, menu oraz rozwijany „Dziennik operacji” mają czytelniejszy kontrast i podświetlenie. Bazą pozostaje **libadwaita** z obsługą trybu jasnego/ciemnego/systemowego. Układ okna, poprawka zawieszania preferencji (2.3.8) i zabezpieczenia GRUB pozostały bez zmian. Wymagany jest jeszcze test na rzeczywistym KDE/Wayland.
 
 Szczegóły projektu wyglądu i przypisania funkcji do kart: **[docs/DESIGN.md](docs/DESIGN.md)**.
 
@@ -92,6 +92,7 @@ cargo build --release --bins
 cargo run --bin grub-studio-universal -- --demo
 GDK_BACKEND=x11 GSK_RENDERER=cairo xvfb-run -a target/release/grub-studio-universal --ui-smoke
 GDK_BACKEND=x11 GSK_RENDERER=cairo xvfb-run -a target/release/grub-studio-universal --ui-smoke-wide
+GDK_BACKEND=x11 GSK_RENDERER=cairo xvfb-run -a target/release/grub-studio-universal --ui-home-layout-smoke
 ```
 
 Skrypt `build-appimage.sh` wymaga dodatkowo `linuxdeploy`. Automatyczny workflow budujący i testujący AppImage znajduje się w [GitHub Actions](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions).
@@ -114,7 +115,7 @@ Masz pomysł lub znalazłeś błąd? Otwórz [Issues](https://github.com/wolfgan
 
 | Area | Features |
 | --- | --- |
-| 🎨 **Interface** | **Native libadwaita** surfaces, widgets, desktop accent and system/light/dark color scheme; system-managed window decorations, a fixed 196/62 px sidebar, system cursor and seven languages. |
+| 🎨 **Interface** | **Native libadwaita** surfaces, full-width equal dashboard tiles, stronger action/expander contrast, desktop accent and system/light/dark color scheme; system-managed window decorations, a fixed 196/62 px sidebar, system cursor and seven languages. |
 | 🐧 **Distributions** | Detection of Bazzite, Fedora, Ubuntu/Debian, Arch/CachyOS, and openSUSE. |
 | 🖥️ **Operating systems** | One combined GRUB/EFI discovery view, merging records with the same system name; optional `os-prober` scan. |
 | 🖼️ **GRUB themes** | Installed `theme.txt` discovery, selection, active-theme status, import, and pinned Apply/Disable buttons even in compact windows. The inaccurate simulated preview is gone. |
@@ -125,18 +126,18 @@ Masz pomysł lub znalazłeś błąd? Otwórz [Issues](https://github.com/wolfgan
 
 ### ⬇️ Download & run
 
-**[Download GRUB Studio Universal 3.0.0 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.0-rc.1/GRUB-Studio-Universal-v3.0.0-x86_64.AppImage)**
+**[Download GRUB Studio Universal 3.0.1 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.1-rc.1/GRUB-Studio-Universal-v3.0.1-x86_64.AppImage)**
 
 The portable AppImage does not require installing an application package or modifying the Bazzite base image:
 
 ```bash
-chmod +x GRUB-Studio-Universal-v3.0.0-x86_64.AppImage
-./GRUB-Studio-Universal-v3.0.0-x86_64.AppImage
+chmod +x GRUB-Studio-Universal-v3.0.1-x86_64.AppImage
+./GRUB-Studio-Universal-v3.0.1-x86_64.AppImage
 ```
 
-**[Download SHA-256 checksum](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.0-rc.1/GRUB-Studio-Universal-v3.0.0-SHA256.txt)** · [Release notes](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v3.0.0-rc.1)
+**[Download SHA-256 checksum](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.1-rc.1/GRUB-Studio-Universal-v3.0.1-SHA256.txt)** · [Release notes](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v3.0.1-rc.1)
 
-> **Version 3.0.0 RC:** Switches the interface to the official **libadwaita** stylesheet, using its system-aware light/dark palettes and accent colors instead of custom hardcoded blue/navy colors. Preserves the stable GTK system window decorations, the non-blocking language/appearance preferences menu from v2.3.8 and GRUB write safeguards. Real KDE/Wayland hardware testing is still needed; administration depends on Polkit/`pkexec`.
+> **Version 3.0.1 RC:** The dashboard now uses four equal-sized cards that span the full content width, while buttons, menus and expandable logs gain clearer visual feedback. It retains the **libadwaita** native system/light/dark appearance, system window decorations, non-blocking language/appearance preferences from v2.3.8 and GRUB write safeguards. Real KDE/Wayland hardware testing is still needed; administration depends on Polkit/`pkexec`.
 
 More about the layout, one-place-per-action design and testing: **[docs/DESIGN.md](docs/DESIGN.md)**.
 
@@ -164,6 +165,7 @@ cargo build --release --bins
 cargo run --bin grub-studio-universal -- --demo
 GDK_BACKEND=x11 GSK_RENDERER=cairo xvfb-run -a target/release/grub-studio-universal --ui-smoke
 GDK_BACKEND=x11 GSK_RENDERER=cairo xvfb-run -a target/release/grub-studio-universal --ui-smoke-wide
+GDK_BACKEND=x11 GSK_RENDERER=cairo xvfb-run -a target/release/grub-studio-universal --ui-home-layout-smoke
 ```
 
 The `build-appimage.sh` script additionally requires `linuxdeploy`. Automated builds and AppImage runtime tests are available in [GitHub Actions](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions).

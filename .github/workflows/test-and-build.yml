@@ -33,6 +33,8 @@ jobs:
           grep -q 'GTK4 cursor settings: Breeze_Snow / 32' gtk-smoke.log
           timeout 20s xvfb-run -a target/release/grub-studio-universal --ui-smoke-wide | tee gtk-smoke-wide.log
           grep -q 'sidebar 196 px: OK' gtk-smoke-wide.log
+          timeout 20s xvfb-run -a target/release/grub-studio-universal --ui-home-layout-smoke | tee gtk-home-layout.log
+          grep -q 'GTK4 home layout smoke: 4 equally sized cards filling' gtk-home-layout.log
       - name: Exercise appearance and language preferences without freezing GTK
         env:
           GDK_BACKEND: x11
@@ -67,7 +69,7 @@ jobs:
           mkdir -p qa-screenshots
           xvfb-run -a -s '-screen 0 1280x800x24' bash -c '
             set -euo pipefail
-            for view in themes-dark themes-light menu-dark tools-light; do
+            for view in home-dark home-light themes-dark themes-light menu-dark tools-dark tools-light; do
               page=${view%-*}
               mode=${view#*-}
               target/release/grub-studio-universal --demo-page="$page" --appearance="$mode" &
@@ -109,24 +111,24 @@ jobs:
         env:
           APPIMAGE_EXTRACT_AND_RUN: "1"
         run: |
-          test -s GRUB-Studio-Universal-v3.0.0-x86_64.AppImage
-          file GRUB-Studio-Universal-v3.0.0-x86_64.AppImage
-          ./GRUB-Studio-Universal-v3.0.0-x86_64.AppImage --version
-          ./GRUB-Studio-Universal-v3.0.0-x86_64.AppImage --self-test
-          sha256sum GRUB-Studio-Universal-v3.0.0-x86_64.AppImage > GRUB-Studio-Universal-v3.0.0-SHA256.txt
+          test -s GRUB-Studio-Universal-v3.0.1-x86_64.AppImage
+          file GRUB-Studio-Universal-v3.0.1-x86_64.AppImage
+          ./GRUB-Studio-Universal-v3.0.1-x86_64.AppImage --version
+          ./GRUB-Studio-Universal-v3.0.1-x86_64.AppImage --self-test
+          sha256sum GRUB-Studio-Universal-v3.0.1-x86_64.AppImage > GRUB-Studio-Universal-v3.0.1-SHA256.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: grub-studio-universal-v3.0.0-release-candidate
+          name: grub-studio-universal-v3.0.1-release-candidate
           path: |
-            GRUB-Studio-Universal-v3.0.0-x86_64.AppImage
-            GRUB-Studio-Universal-v3.0.0-SHA256.txt
+            GRUB-Studio-Universal-v3.0.1-x86_64.AppImage
+            GRUB-Studio-Universal-v3.0.1-SHA256.txt
       - name: Publish downloadable preview release
         if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if gh release view v3.0.0-rc.1 >/dev/null 2>&1; then
-            gh release upload v3.0.0-rc.1 GRUB-Studio-Universal-v3.0.0-x86_64.AppImage GRUB-Studio-Universal-v3.0.0-SHA256.txt --clobber
+          if gh release view v3.0.1-rc.1 >/dev/null 2>&1; then
+            gh release upload v3.0.1-rc.1 GRUB-Studio-Universal-v3.0.1-x86_64.AppImage GRUB-Studio-Universal-v3.0.1-SHA256.txt --clobber
           else
-            gh release create v3.0.0-rc.1 GRUB-Studio-Universal-v3.0.0-x86_64.AppImage GRUB-Studio-Universal-v3.0.0-SHA256.txt --title 'GRUB Studio Universal 3.0.0 — native Adwaita edition' --notes 'Major visual update: official libadwaita stylesheet, native Adwaita light/dark/system themes, system accent colors where supported and consistent surfaces across pages. Keeps system-managed GTK window decorations and the stable non-nested appearance/language panel from v2.3.8. Adds tests for color-scheme switching; retains GRUB/EFI safeguards, sidebar behavior, translations and form drafts. Real KDE/Wayland hardware, Polkit and bootloader writes still need validation.' --prerelease --target "$GITHUB_SHA"
+            gh release create v3.0.1-rc.1 GRUB-Studio-Universal-v3.0.1-x86_64.AppImage GRUB-Studio-Universal-v3.0.1-SHA256.txt --title 'GRUB Studio Universal 3.0.1 — dashboard and interactive contrast' --notes 'Adwaita polish: equal-width 2×2 dashboard tiles spanning the content area, accent-colored values and borders, and clearer hover/focus affordances for clickable actions and expandable operation logs. System window decorations and stable non-nested appearance/language controls remain unchanged. Adds a live GTK geometry smoke test and extra dashboard/screenshots in CI. Real KDE/Wayland, Polkit and bootloader writes still need validation.' --prerelease --target "$GITHUB_SHA"
           fi

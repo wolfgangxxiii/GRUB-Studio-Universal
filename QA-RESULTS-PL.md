@@ -1,4 +1,4 @@
-# GRUB Studio Universal 3.0.0 RC1 — raport jakości / QA
+# GRUB Studio Universal 3.0.1 RC1 — raport jakości / QA
 
 Data: 14 listopada 2026
 
@@ -7,8 +7,9 @@ Data: 14 listopada 2026
 - **Sześć stron**: Przegląd, Menu rozruchowe, Motywy, Ustawienia GRUB, Narzędzia, O programie i bezpieczeństwo.
 - Wykryte wpisy GRUB i EFI są połączone w **jednym panelu Menu rozruchowego**. Identyczne nazwy systemów nie są powtarzane; ich źródła są widoczne razem. Kopie zapasowe i dziennik działań pozostają w Narzędziach.
 - W wersji 2.3.7 wycofano niestandardowy układ `GtkHeaderBar`; stabilne dekoracje okna pozostają obsługiwane przez system.
-- W wersji 2.3.8 przebudowano **wyłącznie menu preferencji**: zagnieżdżone listy GTK zastąpiono przyciskami, a odświeżenie po wyborze języka/wyglądu uruchamia się z kolejki GTK po zamknięciu panelu. Ten mechanizm pozostał niezmieniony w 3.0.0.
+- W wersji 2.3.8 przebudowano **wyłącznie menu preferencji**: zagnieżdżone listy GTK zastąpiono przyciskami, a odświeżenie po wyborze języka/wyglądu uruchamia się z kolejki GTK po zamknięciu panelu. Ten mechanizm pozostał niezmieniony w 3.0.1.
 - W **3.0.0** wykorzystano rzeczywistą bibliotekę **libadwaita 1.5+**, `AdwApplication`, `AdwStyleManager` i jej tokeny kolorów. Usunięto ręcznie zakodowane ciemno-granatowe i jasne palety aplikacji; menu, karty, nawigacja, przyciski i listy używają akcentów z Adwaita. Dekoracje okna pozostały systemowe.
+- W **3.0.1** kafelki pulpitu otrzymały jednorodne kolumny i wiersze w `GtkGrid` z rozciąganiem na całą szerokość. Wartości na kafelkach korzystają z akcentu Adwaita; klikalne przyciski i rozwijane panele, w tym „Dziennik operacji”, mają widoczniejsze granice, stany hover i focus.
 - Ikony bocznej nawigacji są rysowanymi w aplikacji monochromatycznymi wektorami; nie zmieniają stylu na kolorowe ikony zależnie od dystrybucji.
 - Boczne menu jest **zawsze widoczne**. Usunięto przycisk chowania/ponownego pokazywania panelu. Szerokość **196 px** w szerokim oknie i **62 px** w wąskim; ikony kompaktowe mają podpowiedzi. Panel nie zmienia rozmiaru przy przełączaniu stron.
 - Karta Motywy wykrywa katalogi `theme.txt`, pokazuje zainstalowane motywy i stan aktywności. Ścieżki widać bezpośrednio na liście, a operacje pozostają w nieruchomym dolnym pasku.
@@ -35,13 +36,14 @@ Data: 14 listopada 2026
 | `cargo build --release --bins` | Kompilacja aplikacji GTK4/libadwaita i modułu uprzywilejowanego |
 | `--ui-smoke` w `xvfb-run` | 6 stron, **widoczna nawigacja 62 px**, brak przycisku jej ukrywania i dolny pasek działań wyłącznie na karcie Motywy; test motywu/rozmiaru kursora |
 | `--ui-smoke-wide` w `xvfb-run` | 6 stron, nawigacja **196 px** w oknie 1100 × 540 px |
+| `--ui-home-layout-smoke` w `xvfb-run` | Prawdziwe rozmiary GTK: 4 kafelki w siatce 2×2; równe szerokości i wysokości; wykorzystanie całej szerokości pulpitu |
 | `--ui-prefs-smoke` w `xvfb-run` | Otwiera rzeczywiste menu preferencji, wykonuje 6 zmian języka i trybu jasny/ciemny/systemowy, sprawdza stan, aktywność palety `AdwStyleManager` oraz brak awarii pętli GTK |
 | `--ui-resize-report` + `xdotool` | Automatyczne przejście z panelu z podpisami **196 px** do ikonek **62 px** po zmianie szerokości okna na 720 px; panel cały czas pozostaje widoczny |
-| Zrzuty GTK4 | Motywy (ciemny, jasny i kompaktowy polski), Menu (ciemny i kompaktowy polski), Narzędzia (jasny) |
+| Zrzuty GTK4 | Pulpit (ciemny, jasny), Motywy (ciemny, jasny i kompaktowy polski), Menu (ciemny i kompaktowy polski), Narzędzia (ciemny, jasny) |
 | `build-appimage.sh` | Wytworzenie przenośnego AppImage x86_64 |
 | `AppImage --version` i `AppImage --self-test` | Sprawdzenie pliku wynikowego |
 
-Raport dla wersji 3.0.0 dotyczy testów zdefiniowanych w [GitHub Actions](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions); ich wynik należy sprawdzić przy publikacji wydania. Testy nie zapisują zmian do bootloadera. Adwaita na KDE/Wayland i współpraca z portalem kolorystyki wymagają sprawdzenia na komputerze użytkownika.
+Raport dla wersji 3.0.1 dotyczy testów zdefiniowanych w [GitHub Actions](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions); ich wynik należy sprawdzić przy publikacji wydania. Testy nie zapisują zmian do bootloadera. Adwaita na KDE/Wayland i współpraca z portalem kolorystyki wymagają sprawdzenia na komputerze użytkownika.
 
 ## Zrzuty z rzeczywistej aplikacji
 

@@ -1,4 +1,4 @@
-# GRUB Studio Universal — projekt interfejsu 3.0.0
+# GRUB Studio Universal — projekt interfejsu 3.0.1
 
 ## Cel
 
@@ -26,6 +26,10 @@ szczegółów na żądanie z [GNOME HIG](https://developer.gnome.org/hig/).
   programu jest osadzona w binarium, więc działa również w AppImage bez motywu ikon.
 - **Obszar treści:** nagłówek karty, zwięzły opis i jeden poziom istotnych
   paneli. Zadania drugorzędne są składane w rozwijane sekcje.
+- **Pulpit:** cztery kafelki w równych kolumnach i wierszach `GtkGrid` 2×2,
+  rozciągnięte do szerokości treści bez pustego pola po prawej stronie.
+  Wartości mają akcent Adwaita; klikalne przyciski i rozwijane sekcje mają
+  silniejszy kontrast, podświetlenie najechania i widoczną reakcję klawiatury.
 - **Wykryte wpisy:** dane GRUB, UEFI/EFI i opcjonalnego `os-prober` są pokazane
   w jednym panelu, identyczne nazwy łączą źródła, a dokładny skan jest
   drugorzędną akcją. Tryb bez edycji nie nazywa już strony edytorem.
@@ -83,17 +87,20 @@ cargo test --all-targets
 cargo build --release --bins
 GDK_BACKEND=x11 GSK_RENDERER=cairo xvfb-run -a target/release/grub-studio-universal --ui-smoke
 GDK_BACKEND=x11 GSK_RENDERER=cairo xvfb-run -a target/release/grub-studio-universal --ui-smoke-wide
+GDK_BACKEND=x11 GSK_RENDERER=cairo xvfb-run -a target/release/grub-studio-universal --ui-home-layout-smoke
 GDK_BACKEND=x11 GSK_RENDERER=cairo xvfb-run -a target/release/grub-studio-universal --ui-prefs-smoke
 ```
 
 Tryb `--ui-smoke` (bez operacji na GRUB) automatycznie otwiera wszystkie sześć
 kart w oknie 720 px i sprawdza, że nawigacja pozostaje zwinięta (62 px).
 `--ui-smoke-wide` sprawdza analogiczny układ przy 1100 px i panelu 196 px.
+`--ui-home-layout-smoke` sprawdza rozmiary faktycznie wyrenderowanych kafelków
+na pulpicie, a nie wyłącznie deklarację siatki w kodzie.
 GitHub Actions uruchamia oba testy przed budową AppImage.
 Osobny test `--ui-resize-report` wymusza rozmiar 720 px poleceniem `xdotool`
 **po otwarciu okna** i sprawdza przejście z 196 do 62 px; dzięki temu test
 obejmuje też menedżery okien niewysyłające powiadomień o zmianie szerokości.
-Wersja 3.0.0 testuje zmianę koloru `AdwStyleManager` oraz sześć kolejnych
+Wersja 3.0.1 testuje zmianę koloru `AdwStyleManager` oraz sześć kolejnych
 zmian języka/wyglądu bez blokowania pętli GTK. Sprawdza obecność osadzonego PNG aplikacji, komplet komunikatów
 uprawnień w siedmiu językach oraz zachowuje testy kursora i stałego paska akcji Motywów.
 
