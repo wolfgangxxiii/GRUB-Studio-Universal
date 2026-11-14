@@ -65,39 +65,6 @@ pub fn scan_themes() -> Vec<Theme> {
     scan_themes_from_roots(&roots, active.as_deref())
 }
 
-/// Locate a local image mentioned by a GRUB theme's `desktop-image` setting.
-/// This is a *background image* preview, not a rendered GRUB screen.
-/// Never trust absolute paths, traversal, symlink escapes or oversized images.
-pub fn theme_preview_image(theme_file: &str) -> Option<PathBuf> {
-    let theme = Path::new(theme_file);
-    if theme.file_name()?.to_str()? != "theme.txt" { return None }
-    let metadata = fs::symlink_metadata(theme).ok()?;
-    if !metadata.file_type().is_file() || metadata.len() > 1_000_000 { return None }
-    let data = fs::read_to_string(theme).ok()?;
-    let base = theme.parent()?;
-    for line in data.lines().take(5000) {
-        let Some((key,value)) = line.trim().split_once(':') else { continue };
-        if key.trim() != "desktop-image" { continue }
-        let value = value.trim().trim_matches('"').trim_matches('\'');
-        if value.is_empty() { continue }
-        let relative = Path::new(value);
-        if !relative.components().all(|c| matches!(c, std::path::Component::Normal(_))) { continue }
-        let file = base.join(relative);
-        let ext = file.extension()?.to_string_lossy().to_ascii_lowercase();
-        if !matches!(ext.as_str(),"png" | "jpg" | "jpeg") { continue }
-        let md = fs::symlink_metadata(&file).ok()?;
-        if !md.file_type().is_file() || md.len() < 8 || md.len() > 8_000_000 { continue }
-        let mut signature = [0_u8;8];
-        let mut handle = fs::File::open(&file).ok()?;
-        use std::io::Read;
-        if handle.read_exact(&mut signature).is_err() { continue }
-        if ext == "png" && signature != *b"\x89PNG\r\n\x1a\n" { continue }
-        if ext != "png" && signature[..3] != [0xff,0xd8,0xff] { continue }
-        if !fs::canonicalize(&file).ok()?.starts_with(fs::canonicalize(base).ok()?) { continue }
-        return Some(file)
-    }
-    None
-}
 fn scan_themes_from_roots(roots: &[&Path], active: Option<&str>) -> Vec<Theme> {
     let mut found = Vec::new();
     let mut seen = HashSet::new();
@@ -306,22 +273,6 @@ mod tests {
         assert_eq!(found.len(),2);
         assert!(found.iter().any(|t| t.name=="legion"));
         assert!(found.iter().any(|t| t.name=="lenovo"));
-        fs::remove_dir_all(&base).unwrap();
-    }
-    #[test]
-    fn preview_image_refuses_traversal_and_links() {
-        use std::os::unix::fs::symlink;
-        let base=std::env::temp_dir().join(format!("gs-preview-{}",std::process::id()));
-        fs::create_dir_all(base.join("legion")).unwrap();
-        let theme=base.join("legion/theme.txt");
-        fs::write(base.join("legion/background.png"),b"\x89PNG\r\n\x1a\n").unwrap();
-        fs::write(&theme,"desktop-image: background.png\n").unwrap();
-        assert_eq!(theme_preview_image(theme.to_str().unwrap()),Some(base.join("legion/background.png")));
-        fs::write(&theme,"desktop-image: ../legion/background.png\n").unwrap();
-        assert!(theme_preview_image(theme.to_str().unwrap()).is_none());
-        symlink(base.join("legion/background.png"),base.join("legion/alias.png")).unwrap();
-        fs::write(&theme,"desktop-image: alias.png\n").unwrap();
-        assert!(theme_preview_image(theme.to_str().unwrap()).is_none());
         fs::remove_dir_all(&base).unwrap();
     }
 }

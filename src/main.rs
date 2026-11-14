@@ -775,24 +775,8 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     let themes=state.borrow().snapshot.themes.clone();
     let active=state.borrow().snapshot.config.get("GRUB_THEME").cloned().unwrap_or_default();
     let writable=can_edit(&state.borrow());
-    // FlowBox adapts between two columns on wide desktops and a single
-    // vertical column on narrow windows. A horizontal Paned hid the theme
-    // preview at 560–700 px window widths.
-    let columns=gtk::FlowBox::new();
-    columns.add_css_class("theme-split");
-    columns.set_selection_mode(gtk::SelectionMode::None);
-    columns.set_min_children_per_line(1);
-    columns.set_max_children_per_line(2);
-    columns.set_column_spacing(10);
-    columns.set_row_spacing(10);
-    columns.set_homogeneous(true);
-    // Keep the library dense when only a few themes are installed; the page
-    // scroller owns extra vertical space rather than stretching both cards.
-    columns.set_vexpand(false);
-
     let list=card();
     list.add_css_class("theme-browser");
-    list.set_size_request(275,-1);
     let list_header=gtk::Box::new(gtk::Orientation::Horizontal,8);
     let label=gtk::Label::new(Some(&format!("{}  ({})",tr(state,"themes.installed"),themes.len())));
     label.add_css_class("section-heading");label.set_xalign(0.0);label.set_hexpand(true);
@@ -807,22 +791,14 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     for theme in &themes {
         let display=if active==theme.path {format!("●  {}",theme.name)} else {format!("◇  {}",theme.name)};
         let row=gtk::Box::new(gtk::Orientation::Horizontal,10);
-        if let Some(file)=inspect::theme_preview_image(&theme.path) {
-            let thumbnail=gtk::Picture::for_filename(file);
-            thumbnail.set_keep_aspect_ratio(true);
-            thumbnail.set_size_request(62,42);
-            thumbnail.add_css_class("theme-thumbnail");
-            row.append(&thumbnail);
-        } else {
-            let icon=gtk::Image::from_icon_name("applications-graphics-symbolic");
-            icon.set_pixel_size(22);icon.add_css_class("theme-icon-fallback");
-            icon.set_size_request(62,42);
-            row.append(&icon);
-        }
+        let icon=gtk::Image::from_icon_name("applications-graphics-symbolic");
+        icon.set_pixel_size(20);icon.add_css_class("theme-icon-fallback");
+        icon.set_size_request(42,38);
+        row.append(&icon);
         let labels=gtk::Box::new(gtk::Orientation::Vertical,3);
         add_text(&labels,&display,"row-title",false);
         let location=add_text(&labels,&theme.path,"muted",false);
-        location.set_max_width_chars(28);
+        location.set_max_width_chars(70);
         location.set_ellipsize(gtk::pango::EllipsizeMode::Middle);
         location.set_tooltip_text(Some(&theme.path));
         row.append(&labels);
@@ -867,65 +843,35 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
         dialog.show();
     });
     list.append(&install);
-    columns.insert(&list,-1);
+    page.append(&list);
 
-    let preview=card();
-    preview.add_css_class("theme-details");
-    preview.set_size_request(275,-1);
-    add_text(&preview,&tr(state,"themes.preview"),"section-heading",true);
+    // The previous simulated GRUB screen was not a renderer of theme.txt and
+    // misled users into expecting an accurate preview. Show only verifiable
+    // metadata and real actions; no simulated menu or wallpaper thumbnails.
+    let details_card=card();
+    details_card.add_css_class("theme-details");
+    add_text(&details_card,&tr(state,"themes.details"),"section-heading",true);
     let selected_name=themes.iter().find(|t|t.path==selected).map(|t|t.name.as_str()).unwrap_or("—");
     let current_name=gtk::Label::new(Some(selected_name));
     current_name.add_css_class("theme-selected-name");
     current_name.set_xalign(0.0);
     current_name.set_hexpand(true);
     current_name.set_ellipsize(gtk::pango::EllipsizeMode::End);
-    let current_state_word=if selected==active {tr(state,"themes.active")}else{tr(state,"themes.detected")};
+    let current_state_word=if !selected.is_empty() && selected==active {tr(state,"themes.active")}else{tr(state,"themes.detected")};
     let current_status=gtk::Label::new(Some(&current_state_word));
+    current_status.set_visible(!selected.is_empty());
     current_status.add_css_class("theme-selected-status");
-    current_status.add_css_class(if selected==active {"theme-state-active"}else{"theme-state-idle"});
-    let preview_heading=gtk::Box::new(gtk::Orientation::Horizontal,8);
-    preview_heading.append(&current_name);
-    preview_heading.append(&current_status);
-    preview.append(&preview_heading);
-    let canvas=gtk::Box::new(gtk::Orientation::Vertical,5);
-    canvas.add_css_class("boot-preview");
-    add_text(&canvas,"GNU GRUB 2", "preview-title",true);
-    // A representative view of this machine's actual detected GRUB entries.
-    // Visual colors are only an approximation, not a rendering of theme.txt.
-    let mut entries=state.borrow().snapshot.generated.iter().take(3).cloned().collect::<Vec<_>>();
-    if entries.is_empty() {
-        entries.push(state.borrow().snapshot.profile.name.clone());
-        entries.extend(state.borrow().snapshot.systems.iter().take(2).map(|os|os.name.clone()));
-    }
-    for (i,entry) in entries.iter().enumerate() {
-        let l=gtk::Label::new(Some(entry));
-        l.set_xalign(0.0);l.add_css_class(if i==0{"preview-selected"}else{"preview-entry"});
-        canvas.append(&l);
-    }
-    // The real local wallpaper is shown when the theme specifies a valid
-    // desktop-image file. GRUB widget layout/fonts cannot be rendered by GTK.
-    let image=gtk::Picture::new();
-    image.add_css_class("theme-background");
-    image.set_keep_aspect_ratio(true);
-    image.set_can_shrink(true);
-    image.set_size_request(-1,196);
-    let visual=gtk::Stack::new();
-    visual.add_named(&canvas,Some("fallback"));
-    visual.add_named(&image,Some("wallpaper"));
-    if let Some(path)=inspect::theme_preview_image(&selected) {
-        image.set_filename(Some(path));
-        visual.set_visible_child_name("wallpaper");
-    } else {visual.set_visible_child_name("fallback");}
-    preview.append(&visual);
+    current_status.add_css_class(if selected==active && !selected.is_empty() {"theme-state-active"}else{"theme-state-idle"});
+    let selection_heading=gtk::Box::new(gtk::Orientation::Horizontal,8);
+    selection_heading.append(&current_name);
+    selection_heading.append(&current_status);
+    details_card.append(&selection_heading);
     let selected_info=gtk::Label::new(Some(if selected.is_empty() {"—"}else{&selected}));
     selected_info.add_css_class("muted");
+    selected_info.add_css_class("theme-file-location");
     selected_info.set_xalign(0.0);selected_info.set_wrap(true);
     selected_info.set_selectable(true);
-    let details=gtk::Expander::new(Some(&tr(state,"themes.details")));
-    details.add_css_class("theme-path-details");
-    details.set_child(Some(&selected_info));
-    preview.append(&details);
-    add_text(&preview,&tr(state,"themes.approx"),"muted",true);
+    details_card.append(&selected_info);
     let controls=action_row();
     let activate=button(&tr(state,"themes.use"),true);
     let can_apply_theme=writable && !selected.is_empty() && selected!=active;
@@ -957,9 +903,8 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
             c.get("GRUB_GFXMODE").cloned().unwrap_or_else(||"auto".into()),String::new()],tr(&s,"themes.disable"));
     });
     controls.append(&disable);
-    preview.append(&controls);
-    columns.insert(&preview,-1);
-    page.append(&columns);
+    details_card.append(&controls);
+    page.append(&details_card);
     let s=state.clone();
     let themes_for_selection=themes.clone();
     let active_theme=active.clone();
@@ -971,6 +916,7 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
                 s.borrow_mut().selected_theme=theme.path.clone();
                 selected_info.set_text(&theme.path);
                 current_name.set_text(&theme.name);
+                current_status.set_visible(true);
                 current_status.set_text(if theme.path==active_theme {&active_word}else{&detected_word});
                 current_status.remove_css_class("theme-state-active");
                 current_status.remove_css_class("theme-state-idle");
@@ -979,10 +925,6 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
                 activate.set_sensitive(can_apply);
                 activate.remove_css_class(if can_apply {"flat"}else{"suggested-action"});
                 activate.add_css_class(if can_apply {"suggested-action"}else{"flat"});
-                if let Some(path)=inspect::theme_preview_image(&theme.path) {
-                    image.set_filename(Some(path));
-                    visual.set_visible_child_name("wallpaper");
-                } else {visual.set_visible_child_name("fallback");}
             }
         }
     });
@@ -1063,7 +1005,7 @@ fn page_tools(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     page
 }
 fn page_about(_window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
-    let page=page_root(&tr(state,"about.title"),"Rust Edition · GTK4 · Wayland · 2.3.0");
+    let page=page_root(&tr(state,"about.title"),"Rust Edition · GTK4 · Wayland · 2.3.1");
     for number in 1..=9 {
         let title=tr(state,&format!("about.{number:02}.title"));
         let text=tr(state,&format!("about.{number:02}.text"));
@@ -1197,7 +1139,7 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
     let branding=gtk::Box::new(gtk::Orientation::Vertical,1);
     branding.set_hexpand(true);
     add_text(&branding,"GRUB Studio","brand",false);
-    add_text(&branding,"UNIVERSAL  ·  2.3","brand-subtitle",false);
+    add_text(&branding,"UNIVERSAL  ·  2.3.1","brand-subtitle",false);
     header.append(&branding);
     let status=if s.demo {"DEMO".into()}
         else if s.busy {tr(state,"status.scanning")}
@@ -1350,7 +1292,7 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
 
 fn main() {
     let args:Vec<String>=std::env::args().skip(1).collect();
-    if args.iter().any(|a| a=="--version") { println!("GRUB Studio Universal 2.3.0 Rust Edition");return; }
+    if args.iter().any(|a| a=="--version") { println!("GRUB Studio Universal 2.3.1 Rust Edition");return; }
     if args.iter().any(|a| a=="--self-test") {
         let locales=serde_json::from_str::<serde_json::Value>(include_str!("../assets/translations.json")).expect("valid locale catalog");
         for (code,_) in LANGUAGES {assert!(locales[*code]["tools.title"].is_string(),"missing tools translation: {code}");}

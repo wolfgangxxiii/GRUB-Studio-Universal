@@ -1,4 +1,4 @@
-/* GRUB Studio Universal 2.3 — compact, task-focused GTK4/Wayland/X11 layout.
+/* GRUB Studio Universal 2.3.1 — task-focused GTK4/Wayland/X11 layout.
  * 196px / 62px responsive navigation, typography hierarchy, restrained colors, one
  * primary action per context. Both palettes meet comfortable text contrast.
  */
@@ -76,24 +76,15 @@
 .studio-list { border-radius: 9px; }
 .studio-list row { min-height: 43px; }
 .studio-list row:last-child { border-bottom: 0; }
-.theme-split { min-height: 284px; }
 .theme-browser, .theme-details { margin: 0 2px; }
+.theme-details { margin-top: 10px; }
 .theme-option { padding: 2px; }
-.theme-thumbnail { border-radius: 6px; }
 .theme-icon-fallback { opacity: .72; }
 .grub-dark .theme-icon-fallback { color: #bbd0e8; }
 .grub-light .theme-icon-fallback { color: #496c91; }
-.theme-background { min-height: 196px; background: #0d1624; border-radius: 8px; }
 .theme-selected-name { font-size: 16px; font-weight: 750; }
 .theme-selected-status { padding: 4px 8px; border-radius: 11px; font-size: 10px; font-weight: 750; }
-.theme-path-details { padding: 4px; }
-.boot-preview { min-height: 178px; padding: 16px; border-radius: 8px; }
-.preview-title { color: #b4c9e4; font-family: monospace; font-size: 12px; font-weight: 700; }
-.preview-entry { color: #91a5c4; padding: 6px 10px; font-family: monospace; font-size: 12px; }
-.preview-selected {
-  color: #f5f8ff; background: #356bb1; border-radius: 6px;
-  padding: 6px 10px; font-family: monospace; font-size: 12px;
-}
+.theme-file-location { margin-top: 4px; margin-bottom: 9px; }
 .generated-expander { padding: 6px; border-radius: 9px; }
 
 /* Dark mode — ink/navy with a single blue accent. */
@@ -141,7 +132,6 @@
 .grub-dark .popup-action > button, .grub-dark .prefs-trigger > button { background: #293648; color: #e3ebf7; border: 1px solid #3e5065; }
 .grub-dark .action-button.flat:hover, .grub-dark .icon-button:hover { background: #34485e; }
 .grub-dark .action-button.suggested-action { background: #4b92e7; color: #071522; }
-.grub-dark .boot-preview { background: #0d1624; border: 1px solid #3e5675; }
 .grub-dark .generated-expander { background: #192331; border: 1px solid #354355; }
 
 /* Light mode — clean graphite typography, restrained slate outlines. */
@@ -189,5 +179,4 @@
 .grub-light .popup-action > button, .grub-light .prefs-trigger > button { background: #ffffff; color: #37506d; border: 1px solid #d0dce9; }
 .grub-light .action-button.flat:hover, .grub-light .icon-button:hover { background: #e9f1fb; }
 .grub-light .action-button.suggested-action { background: #347bc9; color: #ffffff; }
-.grub-light .boot-preview { background: #0e1827; border: 1px solid #486080; }
 .grub-light .generated-expander { background: #ffffff; border: 1px solid #dce5ef; }

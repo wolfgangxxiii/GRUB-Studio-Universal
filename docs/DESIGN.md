@@ -1,4 +1,4 @@
-# GRUB Studio Universal — projekt interfejsu 2.3
+# GRUB Studio Universal — projekt interfejsu 2.3.1
 
 ## Cel
 
@@ -28,7 +28,7 @@ szczegółów na żądanie z [GNOME HIG](https://developer.gnome.org/hig/).
 | --- | --- |
 | Pulpit | Status, aktywny motyw, liczba motywów i systemów, profil rozruchu. Bez powtórzonych przycisków nawigacji. |
 | Menu GRUB | Własne wpisy EFI: dodaj, edytuj, zapisz. Przesunięcie, ukrycie i usunięcie dostępne są w kontekstowym menu zaznaczonego wpisu. W osobnym menu: wybór domyślnego wpisu i odrzucenie zmian. Rozwijane informacje o wpisach wygenerowanych i wykrytych systemach; opcjonalny `os-prober`. |
-| Motywy | Lista instalacji z `theme.txt`, miniatury lokalnego tła `desktop-image`, większy podgląd, wybór, import, aktywowanie lub wyłączenie motywu. Pełna ścieżka jest w rozwijanych szczegółach. |
+| Motywy | Wykrywanie zainstalowanych plików `theme.txt`, lista motywów ze stanem aktywności, pełna ścieżka zaznaczonego pliku, import, zastosowanie i wyłączenie motywu. Brak symulowanego menu GRUB. |
 | Ustawienia | Czas menu, tryb, rozdzielczość, widoczność i obsługiwane parametry jądra. Bez drugiego selektora motywów. |
 | Narzędzia | Tworzenie/przywracanie kopii oraz dziennik w oddzielnych rozwijanych panelach. |
 | Informacje | Dokumentacja obsługi i bezpieczeństwa. |
@@ -44,7 +44,8 @@ bez uprawnień. Funkcje zapisu GRUB zachowują walidację i kopię bezpieczeńst
 - Edytor wpisów zawija przyciski do kolejnego wiersza.
 - Na szerokim ekranie edytor ma dwie kolumny (lista wpisów i formularz);
   przy mniejszej szerokości kolumny ustawiają się jedna pod drugą.
-- Biblioteka motywów przechodzi z dwóch kolumn do jednej, gdy brak miejsca.
+- Biblioteka motywów jest jednokolumnowa: lista na całej szerokości,
+  poniżej szczegóły wybranego pliku i działania, również na małym ekranie.
 - Preferencje wyglądu i języka nie zabierają osobnego miejsca w górnym pasku.
 - Działania na zaznaczonym wpisie są dostępne w menu kontekstowym, a nie w sześciu równych przyciskach.
 - Elementy nawigacji nie zwiększają szerokości pod wpływem tekstu innej karty.
@@ -66,13 +67,13 @@ GitHub Actions uruchamia oba testy przed budową AppImage.
 Osobny test `--ui-resize-report` wymusza rozmiar 720 px poleceniem `xdotool`
 **po otwarciu okna** i sprawdza przejście z 196 do 62 px; dzięki temu test
 obejmuje też menedżery okien niewysyłające powiadomień o zmianie szerokości.
-Wersja 2.3 zawiera dodatkowy test kompletności kluczowych komunikatów we wszystkich
+Wersja 2.3.1 zawiera dodatkowy test kompletności kluczowych komunikatów we wszystkich
 siedmiu językach oraz zrzut wąskiego układu menu z polskimi etykietami.
 
-**Granica podglądu motywów:** `desktop-image` to prawdziwy plik tła wskazany
-w motywie GRUB. Program nie odtwarza całej kompozycji widgetów, czcionek
-oraz grafiki firmware GRUB. Odczyt jest ograniczony do niepowiązanych linkami
-plików PNG/JPEG wewnątrz katalogu motywu, z limitem rozmiaru.
+**Decyzja projektowa:** usunięto pozorny podgląd motywu. Sam odczyt
+`desktop-image` nie wystarcza, aby wiarygodnie pokazać układ, czcionki,
+grafikę i zachowanie GRUB. Prawdziwy wygląd należy zweryfikować w GRUB
+podczas rozruchu, dlatego interfejs pokazuje tylko wykrywalne dane.
 
 ## Odniesienia projektowe
 

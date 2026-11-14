@@ -22,14 +22,14 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.0-rc.1/GRUB-Studio-Universal-v2.3.0-x86_64.AppImage"><strong>⬇️ Download AppImage · v2.3.0 RC1</strong></a>
+  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.1-rc.1/GRUB-Studio-Universal-v2.3.1-x86_64.AppImage"><strong>⬇️ Download AppImage · v2.3.1 RC1</strong></a>
   &nbsp;·&nbsp;
   <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases">All releases</a>
 </p>
 
 <p align="center">
-  <img src="preview/GRUB-Studio-2.3-GTK4-Dark.png" alt="Actual GRUB Studio 2.3 GTK4 dark-mode screenshot" width="49%">
-  <img src="preview/GRUB-Studio-2.3-GTK4-Light.png" alt="Actual GRUB Studio 2.3 GTK4 light-mode screenshot" width="49%">
+  <img src="preview/GRUB-Studio-2.3.1-Themes-Dark.png" alt="Actual GRUB Studio 2.3.1 GTK4 dark-mode screenshot" width="49%">
+  <img src="preview/GRUB-Studio-2.3.1-Themes-Light.png" alt="Actual GRUB Studio 2.3.1 GTK4 light-mode screenshot" width="49%">
 </p>
 <p align="center"><sub>Rzeczywiste zrzuty GTK4 / Actual GTK4 screenshots · tryb demonstracyjny / demo mode</sub></p>
 
@@ -48,7 +48,7 @@
 | 🎨 **Interfejs** | Nawigacja 196/62 px zależna od szerokości okna, sześć sekcji, jasny i ciemny motyw oraz 7 języków w jednym menu preferencji. |
 | 🐧 **Dystrybucje** | Rozpoznawanie Bazzite, Fedora, Ubuntu/Debian, Arch/CachyOS i openSUSE. |
 | 🖥️ **Systemy** | Wykrywanie śladów Windows i innych systemów przez UEFI/EFI; opcjonalny skan `os-prober`. |
-| 🖼️ **Motywy GRUB** | Wykrywanie `theme.txt`, wybór, import, większy podgląd i miniatury prawdziwego tła (jeśli plik jest bezpiecznie dostępny). Ścieżki ukryte w szczegółach. Nie jest to pełna emulacja GRUB. |
+| 🖼️ **Motywy GRUB** | Wykrywanie `theme.txt`, lista motywów, pełna ścieżka wybranego pliku, oznaczenie aktywnego motywu, import i zastosowanie. Bez symulacji podglądu, która nie odzwierciedlała wyglądu GRUB. |
 | ⚙️ **Ustawienia** | Czas wyświetlania menu, tryb menu, rozdzielczość, motyw i wybrane ustawienia domyślne. |
 | 📋 **Wpisy rozruchowe** | Adaptacyjny edytor z listą i formularzem obok siebie, akcje porządkowania i usuwania w menu kontekstowym, edycja **własnych** pozycji tylko na obsługiwanych instalacjach GRUB. |
 | 🧰 **Narzędzia** | Kopie zapasowe i dziennik działań dostępne razem bez duplikowania pozycji menu. |
@@ -56,24 +56,24 @@
 
 ### ⬇️ Pobieranie i uruchamianie
 
-**[Pobierz GRUB Studio Universal 2.3.0 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.0-rc.1/GRUB-Studio-Universal-v2.3.0-x86_64.AppImage)**
+**[Pobierz GRUB Studio Universal 2.3.1 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.1-rc.1/GRUB-Studio-Universal-v2.3.1-x86_64.AppImage)**
 
 AppImage nie wymaga instalacji pakietu ani ingerencji w obraz systemu Bazzite. Po pobraniu nadaj mu uprawnienia wykonywania:
 
 ```bash
-chmod +x GRUB-Studio-Universal-v2.3.0-x86_64.AppImage
-./GRUB-Studio-Universal-v2.3.0-x86_64.AppImage
+chmod +x GRUB-Studio-Universal-v2.3.1-x86_64.AppImage
+./GRUB-Studio-Universal-v2.3.1-x86_64.AppImage
 ```
 
-**[Pobierz sumę SHA-256](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.0-rc.1/GRUB-Studio-Universal-v2.3.0-SHA256.txt)** · [Zobacz wydanie i zmiany](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.3.0-rc.1)
+**[Pobierz sumę SHA-256](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.1-rc.1/GRUB-Studio-Universal-v2.3.1-SHA256.txt)** · [Zobacz wydanie i zmiany](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.3.1-rc.1)
 
-> **Wersja 2.3.0 RC:** Mniej przycisków na ekranie, menu kontekstowe dla wpisów EFI, większy podgląd motywów, jedno menu wyglądu i języka oraz automatycznie zwijana nawigacja. Testy GUI sprawdzają przejścia między sześcioma kartami w wąskim i szerokim oknie. Nadal wymagany jest test na konkretnym komputerze; do administracji potrzebny jest Polkit/`pkexec`.
+> **Wersja 2.3.1 RC:** Uproszczony menedżer motywów bez niedziałającej symulacji wyglądu GRUB. Pozostają: wybór rzeczywiście wykrytych motywów, kontekstowe akcje EFI, jedno menu preferencji i adaptacyjna nawigacja. Testy GUI sprawdzają wszystkie sześć kart oraz zmianę szerokości okna. Zapis na konkretnym komputerze nadal wymaga testu i Polkit/`pkexec`.
 
 Szczegóły projektu wyglądu i przypisania funkcji do kart: **[docs/DESIGN.md](docs/DESIGN.md)**.
 
 ### 🔐 Bezpieczeństwo i kompatybilność
 
-- Aplikację uruchamia się jako **zwykły użytkownik**. O hasło administratora prosi systemowy **Polkit**; po odmowie dostępny jest podgląd.
+- Aplikację uruchamia się jako **zwykły użytkownik**. O hasło administratora prosi systemowy **Polkit**; po odmowie pozostaje tryb tylko do odczytu.
 - Program **nie edytuje bezpośrednio** `grub.cfg`, nie uruchamia `grub-install` i nie zmienia kolejności startowej UEFI.
 - Plik `/etc/default/grub`, jeśli go nie ma, może zostać utworzony **dopiero po zatwierdzeniu zapisu** w obsługiwanej konfiguracji.
 - Wykrywanie Windows w EFI potwierdza obecność wpisu lub pliku, **nie gwarantuje** poprawnego uruchomienia systemu.
@@ -120,7 +120,7 @@ Masz pomysł lub znalazłeś błąd? Otwórz [Issues](https://github.com/wolfgan
 | 🎨 **Interface** | Six destinations, responsive 196/62 px navigation, compact layout, and a single preferences menu for light/dark modes and 7 languages. |
 | 🐧 **Distributions** | Detection of Bazzite, Fedora, Ubuntu/Debian, Arch/CachyOS, and openSUSE. |
 | 🖥️ **Operating systems** | Detection of Windows and other OS traces through UEFI/EFI; optional `os-prober` scan. |
-| 🖼️ **GRUB themes** | Installed-theme discovery, import, larger preview, thumbnails and real wallpaper when safely accessible; paths in collapsible details (not a full GRUB renderer). |
+| 🖼️ **GRUB themes** | Installed `theme.txt` discovery, selection, full file path, active-theme state, import and apply. The inaccurate simulated GRUB preview has been removed. |
 | ⚙️ **Settings** | Menu timeout, display style, resolution, theme, and selected default options. |
 | 📋 **Boot entries** | Responsive list-and-form editor for user-created EFI entries, contextual actions and OS discovery on supported conventional GRUB installations. |
 | 🧰 **Tools** | Backups and activity log consolidated into one destination. |
@@ -128,18 +128,18 @@ Masz pomysł lub znalazłeś błąd? Otwórz [Issues](https://github.com/wolfgan
 
 ### ⬇️ Download & run
 
-**[Download GRUB Studio Universal 2.3.0 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.0-rc.1/GRUB-Studio-Universal-v2.3.0-x86_64.AppImage)**
+**[Download GRUB Studio Universal 2.3.1 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.1-rc.1/GRUB-Studio-Universal-v2.3.1-x86_64.AppImage)**
 
 The portable AppImage does not require installing an application package or modifying the Bazzite base image:
 
 ```bash
-chmod +x GRUB-Studio-Universal-v2.3.0-x86_64.AppImage
-./GRUB-Studio-Universal-v2.3.0-x86_64.AppImage
+chmod +x GRUB-Studio-Universal-v2.3.1-x86_64.AppImage
+./GRUB-Studio-Universal-v2.3.1-x86_64.AppImage
 ```
 
-**[Download SHA-256 checksum](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.0-rc.1/GRUB-Studio-Universal-v2.3.0-SHA256.txt)** · [Release notes](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.3.0-rc.1)
+**[Download SHA-256 checksum](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v2.3.1-rc.1/GRUB-Studio-Universal-v2.3.1-SHA256.txt)** · [Release notes](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v2.3.1-rc.1)
 
-> **Version 2.3.0 RC:** Fewer always-visible buttons, contextual EFI actions, larger theme previews, one preferences menu for appearance/language and an adaptive sidebar. GUI smoke tests navigate all six pages in narrow and wide windows. Real-hardware testing is still required; administration depends on Polkit/`pkexec`.
+> **Version 2.3.1 RC:** The misleading simulated GRUB screen is gone. Actual installed-theme selection, contextual EFI actions, one appearance/language menu and an adaptive sidebar remain. GUI smoke tests exercise six pages and live window resizing. Real-hardware testing is still required; administration depends on Polkit/`pkexec`.
 
 More about the layout, one-place-per-action design and testing: **[docs/DESIGN.md](docs/DESIGN.md)**.
 
