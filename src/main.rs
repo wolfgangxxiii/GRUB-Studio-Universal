@@ -812,10 +812,10 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     }
     let scroll=gtk::ScrolledWindow::new();
     scroll.set_policy(gtk::PolicyType::Never,gtk::PolicyType::Automatic);
-    // Three installed themes should be visible without clipping the last row.
-    // Larger libraries scroll inside the card rather than growing indefinitely.
-    scroll.set_min_content_height(220);
-    scroll.set_max_content_height(270);
+    // Three installed themes fit without blank space. Longer collections
+    // scroll, keeping the selected-theme actions above the window footer.
+    scroll.set_min_content_height(180);
+    scroll.set_max_content_height(240);
     scroll.set_propagate_natural_height(true);
     scroll.set_vexpand(false);
     scroll.set_visible(!themes.is_empty());
@@ -842,7 +842,9 @@ fn page_themes(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
         });
         dialog.show();
     });
-    list.append(&install);
+    // Import belongs to this list and stays in its header; a separate
+    // full-width button below the list needlessly pushed actions offscreen.
+    list_header.append(&install);
     page.append(&list);
 
     // The previous simulated GRUB screen was not a renderer of theme.txt and
