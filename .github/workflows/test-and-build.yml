@@ -66,15 +66,17 @@ jobs:
               kill "$app_pid"
               wait "$app_pid" || true
             done
-            target/release/grub-studio-universal --demo-page=menu --appearance=light --language=pl &
-            app_pid=$!
-            sleep 3
-            window_id=$(xdotool search --onlyvisible --name "GRUB Studio Universal" | tail -n 1)
-            xdotool windowsize "$window_id" 700 540
-            sleep 2
-            import -window "$window_id" qa-screenshots/menu-compact-pl.png
-            kill "$app_pid"
-            wait "$app_pid" || true
+            for page in menu themes; do
+              target/release/grub-studio-universal --demo-page="$page" --appearance=light --language=pl &
+              app_pid=$!
+              sleep 3
+              window_id=$(xdotool search --onlyvisible --name "GRUB Studio Universal" | tail -n 1)
+              xdotool windowsize "$window_id" 700 540
+              sleep 2
+              import -window "$window_id" "qa-screenshots/$page-compact-pl.png"
+              kill "$app_pid"
+              wait "$app_pid" || true
+            done
           '
       - uses: actions/upload-artifact@v4
         with:

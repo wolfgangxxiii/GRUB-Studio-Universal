@@ -22,7 +22,7 @@ Data: 14 listopada 2026
 | `--ui-smoke` w `xvfb-run` | 6 stron, nawigacja **62 px** w oknie 720 × 540 px |
 | `--ui-smoke-wide` w `xvfb-run` | 6 stron, nawigacja **196 px** w oknie 1100 × 540 px |
 | `--ui-resize-report` + `xdotool` | Zwinięcie panelu z **196 px do 62 px**, gdy już otwarte okno zmniejszy się do 720 px |
-| Zrzuty GTK4 | Motywy (ciemny i jasny), Menu (ciemny), Narzędzia (jasny), Menu kompaktowe (polski) |
+| Zrzuty GTK4 | Motywy (ciemny, jasny i kompaktowy polski), Menu (ciemny i kompaktowy polski), Narzędzia (jasny) |
 | `build-appimage.sh` | Wytworzenie przenośnego AppImage x86_64 |
 | `AppImage --version` i `AppImage --self-test` | Sprawdzenie pliku wynikowego |
 
@@ -34,6 +34,7 @@ Zrzuty pochodzą z procesu GTK4 w wirtualnym środowisku X11; nie są renderami 
 
 - [Motywy — ciemny](preview/GRUB-Studio-2.3.1-Themes-Dark.png)
 - [Motywy — jasny](preview/GRUB-Studio-2.3.1-Themes-Light.png)
+- [Motywy — kompaktowy układ po polsku](preview/GRUB-Studio-2.3.1-Themes-Compact-PL.png)
 - [Menu — ciemny](preview/GRUB-Studio-2.3-Menu-Dark.png)
 - [Narzędzia — jasny](preview/GRUB-Studio-2.3-Tools-Light.png)
 - [Menu — kompaktowy układ po polsku](preview/GRUB-Studio-2.3-Menu-Compact-PL.png)
