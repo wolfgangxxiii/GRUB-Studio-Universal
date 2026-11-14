@@ -111,24 +111,24 @@ jobs:
         env:
           APPIMAGE_EXTRACT_AND_RUN: "1"
         run: |
-          test -s GRUB-Studio-Universal-v3.0.1-x86_64.AppImage
-          file GRUB-Studio-Universal-v3.0.1-x86_64.AppImage
-          ./GRUB-Studio-Universal-v3.0.1-x86_64.AppImage --version
-          ./GRUB-Studio-Universal-v3.0.1-x86_64.AppImage --self-test
-          sha256sum GRUB-Studio-Universal-v3.0.1-x86_64.AppImage > GRUB-Studio-Universal-v3.0.1-SHA256.txt
+          test -s GRUB-Studio-Universal-v3.0.2-x86_64.AppImage
+          file GRUB-Studio-Universal-v3.0.2-x86_64.AppImage
+          ./GRUB-Studio-Universal-v3.0.2-x86_64.AppImage --version
+          ./GRUB-Studio-Universal-v3.0.2-x86_64.AppImage --self-test
+          sha256sum GRUB-Studio-Universal-v3.0.2-x86_64.AppImage > GRUB-Studio-Universal-v3.0.2-SHA256.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: grub-studio-universal-v3.0.1-release-candidate
+          name: grub-studio-universal-v3.0.2-release-candidate
           path: |
-            GRUB-Studio-Universal-v3.0.1-x86_64.AppImage
-            GRUB-Studio-Universal-v3.0.1-SHA256.txt
+            GRUB-Studio-Universal-v3.0.2-x86_64.AppImage
+            GRUB-Studio-Universal-v3.0.2-SHA256.txt
       - name: Publish downloadable preview release
         if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if gh release view v3.0.1-rc.1 >/dev/null 2>&1; then
-            gh release upload v3.0.1-rc.1 GRUB-Studio-Universal-v3.0.1-x86_64.AppImage GRUB-Studio-Universal-v3.0.1-SHA256.txt --clobber
+          if gh release view v3.0.2-rc.1 >/dev/null 2>&1; then
+            gh release upload v3.0.2-rc.1 GRUB-Studio-Universal-v3.0.2-x86_64.AppImage GRUB-Studio-Universal-v3.0.2-SHA256.txt --clobber
           else
-            gh release create v3.0.1-rc.1 GRUB-Studio-Universal-v3.0.1-x86_64.AppImage GRUB-Studio-Universal-v3.0.1-SHA256.txt --title 'GRUB Studio Universal 3.0.1 — dashboard and interactive contrast' --notes 'Adwaita polish: equal-width 2×2 dashboard tiles spanning the content area, accent-colored values and borders, and clearer hover/focus affordances for clickable actions and expandable operation logs. System window decorations and stable non-nested appearance/language controls remain unchanged. Adds a live GTK geometry smoke test and extra dashboard/screenshots in CI. Real KDE/Wayland, Polkit and bootloader writes still need validation.' --prerelease --target "$GITHUB_SHA"
+            gh release create v3.0.2-rc.1 GRUB-Studio-Universal-v3.0.2-x86_64.AppImage GRUB-Studio-Universal-v3.0.2-SHA256.txt --title 'GRUB Studio Universal 3.0.2 — secure ZIP/TAR theme import' --notes 'Adds direct theme import from ZIP, TAR.GZ and TAR.XZ. Archives are unpacked as the unprivileged user into private temporary staging; paths, links, file types, item count, sizes and theme.txt are validated before confirmation and Polkit installation. Multiple theme.txt candidates are rejected with a clear instruction to choose an extracted folder. Scripts are never executed or installed. Theme activation remains explicit. GTK4/libadwaita window behavior is unchanged. Import and UI tests run in CI; real bootloader writes still require testing on physical hardware.' --prerelease --target "$GITHUB_SHA"
           fi

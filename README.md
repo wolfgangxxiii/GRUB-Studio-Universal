@@ -23,7 +23,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.1-rc.1/GRUB-Studio-Universal-v3.0.1-x86_64.AppImage"><strong>⬇️ Download AppImage · v3.0.1 RC1</strong></a>
+  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.2-rc.1/GRUB-Studio-Universal-v3.0.2-x86_64.AppImage"><strong>⬇️ Download AppImage · v3.0.2 RC1</strong></a>
   &nbsp;·&nbsp;
   <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases">All releases</a>
 </p>
@@ -45,7 +45,7 @@
 | 🎨 **Interfejs** | **Natywna stylistyka libadwaita** — tryb systemowy/jasny/ciemny, akcent systemowy (gdy obsługiwany), cztery równe kafelki na pulpicie, czytelne przyciski i rozwijane sekcje; stabilne dekoracje okna, zawsze widoczna nawigacja 196/62 px, siedem języków i kursor systemowy. |
 | 🐧 **Dystrybucje** | Rozpoznawanie Bazzite, Fedora, Ubuntu/Debian, Arch/CachyOS i openSUSE. |
 | 🖥️ **Systemy** | Wspólny widok informacji GRUB/EFI bez duplikowania systemów o tej samej nazwie; opcjonalny skan `os-prober`. |
-| 🖼️ **Motywy GRUB** | Wykrywanie `theme.txt`, lista z lokalizacją plików, stan aktywności, import oraz przyciski zastosowania/wyłączenia dostępne nawet przy przewijaniu. Bez symulowanego podglądu. |
+| 🖼️ **Motywy GRUB** | Wykrywanie `theme.txt`, lista z lokalizacją plików, stan aktywności, import folderów i archiwów ZIP/TAR.GZ/TAR.XZ oraz przyciski zastosowania/wyłączenia dostępne nawet przy przewijaniu. Bez symulowanego podglądu. |
 | ⚙️ **Ustawienia** | Czas wyświetlania menu, przetłumaczone style menu, lista rozdzielczości i parametry rozruchu. Niezapisane wartości formularza pozostają przy zmianie kart; bez prawa zapisu wyświetla się podsumowanie tylko do odczytu. |
 | 📋 **Wpisy rozruchowe** | Prostsza karta „Menu rozruchowe” z czytelnym stanem blokady i jednym panelem wykrywania; edycja własnych EFI tylko na obsługiwanych konfiguracjach. Niezapisane dane pozostają także po ręcznym odświeżeniu. |
 | 🧰 **Narzędzia** | Kopie zapasowe i dziennik działań dostępne razem bez duplikowania pozycji menu. |
@@ -56,22 +56,22 @@
 - **[Gorgeous-GRUB](https://github.com/jacksaur/Gorgeous-GRUB)** — galeria motywów społecznościowych z odnośnikami do stron poszczególnych projektów.
 - **[Distro GRUB Themes — podgląd i pobieranie](https://k1ng.dev/distro-grub-themes/preview)** — motywy dopasowane do wielu dystrybucji Linuksa.
 
-**Importowanie:** obecnie program przyjmuje **rozpakowany katalog motywu**, a nie plik `.zip`, `.tar.gz` czy `.tar.xz`. Pobierz wybrany motyw, rozpakuj archiwum, otwórz **Motywy → Importuj folder** i wskaż katalog zawierający bezpośrednio `theme.txt` oraz pliki graficzne/czcionki. Jeśli archiwum ma dodatkowy katalog nadrzędny, wybierz katalog wewnętrzny z `theme.txt`. Import wymaga uprawnień administratora i **nie aktywuje motywu automatycznie** — zaznacz go na liście i wybierz „Zastosuj motyw”. Nie uruchamiaj skryptów instalacyjnych pobranych z nieznanych źródeł.
+**Importowanie w 3.0.2:** pobierz motyw i wybierz **Motywy → Importuj archiwum** dla `.zip`, `.tar.gz` lub `.tar.xz`. Program sam wyszuka pojedynczy `theme.txt`, także w podfolderze, **rozpakuje wyłącznie pliki motywu bez uprawnień administratora**, sprawdzi ich typy, rozmiary i ścieżki, a następnie pokaże nazwę i liczbę plików przed potwierdzeniem. Dopiero po potwierdzeniu i autoryzacji Polkit kopiuje motyw do katalogu GRUB. Istnieje też opcja **Importuj folder** dla już rozpakowanych motywów. Archiwa zawierające *wiele* motywów (`theme.txt`) należy rozpakować samodzielnie i wybrać konkretny folder. Archiwa z niedozwolonymi ścieżkami, dowiązaniami lub nadmiernym rozmiarem są odrzucane. Pliki instalatorów/skryptów są pomijane i **nigdy nie są wykonywane**. Import **nie włącza motywu automatycznie** — wybierz go i naciśnij „Zastosuj motyw”.
 
 ### ⬇️ Pobieranie i uruchamianie
 
-**[Pobierz GRUB Studio Universal 3.0.1 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.1-rc.1/GRUB-Studio-Universal-v3.0.1-x86_64.AppImage)**
+**[Pobierz GRUB Studio Universal 3.0.2 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.2-rc.1/GRUB-Studio-Universal-v3.0.2-x86_64.AppImage)**
 
 AppImage nie wymaga instalacji pakietu ani ingerencji w obraz systemu Bazzite. Po pobraniu nadaj mu uprawnienia wykonywania:
 
 ```bash
-chmod +x GRUB-Studio-Universal-v3.0.1-x86_64.AppImage
-./GRUB-Studio-Universal-v3.0.1-x86_64.AppImage
+chmod +x GRUB-Studio-Universal-v3.0.2-x86_64.AppImage
+./GRUB-Studio-Universal-v3.0.2-x86_64.AppImage
 ```
 
-**[Pobierz sumę SHA-256](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.1-rc.1/GRUB-Studio-Universal-v3.0.1-SHA256.txt)** · [Zobacz wydanie i zmiany](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v3.0.1-rc.1)
+**[Pobierz sumę SHA-256](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.2-rc.1/GRUB-Studio-Universal-v3.0.2-SHA256.txt)** · [Zobacz wydanie i zmiany](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v3.0.2-rc.1)
 
-> **Wersja 3.0.1 RC:** Pulpit ma teraz cztery kafelki o równych wymiarach, wypełniające całą szerokość obszaru treści. Przyciski, menu oraz rozwijany „Dziennik operacji” mają czytelniejszy kontrast i podświetlenie. Bazą pozostaje **libadwaita** z obsługą trybu jasnego/ciemnego/systemowego. Układ okna, poprawka zawieszania preferencji (2.3.8) i zabezpieczenia GRUB pozostały bez zmian. Wymagany jest jeszcze test na rzeczywistym KDE/Wayland.
+> **Wersja 3.0.2 RC:** Bezpośredni import ZIP, TAR.GZ i TAR.XZ z wykrywaniem `theme.txt` i kontrolą bezpieczeństwa. Zachowano ulepszony pulpit, kontrast przycisków, **libadwaita**, stabilne menu języków/wyglądu oraz dotychczasowe ograniczenia uprawnień. Wymagany jest jeszcze test z zapisem motywu na rzeczywistym KDE/Wayland.
 
 Szczegóły projektu wyglądu i przypisania funkcji do kart: **[docs/DESIGN.md](docs/DESIGN.md)**.
 
@@ -125,7 +125,7 @@ Masz pomysł lub znalazłeś błąd? Otwórz [Issues](https://github.com/wolfgan
 | 🎨 **Interface** | **Native libadwaita** surfaces, full-width equal dashboard tiles, stronger action/expander contrast, desktop accent and system/light/dark color scheme; system-managed window decorations, a fixed 196/62 px sidebar, system cursor and seven languages. |
 | 🐧 **Distributions** | Detection of Bazzite, Fedora, Ubuntu/Debian, Arch/CachyOS, and openSUSE. |
 | 🖥️ **Operating systems** | One combined GRUB/EFI discovery view, merging records with the same system name; optional `os-prober` scan. |
-| 🖼️ **GRUB themes** | Installed `theme.txt` discovery, selection, active-theme status, import, and pinned Apply/Disable buttons even in compact windows. The inaccurate simulated preview is gone. |
+| 🖼️ **GRUB themes** | Installed `theme.txt` discovery, selection, active-theme status, folder/ZIP/TAR.GZ/TAR.XZ import and pinned Apply/Disable buttons even in compact windows. The inaccurate simulated preview is gone. |
 | ⚙️ **Settings** | Menu timeout, localized menu styles, resolution presets, and supported boot options. Unsaved edits survive navigation, while unauthorized sessions show a read-only summary. |
 | 📋 **Boot entries** | Clear boot-menu view, consolidated system discovery, drafts retained across refresh, and editing restricted to supported GRUB profiles. |
 | 🧰 **Tools** | Backups and activity log consolidated into one destination. |
@@ -136,22 +136,22 @@ Masz pomysł lub znalazłeś błąd? Otwórz [Issues](https://github.com/wolfgan
 - **[Gorgeous-GRUB](https://github.com/jacksaur/Gorgeous-GRUB)** — a curated gallery of community themes with links to their original projects.
 - **[Distro GRUB Themes — previews and downloads](https://k1ng.dev/distro-grub-themes/preview)** — themes for a variety of Linux distributions.
 
-**Importing:** the current app accepts an **extracted theme directory**, not `.zip`, `.tar.gz`, or `.tar.xz` files directly. Download and extract the theme, then select **Themes → Import folder** and choose the folder containing `theme.txt` directly alongside the theme resources. If the archive has an extra top-level folder, choose the inner `theme.txt` directory. Administrator authorization is required. Importing **does not activate** the theme: select it in the list and click Apply theme. Avoid executing installation scripts from untrusted sources.
+**Importing in 3.0.2:** download a theme and choose **Themes → Import archive** for ZIP, TAR.GZ or TAR.XZ. The app finds one `theme.txt` automatically, including nested folders, extracts the theme **as an unprivileged user** into private temporary storage, validates paths/file types/sizes, then shows its name and file count for confirmation. Polkit authorization is requested only after validation. **Import folder** remains available for extracted themes. If an archive contains *multiple* `theme.txt` files, extract it yourself and select the intended folder. Archives with unsafe paths, links, or excessive sizes are rejected; installers and scripts are skipped and **never executed**. Imported themes are **not activated** automatically — select the theme and click Apply theme.
 
 ### ⬇️ Download & run
 
-**[Download GRUB Studio Universal 3.0.1 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.1-rc.1/GRUB-Studio-Universal-v3.0.1-x86_64.AppImage)**
+**[Download GRUB Studio Universal 3.0.2 — AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.2-rc.1/GRUB-Studio-Universal-v3.0.2-x86_64.AppImage)**
 
 The portable AppImage does not require installing an application package or modifying the Bazzite base image:
 
 ```bash
-chmod +x GRUB-Studio-Universal-v3.0.1-x86_64.AppImage
-./GRUB-Studio-Universal-v3.0.1-x86_64.AppImage
+chmod +x GRUB-Studio-Universal-v3.0.2-x86_64.AppImage
+./GRUB-Studio-Universal-v3.0.2-x86_64.AppImage
 ```
 
-**[Download SHA-256 checksum](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.1-rc.1/GRUB-Studio-Universal-v3.0.1-SHA256.txt)** · [Release notes](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v3.0.1-rc.1)
+**[Download SHA-256 checksum](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.2-rc.1/GRUB-Studio-Universal-v3.0.2-SHA256.txt)** · [Release notes](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v3.0.2-rc.1)
 
-> **Version 3.0.1 RC:** The dashboard now uses four equal-sized cards that span the full content width, while buttons, menus and expandable logs gain clearer visual feedback. It retains the **libadwaita** native system/light/dark appearance, system window decorations, non-blocking language/appearance preferences from v2.3.8 and GRUB write safeguards. Real KDE/Wayland hardware testing is still needed; administration depends on Polkit/`pkexec`.
+> **Version 3.0.2 RC:** Direct ZIP, TAR.GZ and TAR.XZ theme import with automatic `theme.txt` discovery and safety validation. The improved dashboard, native **libadwaita** appearance and responsive language/color preferences remain unchanged. Real KDE/Wayland theme installation still requires on-device validation.
 
 More about the layout, one-place-per-action design and testing: **[docs/DESIGN.md](docs/DESIGN.md)**.
 
