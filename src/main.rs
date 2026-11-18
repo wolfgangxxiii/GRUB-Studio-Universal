@@ -640,8 +640,16 @@ fn page_home(_window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     let page = page_root(&tr(state, "home.title"), &tr(state, "home.sub"));
     let banner = card();
     banner.add_css_class("hero");
-    add_text(&banner,&tr(state,"home.distribution"),"section-heading",true);
-    add_text(&banner, &snapshot.profile.name, "hero-title", true);
+    let hero_header=gtk::Box::new(gtk::Orientation::Horizontal,12);
+    let hero_icon=nav_icon("boot");
+    hero_icon.add_css_class("hero-icon");
+    hero_header.append(&hero_icon);
+    let hero_copy=gtk::Box::new(gtk::Orientation::Vertical,4);
+    hero_copy.set_hexpand(true);
+    add_text(&hero_copy,&tr(state,"home.distribution"),"section-heading",true);
+    add_text(&hero_copy,&snapshot.profile.name,"hero-title",true);
+    hero_header.append(&hero_copy);
+    banner.append(&hero_header);
     add_text(&banner, &format!("{} · {} · {}",
         snapshot.profile.family.label(), snapshot.profile.bootloader,
         if !state.borrow().authorized {tr(state,"status.locked")}
@@ -665,17 +673,27 @@ fn page_home(_window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     stats.set_row_spacing(10);stats.set_column_spacing(10);
     let current_theme=snapshot.config.get("GRUB_THEME").and_then(|s|s.split('/').rev().nth(1))
         .unwrap_or("—");
-    for (position,title,value) in [
-        (0,tr(state,"home.theme"),current_theme.to_string()),
-        (1,tr(state,"themes.installed"),snapshot.themes.len().to_string()),
-        (2,tr(state,"home.others"),snapshot.systems.len().to_string()),
-        (3,tr(state,"home.bootloader"),snapshot.profile.bootloader.clone()),
+    for (position,title,value,icon) in [
+        (0,tr(state,"home.theme"),current_theme.to_string(),"themes"),
+        (1,tr(state,"themes.installed"),snapshot.themes.len().to_string(),"home"),
+        (2,tr(state,"home.others"),snapshot.systems.len().to_string(),"menu"),
+        (3,tr(state,"home.bootloader"),snapshot.profile.bootloader.clone(),"boot"),
     ] {
         let tile=card();tile.add_css_class("metric-card");
         tile.set_hexpand(true);
         tile.set_halign(gtk::Align::Fill);
         tile.set_vexpand(true);
-        add_text(&tile,title,"metric-label",true);
+        let heading=gtk::Box::new(gtk::Orientation::Horizontal,9);
+        let graphic=nav_icon(icon);
+        graphic.add_css_class("metric-icon");
+        heading.append(&graphic);
+        let caption=gtk::Label::new(Some(&title));
+        caption.set_xalign(0.0);
+        caption.set_wrap(true);
+        caption.set_hexpand(true);
+        caption.add_css_class("metric-label");
+        heading.append(&caption);
+        tile.append(&heading);
         add_text(&tile,value,"metric-value",true);
         stats.attach(&tile,position%2,position/2,1,1);
     }
@@ -1385,14 +1403,75 @@ fn page_tools(window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
     page
 }
 fn page_about(_window: &gtk::ApplicationWindow, state: &Shared) -> gtk::Box {
-    let page=page_root(&tr(state,"about.title"),"Rust Edition · GTK4 · libadwaita · 3.0.2");
-    for number in 1..=9 {
-        let title=tr(state,&format!("about.{number:02}.title"));
-        let text=tr(state,&format!("about.{number:02}.text"));
-        let section=section(&page,&title);
-        add_text(&section,&text,"muted",true);
+    let page=page_root(&tr(state,"about.title"),&tf(state,"about.sub",&[("version",env!("CARGO_PKG_VERSION"))]));
+    let identity=card();identity.add_css_class("about-identity");
+    let row=gtk::Box::new(gtk::Orientation::Horizontal,16);
+    let logo_bytes=glib::Bytes::from_static(include_bytes!("../assets/grub-studio-256.png"));
+    let logo_texture=gdk::Texture::from_bytes(&logo_bytes).expect("bundled app icon is PNG");
+    let logo=gtk::Picture::for_paintable(&logo_texture);
+    logo.set_size_request(72,72);
+    logo.set_valign(gtk::Align::Start);
+    logo.add_css_class("about-logo");
+    row.append(&logo);
+    let about_heading=gtk::Box::new(gtk::Orientation::Vertical,7);
+    about_heading.set_hexpand(true);
+    add_text(&about_heading,"GRUB Studio Universal","about-product-name",true);
+    add_text(&about_heading,format!("v{} · Rust · GTK4 · libadwaita",env!("CARGO_PKG_VERSION")),"muted",true);
+    add_text(&about_heading,&tr(state,"about.09.text"),"muted",true);
+    row.append(&about_heading);
+    identity.append(&row);
+    page.append(&identity);
+
+    let links=section(&page,&tr(state,"about.links.title"));
+    links.add_css_class("about-links");
+    let actions=gtk::FlowBox::new();
+    actions.set_selection_mode(gtk::SelectionMode::None);
+    actions.set_min_children_per_line(1);
+    actions.set_max_children_per_line(2);
+    actions.set_row_spacing(9);
+    actions.set_column_spacing(9);
+    for (url,key,primary) in [
+        ("https://github.com/wolfgangxxiii/GRUB-Studio-Universal","about.links.repository",true),
+        ("https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases","about.links.releases",false),
+        ("https://github.com/wolfgangxxiii/GRUB-Studio-Universal/issues","about.links.issues",false),
+        ("https://www.gnu.org/software/grub/manual/grub/html_node/","about.docs",false),
+        ("https://github.com/wolfgangxxiii","about.links.author",false),
+        ("https://github.com/wolfgangxxiii/GRUB-Studio-Universal/blob/main/LICENSE","about.links.license",false),
+    ] {
+        let link=gtk::LinkButton::new(url);
+        link.add_css_class("about-link");
+        link.add_css_class("action-button");
+        link.add_css_class(if primary {"suggested-action"}else{"flat"});
+        link.set_tooltip_text(Some(url));
+        let contents=gtk::Box::new(gtk::Orientation::Horizontal,7);
+        let caption=gtk::Label::new(Some(&tr(state,key)));
+        caption.set_wrap(true);
+        caption.set_hexpand(true);
+        caption.set_xalign(0.0);
+        contents.append(&caption);
+        contents.append(&nav_icon("external"));
+        link.set_child(Some(&contents));
+        actions.insert(&link,-1);
     }
-    add_text(&page,"GPL-3.0-or-later · Independent application · GTK4 and libadwaita runtime", "muted",true);
+    links.append(&actions);
+
+    let details=section(&page,&tr(state,"about.details.title"));
+    details.add_css_class("about-details");
+    for number in 1..=9 {
+        let numbered=tr(state,&format!("about.{number:02}.title"));
+        let title=numbered.split_once("   ").map(|(_,label)|label).unwrap_or(&numbered);
+        let text=tr(state,&format!("about.{number:02}.text"));
+        let expander=gtk::Expander::new(Some(title));
+        expander.add_css_class("generated-expander");
+        expander.add_css_class("about-expander");
+        let contents=gtk::Box::new(gtk::Orientation::Vertical,0);
+        contents.set_margin_start(12);
+        contents.set_margin_end(12);
+        contents.set_margin_bottom(11);
+        add_text(&contents,&text,"muted",true);
+        expander.set_child(Some(&contents));
+        details.append(&expander);
+    }
     page
 }
 
@@ -1401,6 +1480,99 @@ fn load_css() {
     // load_from_data is available on GTK4 before 4.12; keep older desktop support.
     provider.load_from_data(include_str!("../assets/style.css"));
     if let Some(display)=gdk::Display::default(){
+        gtk::style_context_add_provider_for_display(&display,&provider,gtk::STYLE_PROVIDER_PRIORITY_APPLICATION);
+    }
+}
+
+// Use the KDE selection accent when Plasma supplies one. Other desktops keep
+// libadwaita's own palette, including high-contrast and appearance preferences.
+fn ini_setting<'a>(content: &'a str, section: &str, key: &str) -> Option<&'a str> {
+    let mut current="";
+    for line in content.lines().map(str::trim) {
+        if let Some(name)=line.strip_prefix('[').and_then(|part|part.strip_suffix(']')) {
+            current=name.trim();
+        } else if current==section {
+            if let Some((name,value))=line.split_once('=') {
+                if name.trim()==key {return Some(value.trim());}
+            }
+        }
+    }
+    None
+}
+fn parse_accent_rgb(value: &str) -> Option<(u8,u8,u8)> {
+    let value=value.trim().trim_matches('"');
+    if let Some(hex)=value.strip_prefix('#') {
+        if hex.len()!=6 || !hex.bytes().all(|b|b.is_ascii_hexdigit()) {return None;}
+        return Some((u8::from_str_radix(&hex[0..2],16).ok()?,
+            u8::from_str_radix(&hex[2..4],16).ok()?,
+            u8::from_str_radix(&hex[4..6],16).ok()?));
+    }
+    let mut values=value.split(',').map(|part|part.trim().parse::<u8>().ok());
+    let result=(values.next()??,values.next()??,values.next()??);
+    values.next().is_none().then_some(result)
+}
+fn kde_accent_color() -> Option<(u8,u8,u8)> {
+    let desktop=std::env::var("XDG_CURRENT_DESKTOP").unwrap_or_default();
+    let is_kde=desktop.split(':').any(|part|part.eq_ignore_ascii_case("KDE"))
+        || std::env::var("KDE_FULL_SESSION").as_deref()==Ok("true");
+    if !is_kde {return None;}
+    let config=std::env::var_os("XDG_CONFIG_HOME").map(PathBuf::from)
+        .or_else(||std::env::var_os("HOME").map(|home|PathBuf::from(home).join(".config")))?;
+    let content=fs::read_to_string(config.join("kdeglobals")).ok()?;
+    ini_setting(&content,"General","AccentColor").and_then(parse_accent_rgb)
+        .or_else(||ini_setting(&content,"Colors:Selection","BackgroundNormal").and_then(parse_accent_rgb))
+}
+fn contrasting_foreground((r,g,b):(u8,u8,u8)) -> &'static str {
+    let linear=|value:u8| {
+        let channel=f64::from(value)/255.0;
+        if channel<=0.04045 {channel/12.92} else {((channel+0.055)/1.055).powf(2.4)}
+    };
+    let luminance=0.2126*linear(r)+0.7152*linear(g)+0.0722*linear(b);
+    if luminance>0.179 {"#161616"} else {"#ffffff"}
+}
+fn apply_desktop_accent() {
+    let Some((r,g,b))=kde_accent_color() else {return;};
+    let foreground=contrasting_foreground((r,g,b));
+    let (hr,hg,hb)=if foreground=="#161616" {
+        (r.saturating_sub(16),g.saturating_sub(16),b.saturating_sub(16))
+    } else {
+        (r.saturating_add(16),g.saturating_add(16),b.saturating_add(16))
+    };
+    let css=format!(r#"
+        .grub-light .nav-active, .grub-dark .nav-active {{
+            color: rgb({r},{g},{b}); background: rgba({r},{g},{b},.16);
+            border-left-color: rgb({r},{g},{b});
+        }}
+        .grub-light .nav-active .nav-icon, .grub-dark .nav-active .nav-icon,
+        .grub-light .metric-value, .grub-dark .metric-value,
+        .grub-light .theme-current .row-title, .grub-dark .theme-current .row-title {{
+            color: rgb({r},{g},{b});
+        }}
+        .grub-light .metric-card, .grub-dark .metric-card {{
+            border-left-color: rgba({r},{g},{b},.65);
+        }}
+        .grub-light .nav-button:hover, .grub-dark .nav-button:hover {{
+            background: rgba({r},{g},{b},.12);
+        }}
+        .grub-light .action-button.suggested-action,
+        .grub-dark .action-button.suggested-action,
+        .prefs-panel .prefs-choice.prefs-selected {{
+            background: rgb({r},{g},{b}); color: {foreground};
+            border-color: rgb({r},{g},{b});
+        }}
+        .grub-light .action-button.suggested-action:hover,
+        .grub-dark .action-button.suggested-action:hover {{
+            background: rgb({hr},{hg},{hb});
+        }}
+        .grub-light .action-button.flat:hover, .grub-dark .action-button.flat:hover,
+        .grub-light .icon-button:hover, .grub-dark .icon-button:hover,
+        .prefs-panel .prefs-choice:hover {{
+            border-color: rgba({r},{g},{b},.55);
+        }}
+    "#);
+    if let Some(display)=gdk::Display::default() {
+        let provider=gtk::CssProvider::new();
+        provider.load_from_data(&css);
         gtk::style_context_add_provider_for_display(&display,&provider,gtk::STYLE_PROVIDER_PRIORITY_APPLICATION);
     }
 }
@@ -1440,6 +1612,19 @@ fn nav_icon(kind: &'static str) -> gtk::DrawingArea {
         let _=cr.save();
         cr.translate((w as f64-19.0)/2.0,(h as f64-19.0)/2.0);
         match kind {
+            "boot" => {
+                cr.rectangle(1.8,3.0,15.4,10.8);
+                cr.move_to(6.2,16.4);cr.line_to(12.8,16.4);
+                cr.move_to(9.5,13.8);cr.line_to(9.5,16.4);
+                let _=cr.stroke();
+            }
+            "external" => {
+                cr.move_to(8.0,3.0);cr.line_to(3.0,3.0);cr.line_to(3.0,16.0);
+                cr.line_to(16.0,16.0);cr.line_to(16.0,11.0);
+                cr.move_to(10.0,3.0);cr.line_to(16.0,3.0);cr.line_to(16.0,9.0);
+                cr.move_to(16.0,3.0);cr.line_to(8.0,11.0);
+                let _=cr.stroke();
+            }
             "home" => {
                 for (x,y) in [(2.0,2.0),(10.5,2.0),(2.0,10.5),(10.5,10.5)] {
                     cr.rectangle(x,y,6.0,6.0);
@@ -1597,8 +1782,11 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
     header.append(&brand_icon);
     let brand=gtk::Box::new(gtk::Orientation::Vertical,1);
     brand.set_hexpand(true);
-    add_text(&brand,"GRUB Studio","brand",false);
-    add_text(&brand,"UNIVERSAL  ·  3.0.2","brand-subtitle",false);
+    let brand_line=gtk::Box::new(gtk::Orientation::Horizontal,7);
+    add_text(&brand_line,"GRUB Studio","brand",false);
+    add_text(&brand_line,format!("v{}",env!("CARGO_PKG_VERSION")),"brand-version",false);
+    brand.append(&brand_line);
+    add_text(&brand,"UNIVERSAL  ·  GTK4 / libadwaita","brand-subtitle",false);
     header.append(&brand);
     // Custom controls never become part of the window manager's title bar.
     let status=if s.demo {"DEMO".into()}
@@ -1704,6 +1892,9 @@ fn rebuild(window: &gtk::ApplicationWindow, state: &Shared) {
     let nav=&chrome.sidebar;
     clear_box(nav);
     add_text(nav,&tr(state,"navigation"),"nav-heading",false);
+    let divider=gtk::Separator::new(gtk::Orientation::Horizontal);
+    divider.add_css_class("nav-divider");
+    nav.append(&divider);
     for (page,key) in [
         ("home","nav.home"),
         ("menu","nav.menu"),
@@ -1840,11 +2031,33 @@ mod ui_tests {
         let image=include_bytes!("../assets/grub-studio-256.png");
         assert!(image.starts_with(b"\x89PNG\r\n\x1a\n"),"application artwork must be PNG");
     }
+    #[test]
+    fn kde_accent_is_parsed_and_contrasted_safely() {
+        let contents="[General]\nAccentColor=61, 174, 233\n[Mouse]\nAccentColor=255, 0, 0\n";
+        assert_eq!(ini_setting(contents,"General","AccentColor").and_then(parse_accent_rgb),Some((61,174,233)));
+        assert_eq!(ini_setting(contents,"Mouse","AccentColor").and_then(parse_accent_rgb),Some((255,0,0)));
+        assert_eq!(parse_accent_rgb("#3daee9"),Some((61,174,233)));
+        assert_eq!(parse_accent_rgb("#zzzzzz"),None);
+        assert_eq!(parse_accent_rgb("#ééé"),None);
+        assert_eq!(parse_accent_rgb("300, 0, 0"),None);
+        assert_eq!(parse_accent_rgb("1,2,3,4"),None);
+        assert_eq!(contrasting_foreground((246,248,250)),"#161616");
+        assert_eq!(contrasting_foreground((25,40,70)),"#ffffff");
+    }
+    #[test]
+    fn about_refresh_is_fully_translated() {
+        for (locale,_) in LANGUAGES {
+            for key in ["about.links.title","about.links.repository","about.links.releases",
+                "about.links.issues","about.links.author","about.links.license","about.details.title"] {
+                assert_ne!(translate(locale,key),key,"Missing {locale}: {key}");
+            }
+        }
+    }
 }
 
 fn main() {
     let args:Vec<String>=std::env::args().skip(1).collect();
-    if args.iter().any(|a| a=="--version") { println!("GRUB Studio Universal 3.0.2 Rust / Adwaita Edition");return; }
+    if args.iter().any(|a| a=="--version") { println!("GRUB Studio Universal {} Rust / Adwaita Edition",env!("CARGO_PKG_VERSION"));return; }
     if args.iter().any(|a| a=="--self-test") {
         let locales=serde_json::from_str::<serde_json::Value>(include_str!("../assets/translations.json")).expect("valid locale catalog");
         for (code,_) in LANGUAGES {assert!(locales[*code]["tools.title"].is_string(),"missing tools translation: {code}");}
@@ -1879,7 +2092,7 @@ fn main() {
     // window is still GtkApplicationWindow so that KDE/Wayland controls its
     // system decorations (no custom HeaderBar regression).
     let app=adw::Application::builder().application_id(APP_ID).build();
-    app.connect_startup(|_| {load_css();apply_desktop_cursor();});
+    app.connect_startup(|_| {load_css();apply_desktop_accent();apply_desktop_cursor();});
     app.connect_activate(move |app| {
         if ui_smoke {
             if let Some(settings)=gtk::Settings::default() {

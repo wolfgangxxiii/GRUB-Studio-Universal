@@ -49,6 +49,8 @@
 
 <p align="center"><sub>Rzeczywiste zrzuty okna wersji 3.0.2, przycięte do obszaru aplikacji. / Real, cropped screenshots of version 3.0.2.</sub></p>
 
+> **Nowość w kodzie 3.1.0 / New in the 3.1.0 source:** odświeżone karty i nawigacja, spójne przyciski, ikony na pulpicie, nowe „O programie” oraz kolor akcentu KDE Plasma. / Refreshed cards and navigation, consistent buttons, dashboard icons, redesigned About page and KDE Plasma accent colors. Zrzuty powyżej i linki pobierania nadal dotyczą wydanej wersji 3.0.2. / Screenshots and download links above still refer to the published 3.0.2 release.
+
 | 🎨 Personalizacja | 🛡️ Bezpieczna obsługa | ⚡ Natywny interfejs |
 | :--- | :--- | :--- |
 | Import motywów z **ZIP, TAR.GZ, TAR.XZ** lub folderu; jasny i ciemny wygląd. | Oddzielny proces Polkit, kontrola ścieżek, kopie zapasowe i weryfikacja konfiguracji. | **Rust + GTK4 + libadwaita**, Wayland/X11 i siedem języków. |
@@ -70,7 +72,7 @@ GRUB Studio Universal pomaga przeglądać stan rozruchu, instalować motywy GRUB
 | **Motywy** | Wykrywać motywy, importować katalogi i archiwa, aktywować lub wyłączać wybrany motyw. |
 | **Ustawienia GRUB** | Zmieniać obsługiwane parametry czasu menu, trybu wyświetlania, rozdzielczości i jądra. |
 | **Narzędzia** | Tworzyć i przywracać kopie konfiguracji oraz przeglądać dziennik operacji. |
-| **Wygląd i język** | Wybierać motyw systemowy/jasny/ciemny; korzystać z siedmiu języków interfejsu. |
+| **Wygląd i język** | Wybierać motyw systemowy/jasny/ciemny; korzystać z siedmiu języków interfejsu. Kod 3.1.0 odczytuje też kolor akcentu KDE Plasma z `kdeglobals`. |
 
 ### 📦 Instalowanie AppImage
 
@@ -126,7 +128,7 @@ Wciąż możesz użyć przycisku **Importuj folder**. Jeśli archiwum zawiera *k
 | **Themes** | Detect, import, apply and disable GRUB themes; import folders or ZIP/TAR.GZ/TAR.XZ archives. |
 | **GRUB settings** | Configure supported timeout, menu style, resolution and kernel options. |
 | **Tools** | Create and restore configuration backups; review the operation log. |
-| **Appearance** | System/light/dark modes, native libadwaita styling and seven interface languages. |
+| **Appearance** | System/light/dark modes, native libadwaita styling and seven interface languages. The 3.1.0 source also reads the KDE Plasma accent color from `kdeglobals`. |
 
 ### 📦 Download & run
 
