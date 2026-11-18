@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v3.0.2-rc.1"><img src="https://img.shields.io/badge/version-3.0.2_RC1-3584E4?style=flat-square" alt="Version 3.0.2 RC1" /></a>
+  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/tag/v3.1.0"><img src="https://img.shields.io/badge/version-3.1.0_Stable-3584E4?style=flat-square" alt="Version 3.1.0 Stable" /></a>
   <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions/workflows/test-and-build.yml"><img src="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions/workflows/test-and-build.yml/badge.svg" alt="Build and test status" /></a>
   <img src="https://img.shields.io/badge/Rust-2021-CE422B?style=flat-square&logo=rust&logoColor=white" alt="Rust" />
   <img src="https://img.shields.io/badge/GTK4-%2B_libadwaita-4A86CF?style=flat-square&logo=gnome&logoColor=white" alt="GTK4 and libadwaita" />
@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.2-rc.1/GRUB-Studio-Universal-v3.0.2-x86_64.AppImage"><strong>⬇️ Pobierz AppImage / Download · v3.0.2</strong></a>
+  <a href="https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.1.0/GRUB-Studio-Universal-v3.1.0-x86_64.AppImage"><strong>⬇️ Pobierz AppImage / Download · v3.1.0</strong></a>
   &nbsp;·&nbsp;
   <a href="#polski">🇵🇱 Polski</a>
   &nbsp;·&nbsp;
@@ -27,29 +27,9 @@
 
 ---
 
-## 🖥️ Poznaj aplikację / Take a look
+## ✨ Wersja 3.1.0 / What's new
 
-<p align="center">
-  <a href="docs/screenshots/dashboard-dark.png">
-    <img src="docs/screenshots/dashboard-dark.png" width="980" alt="GRUB Studio Universal 3.0.2 — centrum rozruchu w trybie ciemnym" />
-  </a>
-</p>
-
-<p align="center"><sub>🌙 Tryb ciemny · Dark appearance · Kliknij, aby powiększyć / Click to enlarge</sub></p>
-
-<details>
-  <summary><strong>☀️ Zobacz tryb jasny / View light appearance</strong></summary>
-  <br />
-  <p align="center">
-    <a href="docs/screenshots/dashboard-light.png">
-      <img src="docs/screenshots/dashboard-light.png" width="980" alt="GRUB Studio Universal 3.0.2 — centrum rozruchu w trybie jasnym" />
-    </a>
-  </p>
-</details>
-
-<p align="center"><sub>Rzeczywiste zrzuty okna wersji 3.0.2, przycięte do obszaru aplikacji. / Real, cropped screenshots of version 3.0.2.</sub></p>
-
-> **Nowość w kodzie 3.1.0 / New in the 3.1.0 source:** odświeżone karty i nawigacja, spójne przyciski, ikony na pulpicie, nowe „O programie” oraz kolor akcentu KDE Plasma. / Refreshed cards and navigation, consistent buttons, dashboard icons, redesigned About page and KDE Plasma accent colors. Zrzuty powyżej i linki pobierania nadal dotyczą wydanej wersji 3.0.2. / Screenshots and download links above still refer to the published 3.0.2 release.
+**Stabilne wydanie / Stable release.** Odświeżony pulpit, czytelniejsza nawigacja, spójne przyciski i ikony, przebudowana karta „O programie” oraz kolor akcentu KDE Plasma. / Refreshed dashboard, clearer navigation, consistent buttons and icons, redesigned About page, and KDE Plasma accent integration.
 
 | 🎨 Personalizacja | 🛡️ Bezpieczna obsługa | ⚡ Natywny interfejs |
 | :--- | :--- | :--- |
@@ -72,20 +52,20 @@ GRUB Studio Universal pomaga przeglądać stan rozruchu, instalować motywy GRUB
 | **Motywy** | Wykrywać motywy, importować katalogi i archiwa, aktywować lub wyłączać wybrany motyw. |
 | **Ustawienia GRUB** | Zmieniać obsługiwane parametry czasu menu, trybu wyświetlania, rozdzielczości i jądra. |
 | **Narzędzia** | Tworzyć i przywracać kopie konfiguracji oraz przeglądać dziennik operacji. |
-| **Wygląd i język** | Wybierać motyw systemowy/jasny/ciemny; korzystać z siedmiu języków interfejsu. Kod 3.1.0 odczytuje też kolor akcentu KDE Plasma z `kdeglobals`. |
+| **Wygląd i język** | Wybierać motyw systemowy/jasny/ciemny; korzystać z siedmiu języków interfejsu. Program odczytuje też kolor akcentu KDE Plasma z `kdeglobals`. |
 
 ### 📦 Instalowanie AppImage
 
-**[Pobierz GRUB Studio Universal 3.0.2 — AppImage x86_64](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.2-rc.1/GRUB-Studio-Universal-v3.0.2-x86_64.AppImage)**
+**[Pobierz GRUB Studio Universal 3.1.0 — AppImage x86_64](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.1.0/GRUB-Studio-Universal-v3.1.0-x86_64.AppImage)**
 
 AppImage nie wymaga instalowania pakietu w systemie. Po pobraniu:
 
 ```bash
-chmod +x GRUB-Studio-Universal-v3.0.2-x86_64.AppImage
-./GRUB-Studio-Universal-v3.0.2-x86_64.AppImage
+chmod +x GRUB-Studio-Universal-v3.1.0-x86_64.AppImage
+./GRUB-Studio-Universal-v3.1.0-x86_64.AppImage
 ```
 
-[Suma kontrolna SHA-256](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.2-rc.1/GRUB-Studio-Universal-v3.0.2-SHA256.txt) · [Historia wydań](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases)
+[Suma kontrolna SHA-256](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.1.0/GRUB-Studio-Universal-v3.1.0-SHA256.txt) · [Historia wydań](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases)
 
 ### 🎨 Skąd pobierać motywy GRUB?
 
@@ -128,18 +108,18 @@ Wciąż możesz użyć przycisku **Importuj folder**. Jeśli archiwum zawiera *k
 | **Themes** | Detect, import, apply and disable GRUB themes; import folders or ZIP/TAR.GZ/TAR.XZ archives. |
 | **GRUB settings** | Configure supported timeout, menu style, resolution and kernel options. |
 | **Tools** | Create and restore configuration backups; review the operation log. |
-| **Appearance** | System/light/dark modes, native libadwaita styling and seven interface languages. The 3.1.0 source also reads the KDE Plasma accent color from `kdeglobals`. |
+| **Appearance** | System/light/dark modes, native libadwaita styling and seven interface languages. The app also reads the KDE Plasma accent color from `kdeglobals`. |
 
 ### 📦 Download & run
 
-**[Download GRUB Studio Universal 3.0.2 AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.2-rc.1/GRUB-Studio-Universal-v3.0.2-x86_64.AppImage)**
+**[Download GRUB Studio Universal 3.1.0 AppImage (x86_64)](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.1.0/GRUB-Studio-Universal-v3.1.0-x86_64.AppImage)**
 
 ```bash
-chmod +x GRUB-Studio-Universal-v3.0.2-x86_64.AppImage
-./GRUB-Studio-Universal-v3.0.2-x86_64.AppImage
+chmod +x GRUB-Studio-Universal-v3.1.0-x86_64.AppImage
+./GRUB-Studio-Universal-v3.1.0-x86_64.AppImage
 ```
 
-[SHA-256 checksum](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.0.2-rc.1/GRUB-Studio-Universal-v3.0.2-SHA256.txt) · [All releases](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases)
+[SHA-256 checksum](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases/download/v3.1.0/GRUB-Studio-Universal-v3.1.0-SHA256.txt) · [All releases](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/releases)
 
 ### 🎨 Find and import themes
 
@@ -177,7 +157,7 @@ The AppImage packaging script also requires `linuxdeploy` and `rsvg-convert`:
 bash build-appimage.sh
 ```
 
-Automated Rust tests, GTK4 UI smoke tests, preference switching, live resize, screenshots and AppImage checks run in [GitHub Actions](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions). See [docs/DESIGN.md](docs/DESIGN.md) for the application layout and design notes.
+Automated Rust tests, GTK4 UI smoke tests, preference switching, live resize and AppImage checks run in [GitHub Actions](https://github.com/wolfgangxxiii/GRUB-Studio-Universal/actions). See [docs/DESIGN.md](docs/DESIGN.md) for the application layout and design notes.
 
 </details>
 
