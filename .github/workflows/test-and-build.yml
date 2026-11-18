@@ -69,7 +69,7 @@ jobs:
           mkdir -p qa-screenshots
           xvfb-run -a -s '-screen 0 1280x800x24' bash -c '
             set -euo pipefail
-            for view in home-dark home-light themes-dark themes-light menu-dark tools-dark tools-light; do
+            for view in home-dark home-light themes-dark themes-light menu-dark tools-dark tools-light about-dark about-light; do
               page=${view%-*}
               mode=${view#*-}
               target/release/grub-studio-universal --demo-page="$page" --appearance="$mode" &
@@ -111,24 +111,24 @@ jobs:
         env:
           APPIMAGE_EXTRACT_AND_RUN: "1"
         run: |
-          test -s GRUB-Studio-Universal-v3.0.2-x86_64.AppImage
-          file GRUB-Studio-Universal-v3.0.2-x86_64.AppImage
-          ./GRUB-Studio-Universal-v3.0.2-x86_64.AppImage --version
-          ./GRUB-Studio-Universal-v3.0.2-x86_64.AppImage --self-test
-          sha256sum GRUB-Studio-Universal-v3.0.2-x86_64.AppImage > GRUB-Studio-Universal-v3.0.2-SHA256.txt
+          test -s GRUB-Studio-Universal-v3.1.0-x86_64.AppImage
+          file GRUB-Studio-Universal-v3.1.0-x86_64.AppImage
+          ./GRUB-Studio-Universal-v3.1.0-x86_64.AppImage --version
+          ./GRUB-Studio-Universal-v3.1.0-x86_64.AppImage --self-test
+          sha256sum GRUB-Studio-Universal-v3.1.0-x86_64.AppImage > GRUB-Studio-Universal-v3.1.0-SHA256.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: grub-studio-universal-v3.0.2-release-candidate
+          name: grub-studio-universal-v3.1.0-release-candidate
           path: |
-            GRUB-Studio-Universal-v3.0.2-x86_64.AppImage
-            GRUB-Studio-Universal-v3.0.2-SHA256.txt
+            GRUB-Studio-Universal-v3.1.0-x86_64.AppImage
+            GRUB-Studio-Universal-v3.1.0-SHA256.txt
       - name: Publish downloadable preview release
         if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if gh release view v3.0.2-rc.1 >/dev/null 2>&1; then
-            gh release upload v3.0.2-rc.1 GRUB-Studio-Universal-v3.0.2-x86_64.AppImage GRUB-Studio-Universal-v3.0.2-SHA256.txt --clobber
+          if gh release view v3.1.0-rc.1 >/dev/null 2>&1; then
+            gh release upload v3.1.0-rc.1 GRUB-Studio-Universal-v3.1.0-x86_64.AppImage GRUB-Studio-Universal-v3.1.0-SHA256.txt --clobber
           else
-            gh release create v3.0.2-rc.1 GRUB-Studio-Universal-v3.0.2-x86_64.AppImage GRUB-Studio-Universal-v3.0.2-SHA256.txt --title 'GRUB Studio Universal 3.0.2 — secure ZIP/TAR theme import' --notes 'Adds direct theme import from ZIP, TAR.GZ and TAR.XZ. Archives are unpacked as the unprivileged user into private temporary staging; paths, links, file types, item count, sizes and theme.txt are validated before confirmation and Polkit installation. Multiple theme.txt candidates are rejected with a clear instruction to choose an extracted folder. Scripts are never executed or installed. Theme activation remains explicit. GTK4/libadwaita window behavior is unchanged. Import and UI tests run in CI; real bootloader writes still require testing on physical hardware.' --prerelease --target "$GITHUB_SHA"
+            gh release create v3.1.0-rc.1 GRUB-Studio-Universal-v3.1.0-x86_64.AppImage GRUB-Studio-Universal-v3.1.0-SHA256.txt --title 'GRUB Studio Universal 3.1.0 — UI refresh' --notes 'Visual refresh based on the Bazzite Plasmoid Updater GUI design: consistent action buttons and navigation, icon-enhanced dashboard, richer About page with links, and KDE Plasma accent-color integration with libadwaita fallback. All seven languages remain supported. Existing GRUB, EFI, backup and theme import functionality is preserved. CI runs GTK layout and appearance smoke tests and builds the AppImage; privileged bootloader changes require validation on real hardware.' --prerelease --target "$GITHUB_SHA"
           fi

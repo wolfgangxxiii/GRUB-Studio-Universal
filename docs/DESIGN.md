@@ -1,5 +1,24 @@
 # GRUB Studio Universal — projekt interfejsu 3.0.1
 
+## Odświeżenie interfejsu 3.1.0
+
+- Wspólne wzorce wizualne z Bazzite Plasmoid Updater GUI: większe i bardziej spójne
+  przyciski, prosta nawigacja z linią pod nagłówkiem, znaczniki wersji i czytelne
+  karty z ikonami. Pozostają dwie kolumny statystyk i sześć kart nawigacji.
+- Zakładka „O programie” korzysta z osadzonego logo aplikacji, linków do kodu,
+  wydań, zgłoszeń, autora, licencji i podręcznika GNU GRUB. Dziewięć istniejących
+  sekcji bezpieczeństwa zachowano w rozwijanych panelach.
+- Na KDE Plasma aplikacja odczytuje akcent z `kdeglobals` i stosuje go do
+  zaznaczeń oraz przycisków głównych. Tekst na kolorowym tle dobierany jest
+  według jasności akcentu. Przy braku KDE obowiązują standardowe kolory Adwaita.
+  Zmiana akcentu w czasie pracy wymaga ponownego uruchomienia aplikacji.
+- Własne dekory okien nie są dodawane. Nawigacja nadal przechodzi na ikony
+  poniżej 860 px, bez zastępowania jej nakładką; zachowuje to stabilne działanie
+  menu w małych oknach i na Waylandzie.
+- Bez zmian w mechanizmach administratora, importu motywów i konfiguracji GRUB.
+  Testy obejmują siedem języków, parsowanie kolorów KDE i istniejące przypadki
+  sprawdzające GUI. CI zapisuje też zrzuty zakładki „O programie”.
+
 ## Cel
 
 Zwięzły, czytelny menedżer GRUB działający natywnie w GTK4 i libadwaita na Waylandzie i X11.
